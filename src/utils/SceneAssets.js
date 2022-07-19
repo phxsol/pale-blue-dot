@@ -5,7 +5,6 @@ import { FirstPersonControls } from './jsm/controls/FirstPersonControls.js';
 import { RectAreaLightUniformsLib } from './jsm/lights/RectAreaLightUniformsLib.js';
 import { RectAreaLightHelper } from './jsm/helpers/RectAreaLightHelper.js';
 import { SceneAssets as _SceneAssets, SceneAsset3D } from './ScreenDirector.js';
-import TWEEN from '@tweenjs/tween.js';
 import GUI from 'lil-gui';
 
 // Constant Definitions
@@ -915,8 +914,6 @@ class SceneAssets extends _SceneAssets{
 
   constructor(){
     super();
-
-    this.updatables.set('tweens', TWEEN );
 
     // Camera & Controls Setup
     this.active_cam = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );

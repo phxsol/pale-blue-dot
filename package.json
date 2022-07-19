@@ -1,18 +1,13 @@
 {
   "name": "pale-blue-dot",
   "version": "0.6.9",
-  "private": true,
+  "description": "The Solar System on display, the ship is yours Captain.",
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.0.1",
-    "@testing-library/user-event": "^13.5.0",
-    "@tweenjs/tween.js": "^18.6.4",
     "lil-gui": "^0.16.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-scripts": "5.0.1",
-    "three": "^0.139.2",
-    "web-vitals": "^2.1.4"
+    "react-scripts": "^2.1.3",
+    "three": "^0.139.2"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
@@ -20,12 +15,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
@@ -38,5 +27,20 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phxsol/pale-blue-dot.git"
+  },
+  "keywords": [
+    "THREE.js",
+    "animation",
+    "canvas"
+  ],
+  "author": "Joshua Hopkins",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/phxsol/pale-blue-dot/issues"
+  },
+  "homepage": "https://github.com/phxsol/pale-blue-dot#readme"
 }
