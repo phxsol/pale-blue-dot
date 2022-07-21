@@ -98,12 +98,6 @@ class Workflow extends _Workflow{
     }
     let camera_gui = gui.addFolder( 'Camera Controls' );
     camera_gui.add( camera_folder, 'CaptainCam' ).name( 'Captain\'s Chair' );
-    //camera_gui.add( camera_folder, 'OpsCam' ).name( 'Ops Station' );
-    //camera_gui.add( camera_folder, 'ConnCam' ).name( 'Conn Station' );
-    //camera_gui.add( camera_folder, 'Look Up' ).name('Look Up');
-    //camera_gui.add( camera_folder, 'Look Down' ).name('Turn Down');
-    //camera_gui.add( camera_folder, 'Look Left' ).name('Look Left');
-    //camera_gui.add( camera_folder, 'Look Right' ).name('Look Right');
     const ship_folder = {
       'X: +1': function() {
         //screenplay.actors.Ship.position.add( new THREE.Vector3( 1, 0, 0 ));
@@ -161,15 +155,6 @@ class Workflow extends _Workflow{
     ship_gui.add( screenplay.actors.Ship.light, 'intensity' ).name( 'Light Intensity');
     ship_gui.add( screenplay.actors.Ship.light, 'distance' ).name( 'Light Distance');
     ship_gui.add( screenplay.actors.Ship.light, 'decay' ).name( 'Light Decay');
-
-    //ship_gui.add( ship_folder, 'X: +1' ).name(' nudge X by +1');
-    //ship_gui.add( ship_folder, 'X: -1' ).name(' nudge X by -1');
-    //ship_gui.add( ship_folder, 'Y: +1' ).name(' nudge Y by +1');
-    //ship_gui.add( ship_folder, 'Y: -1' ).name(' nudge Y by -1');
-    //ship_gui.add( ship_folder, 'Z: +1' ).name(' nudge Z by +1');
-    //ship_gui.add( ship_folder, 'Z: -1' ).name(' nudge Z by -1');
-    //ship_gui.add( ship_folder, 'Turn Left' );
-    //ship_gui.add( ship_folder, 'Turn Right' );
     const shipNav_folder = {
 
     	Neptune: function() {
