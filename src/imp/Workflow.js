@@ -75,25 +75,25 @@ class Workflow extends _Workflow{
     const gui = new GUI( { title: 'User Interface' });
     const camera_folder = {
       'Look Up': function() {
-        scene_assets.active_cam.rotateOnAxis( new THREE.Vector3( 1, 0, 0), 0.04 );
+        screenplay.active_cam.rotateOnAxis( new THREE.Vector3( 1, 0, 0), 0.04 );
       },
       'Look Down': function() {
-        scene_assets.active_cam.rotateOnAxis( new THREE.Vector3( 1, 0, 0), -0.04 );
+        screenplay.active_cam.rotateOnAxis( new THREE.Vector3( 1, 0, 0), -0.04 );
       },
       'Look Left': function() {
-        scene_assets.active_cam.rotateOnAxis( new THREE.Vector3( 0, 1, 0), 0.04 );
+        screenplay.active_cam.rotateOnAxis( new THREE.Vector3( 0, 1, 0), 0.04 );
       },
       'Look Right': function() {
-        scene_assets.active_cam.rotateOnAxis( new THREE.Vector3( 0, 1, 0), -0.04 );
+        screenplay.active_cam.rotateOnAxis( new THREE.Vector3( 0, 1, 0), -0.04 );
       },
       'CaptainCam': function() {
-        scene_assets.actions.change_cam( 'CaptainCam' );
+        screenplay.actions.change_cam( 'CaptainCam' );
       },
       'OpsCam': function() {
-        scene_assets.actions.change_cam( 'OpsCam' );
+        screenplay.actions.change_cam( 'OpsCam' );
       },
       'ConnCam': function() {
-        scene_assets.actions.change_cam( 'ConnCam' );
+        screenplay.actions.change_cam( 'ConnCam' );
       }
     }
     let camera_gui = gui.addFolder( 'Camera Controls' );
@@ -106,61 +106,61 @@ class Workflow extends _Workflow{
     //camera_gui.add( camera_folder, 'Look Right' ).name('Look Right');
     const ship_folder = {
       'X: +1': function() {
-        //scene_assets.actors.Ship.position.add( new THREE.Vector3( 1, 0, 0 ));
-        scene_assets.active_cam.position.add( new THREE.Vector3( 1, 0, 0 ));
+        //screenplay.actors.Ship.position.add( new THREE.Vector3( 1, 0, 0 ));
+        screenplay.active_cam.position.add( new THREE.Vector3( 1, 0, 0 ));
       },
       'X: -1': function() {
-        //scene_assets.actors.Ship.position.add( new THREE.Vector3( -1, 0, 0 ));
-        scene_assets.active_cam.position.add( new THREE.Vector3( -1, 0, 0 ));
+        //screenplay.actors.Ship.position.add( new THREE.Vector3( -1, 0, 0 ));
+        screenplay.active_cam.position.add( new THREE.Vector3( -1, 0, 0 ));
       },
       'Y: +1': function() {
-        //scene_assets.actors.Ship.position.add( new THREE.Vector3( 0, 1, 0 ));
-        scene_assets.active_cam.position.add( new THREE.Vector3( 0, 1, 0 ));
+        //screenplay.actors.Ship.position.add( new THREE.Vector3( 0, 1, 0 ));
+        screenplay.active_cam.position.add( new THREE.Vector3( 0, 1, 0 ));
       },
       'Y: -1': function() {
-        //scene_assets.actors.Ship.position.add( new THREE.Vector3( 0, -1, 0 ));
-        scene_assets.active_cam.position.add( new THREE.Vector3( 0, -1, 0 ));
+        //screenplay.actors.Ship.position.add( new THREE.Vector3( 0, -1, 0 ));
+        screenplay.active_cam.position.add( new THREE.Vector3( 0, -1, 0 ));
       },
       'Z: +1': function() {
-        //scene_assets.actors.Ship.position.add( new THREE.Vector3( 0, 0, 1 ));
-        scene_assets.active_cam.position.add( new THREE.Vector3( 0, 0, 1 ));
+        //screenplay.actors.Ship.position.add( new THREE.Vector3( 0, 0, 1 ));
+        screenplay.active_cam.position.add( new THREE.Vector3( 0, 0, 1 ));
       },
       'Z: -1': function() {
-        //scene_assets.actors.Ship.position.add( new THREE.Vector3( 0, 0, -1 ));
-        scene_assets.active_cam.position.add( new THREE.Vector3( 0, 0, -1 ));
+        //screenplay.actors.Ship.position.add( new THREE.Vector3( 0, 0, -1 ));
+        screenplay.active_cam.position.add( new THREE.Vector3( 0, 0, -1 ));
       },
       'Turn Left': function() {
-        let ship = scene_assets.actors.Ship;
+        let ship = screenplay.actors.Ship;
         ship.rotation.y -= 0.1;
         ship.updateMatrixWorld( true );
         var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
         var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
         let sight_target = new THREE.Vector3();
         ship.NavDots.sight_target.getWorldPosition( sight_target );
-        scene_assets.active_cam.up = up_now;
-        scene_assets.active_cam.lookAt( sight_target );
+        screenplay.active_cam.up = up_now;
+        screenplay.active_cam.lookAt( sight_target );
       },
       'Turn Right': function() {
-        let ship = scene_assets.actors.Ship;
+        let ship = screenplay.actors.Ship;
         ship.rotation.y += 0.1;
         ship.updateMatrixWorld( true );
         var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
         var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix) .normalize();
         let sight_target = new THREE.Vector3();
         ship.NavDots.sight_target.getWorldPosition( sight_target );
-        scene_assets.active_cam.up = up_now;
-        scene_assets.active_cam.lookAt( sight_target );
+        screenplay.active_cam.up = up_now;
+        screenplay.active_cam.lookAt( sight_target );
       }
     }
     let ship_gui = gui.addFolder( 'Ship Controls' );
-    scene_assets.scene.updates.cache.warp_speed = 0;
-    ship_gui.add( scene_assets.scene.updates.cache, 'warp_speed' ).name( 'Warp Speed').listen();
-    ship_gui.add( scene_assets.active_cam, 'zoom' ).onChange(()=>{
-      scene_assets.active_cam.updateProjectionMatrix();
+    screenplay.scene.updates.cache.warp_speed = 0;
+    ship_gui.add( screenplay.scene.updates.cache, 'warp_speed' ).name( 'Warp Speed').listen();
+    ship_gui.add( screenplay.active_cam, 'zoom' ).onChange(()=>{
+      screenplay.active_cam.updateProjectionMatrix();
     });
-    ship_gui.add( scene_assets.actors.Ship.light, 'intensity' ).name( 'Light Intensity');
-    ship_gui.add( scene_assets.actors.Ship.light, 'distance' ).name( 'Light Distance');
-    ship_gui.add( scene_assets.actors.Ship.light, 'decay' ).name( 'Light Decay');
+    ship_gui.add( screenplay.actors.Ship.light, 'intensity' ).name( 'Light Intensity');
+    ship_gui.add( screenplay.actors.Ship.light, 'distance' ).name( 'Light Distance');
+    ship_gui.add( screenplay.actors.Ship.light, 'decay' ).name( 'Light Decay');
 
     //ship_gui.add( ship_folder, 'X: +1' ).name(' nudge X by +1');
     //ship_gui.add( ship_folder, 'X: -1' ).name(' nudge X by -1');
@@ -174,34 +174,34 @@ class Workflow extends _Workflow{
 
     	Neptune: function() {
 
-        scene_assets.actions.warp_to(scene_assets.actors.Neptune);
+        screenplay.actions.warp_to(screenplay.actors.Neptune);
       },
      	Uranus: function() {
-        scene_assets.actions.warp_to(scene_assets.actors.Uranus);
+        screenplay.actions.warp_to(screenplay.actors.Uranus);
       },
      	Saturn: function() {
-        scene_assets.actions.warp_to(scene_assets.actors.Saturn);
+        screenplay.actions.warp_to(screenplay.actors.Saturn);
       },
      	Jupiter: function() {
-        scene_assets.actions.warp_to(scene_assets.actors.Jupiter);
+        screenplay.actions.warp_to(screenplay.actors.Jupiter);
       },
      	Mars: function() {
-        scene_assets.actions.warp_to(scene_assets.actors.Mars);
+        screenplay.actions.warp_to(screenplay.actors.Mars);
       },
      	Earth: function() {
-        scene_assets.actions.warp_to(scene_assets.actors.Earth);
+        screenplay.actions.warp_to(screenplay.actors.Earth);
       },
      	Moon: function() {
-        scene_assets.actions.warp_to(scene_assets.actors.Moon);
+        screenplay.actions.warp_to(screenplay.actors.Moon);
       },
      	Venus: function() {
-        scene_assets.actions.warp_to(scene_assets.actors.Venus);
+        screenplay.actions.warp_to(screenplay.actors.Venus);
       },
      	Mercury: function() {
-        scene_assets.actions.warp_to(scene_assets.actors.Mercury);
+        screenplay.actions.warp_to(screenplay.actors.Mercury);
       },
      	Sun: function() {
-        scene_assets.actions.warp_to(scene_assets.actors.Sun);
+        screenplay.actions.warp_to(screenplay.actors.Sun);
       }
     }
     ship_gui.add( shipNav_folder, 'Neptune' ).name('...to Neptune');
@@ -216,19 +216,19 @@ class Workflow extends _Workflow{
     ship_gui.add( shipNav_folder, 'Sun' ).name('...to Sun');
 
     let neptune_gui = gui.addFolder( 'Neptune');
-    let neptune = scene_assets.actors.Neptune;
+    let neptune = screenplay.actors.Neptune;
     neptune_gui.add ( neptune.material, 'roughness', 0, 1 );
     neptune_gui.add ( neptune.material, 'metalness', 0, 1 );
     neptune_gui.add ( neptune.material, 'wireframe' );
 
     let uranus_gui = gui.addFolder( 'Uranus');
-    let uranus = scene_assets.actors.Uranus;
+    let uranus = screenplay.actors.Uranus;
     uranus_gui.add ( uranus.material, 'roughness', 0, 1 );
     uranus_gui.add ( uranus.material, 'metalness', 0, 1 );
     uranus_gui.add ( uranus.material, 'wireframe' );
 
     let saturn_gui = gui.addFolder( 'Saturn');
-    let saturn = scene_assets.actors.Saturn;
+    let saturn = screenplay.actors.Saturn;
     saturn_gui.add ( saturn.material, 'roughness', 0, 1 );
     saturn_gui.add ( saturn.material, 'metalness', 0, 1 );
     saturn_gui.add ( saturn.material, 'wireframe' );
@@ -238,40 +238,40 @@ class Workflow extends _Workflow{
 
 
     let jupiter_gui = gui.addFolder( 'Jupiter');
-    let jupiter = scene_assets.actors.Jupiter;
+    let jupiter = screenplay.actors.Jupiter;
     jupiter_gui.add ( jupiter.material, 'roughness', 0, 1 );
     jupiter_gui.add ( jupiter.material, 'metalness', 0, 1 );
     jupiter_gui.add ( jupiter.material, 'wireframe' );
 
     let mars_gui = gui.addFolder( 'Mars');
-    let mars = scene_assets.actors.Mars;
+    let mars = screenplay.actors.Mars;
     mars_gui.add ( mars.material, 'roughness', 0, 1 );
     mars_gui.add ( mars.material, 'metalness', 0, 1 );
     mars_gui.add ( mars.material, 'wireframe' );
 
     let earth_gui = gui.addFolder( 'Earth');
-    let earth = scene_assets.actors.Earth;
+    let earth = screenplay.actors.Earth;
     earth_gui.add ( earth.material, 'roughness', 0, 1 );
     earth_gui.add ( earth.material, 'metalness', 0, 1 );
     earth_gui.add ( earth.material, 'emissiveIntensity', 0, 1 );
     earth_gui.add ( earth.material, 'wireframe' );
 
     let moon_gui = gui.addFolder( 'Moon');
-    let moon = scene_assets.actors.Moon;
+    let moon = screenplay.actors.Moon;
     moon_gui.add ( moon.material, 'roughness', 0, 1 );
     moon_gui.add ( moon.material, 'metalness', 0, 1 );
     moon_gui.add ( moon.material, 'wireframe' );
 
     let sun_gui = gui.addFolder('Sun');
     let sunlight_gui = sun_gui.addFolder( 'Light');
-    let sunlight = scene_assets.lights.point_light;
+    let sunlight = screenplay.lights.point_light;
     sunlight_gui.add ( sunlight, 'decay', 0, 2, 1 );
     sunlight_gui.add ( sunlight, 'distance', 0, 4500000000 );
     sunlight_gui.add ( sunlight, 'intensity', 0, 10 ).listen();
     sunlight_gui.add ( sunlight, 'power' ).listen();
 
     let sun_model_gui = sun_gui.addFolder( 'Sun Model ');
-    let sun = scene_assets.actors.Sun;
+    let sun = screenplay.actors.Sun;
     sun_model_gui.add ( sun.material, 'wireframe' );
 
     return true;
