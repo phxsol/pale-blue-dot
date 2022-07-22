@@ -30,51 +30,6 @@ const VIEW = {
 class Screenplay extends _Screenplay{
   actors = {
 
-    // Jumping Cube
-    get jumping_cube(){
-      let loading = new Promise((resolve, reject)=>{
-        const loader = new GLTFLoader().setPath( '/models/' );
-        loader.load( 'jumping_cube.glb',
-          async ( gltf )=>{
-
-            let _jumping_cube = gltf.scene.children[0];
-            _jumping_cube.material = new THREE.MeshStandardMaterial( { color: LIGHT.green } );
-            _jumping_cube.animations = gltf.animations;
-            _jumping_cube.name = "Jumping Cube";
-            let jumping_cube = new SceneAsset3D( _jumping_cube );
-            jumping_cube.directions.set( 'revolve', function(){
-              jumping_cube.rotation.y += .01;
-            });
-            jumping_cube.mixer = new THREE.AnimationMixer( jumping_cube );
-            var keyAnimationClip = THREE.AnimationClip.findByName( jumping_cube.animations, 'CubeAction.Jump' );
-            var action = jumping_cube.mixer.clipAction( keyAnimationClip );
-        		action.play();
-            resolve( jumping_cube );
-          },
-          async function ( xhr ) {
-            // TODO: Repair progress functionality
-            //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-          },
-          async ( err )=>{
-            console.error( err );
-            reject( err );
-          }
-        );
-      });
-
-
-      return (async () => {
-      try {
-        return await loading.then(( _jumping_cube )=>{
-          delete this.jumping_cube;
-          return this.jumping_cube = _jumping_cube;
-        })
-      } catch(e) {
-        return 0; // fallback value;
-      }
-    })();
-    },
-
     // Neptune
     get Neptune(){
       let _map = new THREE.TextureLoader().load('resources/neptunemap.jpg');
@@ -93,7 +48,7 @@ class Screenplay extends _Screenplay{
       });
       neptune.surface_distance = 24622000;
       neptune.orbital_distance = 3 * 34820000;
-      neptune.orbital_vector = new THREE.Vector3( 0, 34820000, 34820000 );
+      neptune.orbital_vector = new THREE.Vector3( 34820000, 34820000, 34820000 );
 
       delete this.Neptune;
       return this.Neptune = neptune;
@@ -117,7 +72,7 @@ class Screenplay extends _Screenplay{
       });
       uranus.surface_distance = 25362000;
       uranus.orbital_distance = 3 * 35867000;
-      uranus.orbital_vector = new THREE.Vector3( 0, 35867000, 35867000 );
+      uranus.orbital_vector = new THREE.Vector3( 35867000, 35867000, 35867000 );
       delete this.Uranus;
       return this.Uranus = uranus;
     },
@@ -162,7 +117,7 @@ class Screenplay extends _Screenplay{
       });
       saturn.surface_distance = 58232000;
       saturn.orbital_distance = 3 * 82352000;
-      saturn.orbital_vector = new THREE.Vector3( 0, 82352000, 82352000 );
+      saturn.orbital_vector = new THREE.Vector3( 82352000, 82352000, 82352000 );
       delete this.Saturn;
       return this.Saturn = saturn;
     },
@@ -185,7 +140,7 @@ class Screenplay extends _Screenplay{
       });
       jupiter.surface_distance = 69911000;
       jupiter.orbital_distance = 3 * 98869000;
-      jupiter.orbital_vector = new THREE.Vector3( 0, 98869000, 98869000 );
+      jupiter.orbital_vector = new THREE.Vector3( 98869000, 98869000, 98869000 );
       delete this.Jupiter;
       return this.Jupiter = jupiter;
     },
@@ -209,7 +164,7 @@ class Screenplay extends _Screenplay{
       });
       mars.surface_distance = 3389000;
       mars.orbital_distance = 3 * 4792000;
-      mars.orbital_vector = new THREE.Vector3( 0, 4792000, 4792000 );
+      mars.orbital_vector = new THREE.Vector3( 4792000, 4792000, 4792000 );
       delete this.Mars;
       return this.Mars = mars;
     },
@@ -239,7 +194,7 @@ class Screenplay extends _Screenplay{
       });
       earth.surface_distance = 6371000;
       earth.orbital_distance = 3 * 9009000;
-      earth.orbital_vector = new THREE.Vector3( 0, 9009000, 9009000 );
+      earth.orbital_vector = new THREE.Vector3( 9009000, 9009000, 9009000 );
       delete this.Earth;
       return this.Earth = earth;
     },
@@ -262,7 +217,7 @@ class Screenplay extends _Screenplay{
       });
       moon.surface_distance = 1735500;
       moon.orbital_distance = 3 * 2454000;
-      moon.orbital_vector = new THREE.Vector3( 0, 2454000, 2454000 );
+      moon.orbital_vector = new THREE.Vector3( 2454000, 2454000, 2454000 );
       delete this.Moon;
       return this.Moon = moon;
     },
@@ -286,7 +241,7 @@ class Screenplay extends _Screenplay{
       });
       venus.surface_distance = 6052000;
       venus.orbital_distance = 3 * 8558820;
-      venus.orbital_vector = new THREE.Vector3( 0, 8558820, 8558820 );
+      venus.orbital_vector = new THREE.Vector3( 8558820, 8558820, 8558820 );
       delete this.Venus;
       return this.Venus = venus;
     },
@@ -310,7 +265,7 @@ class Screenplay extends _Screenplay{
       });
       mercury.surface_distance = 2439500;
       mercury.orbital_distance = 3 * 3449973;
-      mercury.orbital_vector = new THREE.Vector3( 0, 3449973, 3449973 );
+      mercury.orbital_vector = new THREE.Vector3( 3449973, 3449973, 3449973 );
       delete this.Mercury;
       return this.Mercury = mercury;
     },
@@ -333,7 +288,7 @@ class Screenplay extends _Screenplay{
       });
       sun.surface_distance = 695508000;
       sun.orbital_distance = 3 * 983596000;
-      sun.orbital_vector = new THREE.Vector3( 0, 983596000, 983596000);
+      sun.orbital_vector = new THREE.Vector3( 983596000, 983596000, 983596000);
       delete this.Sun;
       return this.Sun = sun;
     },
@@ -879,12 +834,14 @@ class Screenplay extends _Screenplay{
     } );
   }
 
+
   constructor( ){
     super( );
 
     // Camera & Controls Setup
     this.active_cam = this.cameras.camera_a = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
     this.cameras.camera_a.name = 'CaptainCam';
+    
   }
 }
 

@@ -52,6 +52,10 @@ class Workflow extends _Workflow{
   };
   verify_capabilities = async ( screenplay ) => {
     console.log( 'Workflow.verify_capabilities' );
+
+    //  By now, the scene assets have been loaded.
+    //  Run some tests to determine system ability.
+    //  Adjust performance values in order to optimize the user experience.
     return true;
   };
   introduction = async ( screenplay ) => {
@@ -199,6 +203,7 @@ class Workflow extends _Workflow{
     ship_gui.add( shipNav_folder, 'Venus' ).name('...to Venus');
     ship_gui.add( shipNav_folder, 'Mercury' ).name('...to Mercury');
     ship_gui.add( shipNav_folder, 'Sun' ).name('...to Sun');
+    ship_gui.add( screenplay.gridHelper, 'visible' ).name('Grid Overlay?');
 
     let neptune_gui = gui.addFolder( 'Neptune');
     let neptune = screenplay.actors.Neptune;
