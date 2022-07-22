@@ -206,6 +206,21 @@ class SceneDirections extends _SceneDirections {
   end_splash = async ( screenplay )=>{
    console.log('SceneDirections.end_splash');
   };
+  enter_prep = async ( screenplay )=>{
+   console.log('SceneDirections.enter_prep');
+  };
+  idle_on_prep = async ( screenplay )=>{
+   console.log('SceneDirections.idle_on_prep');
+  };
+  progress_prep = async ( screenplay )=>{
+   console.log('SceneDirections.progress_prep');
+  };
+  prep_failure = async ( screenplay )=>{
+   console.log('SceneDirections.prep_failure');
+  };
+  prepared = async ( screenplay )=>{
+   console.log('SceneDirections.prepared');
+  };
   enter_ready = async ( screenplay )=>{
    console.log('SceneDirections.enter_ready');
   };

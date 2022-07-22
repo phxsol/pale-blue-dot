@@ -14,7 +14,7 @@ class Workflow extends _Workflow{
   ActivateOrbitControls = async ( screenplay )=>{
     if( !screenplay.controls.orbit_controls ) {
       screenplay.controls.orbit_controls = new OrbitControls( screenplay.active_cam, screenplay.renderer.domElement );
-      screenplay.controls.orbit_controls.zoomSpeed = 4;
+      screenplay.controls.orbit_controls.zoomSpeed = 8;
       screenplay.controls.orbit_controls.enableDamping = true;
       screenplay.controls.orbit_controls.saveState();
     }
@@ -58,11 +58,12 @@ class Workflow extends _Workflow{
     //  Adjust performance values in order to optimize the user experience.
     return true;
   };
+  init_controls = async ( screenplay ) => {};
   introduction = async ( screenplay ) => {
     console.log('Workflow.introduction');
     return true;
   };
-  user_introduction = async ( screenplay ) => {
+  user_instruction = async ( screenplay ) => {
     console.log('Workflow.user_introduction');
 
     screenplay.renderer.domElement.addEventListener( 'wheel', (event)=>{
@@ -266,6 +267,9 @@ class Workflow extends _Workflow{
 
     return true;
   };
+  tour_or_skip = async ( screenplay ) => {};
+  introduce_phox = async ( screenplay ) => {};
+  connect = async ( screenplay ) => {};
 }
 
 export { Workflow }

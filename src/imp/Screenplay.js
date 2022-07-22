@@ -512,7 +512,7 @@ class Screenplay extends _Screenplay{
   };
   cameras;
   actions = {
-    warp_to: async ( planetary_body, equidistant_orbit = true ) =>{
+    warp_to: async ( planetary_body, equidistant_orbit = false ) =>{
       // Find yourself.
       let pov_posi = new THREE.Vector3().copy( this.actors.Ship.position );
       // Set the arrival coordinates.
@@ -841,7 +841,7 @@ class Screenplay extends _Screenplay{
     // Camera & Controls Setup
     this.active_cam = this.cameras.camera_a = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
     this.cameras.camera_a.name = 'CaptainCam';
-    
+
   }
 }
 
