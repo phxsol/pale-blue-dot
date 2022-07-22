@@ -19,7 +19,7 @@ class SceneDirections extends _SceneDirections {
     let ui_scene = screenplay.ui_scene;
     await screenplay.SetSceneBackground( );
     let gridHelper = screenplay.gridHelper = new THREE.GridHelper( 14959787070000, 100 );   // Set the grids to equal to 1AU * 1AU;
-    gridHelper.visible = true;
+    gridHelper.visible = false;
     scene.add( gridHelper );
 
   };
