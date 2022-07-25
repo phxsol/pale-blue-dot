@@ -12,7 +12,7 @@ import { CSS3DObject } from '../lib/CSS3DRenderer.js';
     Note: Be sure to override the lazy Getter with the initialized model ( See Screenplay.js for an example ).
 */
 class SceneDirections extends _SceneDirections {
-  enter_splash = async ( screenplay )=>{
+  enter_splash = async ( screenplay, dictum_name, next_emit, director )=>{
 
     console.log('SceneDirections.enter_splash');
     let scene = screenplay.scene;
@@ -22,8 +22,9 @@ class SceneDirections extends _SceneDirections {
     gridHelper.visible = false;
     scene.add( gridHelper );
 
+    director.emit( next_emit, dictum_name );
   };
-  idle_on_splash = async ( screenplay )=>{
+  idle_on_splash = async ( screenplay, dictum_name, next_emit, director )=>{
     console.log('SceneDirections.idle_on_splash');
     let scene = screenplay.scene;
     let ui_scene = screenplay.ui_scene;
@@ -196,6 +197,8 @@ class SceneDirections extends _SceneDirections {
 
     // Ship
     scene.add( ship );
+
+    director.emit( next_emit, dictum_name );
   };
   progress_splash = async ( screenplay )=>{
     console.log('SceneDirections.progress_splash');
@@ -203,14 +206,20 @@ class SceneDirections extends _SceneDirections {
   splash_failure = async ( screenplay )=>{
    console.log('SceneDirections.splash_failure');
   };
-  end_splash = async ( screenplay )=>{
+  end_splash = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.end_splash');
+
+   director.emit( next_emit, dictum_name );
   };
-  enter_prep = async ( screenplay )=>{
+  enter_prep = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.enter_prep');
+
+   director.emit( next_emit, dictum_name );
   };
-  idle_on_prep = async ( screenplay )=>{
+  idle_on_prep = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.idle_on_prep');
+
+   director.emit( next_emit, dictum_name );
   };
   progress_prep = async ( screenplay )=>{
    console.log('SceneDirections.progress_prep');
@@ -218,14 +227,20 @@ class SceneDirections extends _SceneDirections {
   prep_failure = async ( screenplay )=>{
    console.log('SceneDirections.prep_failure');
   };
-  prepared = async ( screenplay )=>{
+  prepared = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.prepared');
+
+   director.emit( next_emit, dictum_name );
   };
-  enter_ready = async ( screenplay )=>{
+  enter_ready = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.enter_ready');
+
+   director.emit( next_emit, dictum_name );
   };
-  idle_on_ready = async ( screenplay )=>{
+  idle_on_ready = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.idle_on_ready');
+
+   director.emit( next_emit, dictum_name );
   };
   progress_ready = async ( screenplay )=>{
    console.log('SceneDirections.progress_ready');
@@ -233,8 +248,10 @@ class SceneDirections extends _SceneDirections {
   ready_failure = async ( screenplay )=>{
    console.log('SceneDirections.ready_failure');
   };
-  ready_for_anything = async ( screenplay )=>{
+  ready_for_anything = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.ready_for_anything');
+
+   director.emit( next_emit, dictum_name );
   };
 }
 

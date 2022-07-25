@@ -8,25 +8,27 @@ import { CSS3DRenderer } from '../lib/CSS3DRenderer.js';
   Scenes are complex, orchestrated animations which are driven by the ScreenDirector to create a rich user experience for webapp interactions.
   Use this to prepare the user-interface for interaction, then to drive the interaction through each entry in your site's manifesto.
 */
-class ScreenDirector extends EventEmitter {
+class ScreenDirector{
   active_dictum = 0;  // State Awareness Variable
   dictum_index = [];  // Track the dictums by name in an array for efficient iteration control.
-
+  director;
   start = function(){
+
     this.screenplay.animate();  // Kickstart the animation loop
-    this.emit('first_dictum');  // Begin the Manifesto
+    this.director.emit('first_dictum');  // Begin the Manifesto
+
   }
 
   // GUI Interactions
   raycaster; mouse;
   onPointerDown = ( event )=> {
+
     this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
     this.raycaster.setFromCamera( this.mouse, this.screenplay.active_cam );
     const intersects = (this.screenplay.interactives && this.screenplay.interactives.length > 0) ? this.raycaster.intersectObjects( this.screenplay.interactives, false ) : [];
     if ( intersects.length > 0 ) {
-
 
       // Capture the first clicked target
       const object = intersects[ 0 ].object;
@@ -40,153 +42,140 @@ class ScreenDirector extends EventEmitter {
   // manifesto: The orchestrated performance of an animated THREE.js environment and the workflow of a web app.
   // start_now: Whether to begin immediately once the ScreenDirector has been generated, or to wait for the .start() method call.
   constructor( screenplay, manifesto, start_now ){
-    super();  // Instantiating the EventEmitter super class gives access to 'this'.
-
-    this.screenplay = screenplay;
-    this.manifesto = manifesto;
+    this.director = new EventEmitter();
 
     // Listen to environmental changes, adjust accordingly.
     window.addEventListener( 'pointerdown', this.onPointerDown );
-    window.addEventListener( 'resize', this.screenplay.resize, { capture: true } );
+    window.addEventListener( 'resize', this.resize, { capture: true } );
 
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
 
+    this.screenplay = screenplay;
+    this.manifesto = manifesto;
 
     // Iterate through the provided dictums, generating event-handing pathways to progress through the manifesto.
     for (const dictum_name in this.manifesto) {
+
       this.dictum_index.push(dictum_name);
       let dictum = this.manifesto[dictum_name];
 
-      // Keep track of the success and failure of the screenplay's dictum logic.
-      dictum.progress = { completed: 0, failed: 0, passed: 0 };
-
       // EventHandler <dictum_name>: When fired, executes the designated functions in order, reporting the progress to the <dictum_name>_progress eventhandler.
-      this.on(`${dictum_name}`, async function( dictum_name ){
-
-        // Run Entry Directions
-        let dictum = this.manifesto[dictum_name];
-        await dictum.directions.on_enter(this.screenplay);
-
-        // Begin Idle Directions while continuing on to the dictum logic.
-        await dictum.directions.on_idle(this.screenplay);
-
-        // Run the dictum logic
-        let logic_count = 0;
-        if(!dictum.logic) throw new Error('Dictums must be logical.  Declare a void function at least.');   // Feedback for the Dictum writers.
-        if(Array.isArray(dictum.logic)){     // Differentiate between singular functions and function arrays
-          logic_count = dictum.logic.length;
-          for(let ndx=0; ndx<dictum.logic.length;ndx++){
-            let logic_response = dictum.logic[ndx]( this.screenplay ); // Wait on the response for this dictum logic algorithm before moving to the next in the array... NOTE: Must be a valid thing to pass on to the _progress event.
-            Promise.all( [ logic_response ] ).then( ()=>{
-              this.emit(`${dictum_name}_progress`, dictum_name, logic_count, logic_response);  // Emit the progress event for this dictum... along with how many there are to expect.
-            });
-          }
-        } else {
-          logic_count = 1;
-          let logic_response = dictum.logic( this.screenplay );  // Wait on the response to this dictum's one logic algorithm... NOTE: Must be a valid thing to pass on to the _progress event.
-          Promise.all( [ logic_response ] ).then( ()=>{
-            this.emit(`${dictum_name}_progress`, dictum_name, logic_count, logic_response); // Emit the progress event for this dictum... along with 1, how many there are to expect.
-          });
-        }
-
+      this.director.on( `${dictum_name}`, async ()=>{
+        this.manifesto[ dictum_name ].directions.on_enter( this.screenplay, dictum_name, `${dictum_name}_entered`, this.director );
+      });
+      this.director.on( `${dictum_name}_entered`, async ()=>{
+        this.manifesto[ dictum_name ].directions.on_idle( this.screenplay, dictum_name, `${dictum_name}_idling`, this.director );
       });
 
-      // EventHandler <dictum_name>_progress: When fired, determines success or failure of the dictum, and upon determination, responds to the 'confirm_dictum' or 'fail_dictum' eventhandlers respectively.
-      this.on(`${dictum_name}_progress`, async function( dictum_name, count, response ){
-        let dictum = this.manifesto[dictum_name];
-        dictum.progress.completed++;
-        if(response) {
-          // Run Logic Progression directions
-          dictum.directions.on_progress( this.screenplay );
-          dictum.progress.passed++;
-          if(dictum.progress.passed === count) {
-            // Perform the 'on_end' directions prior to confirming it and progressing on.
-            let directions = [];
-            if(Array.isArray(dictum.directions.on_end)){  // Differentiate between singular functions and function arrays
-              for(let ndx=0;ndx<dictum.directions.on_end.length;ndx++){
-                directions.push( dictum.directions.on_end[ndx]( this.screenplay ) ); // Wait for the directions to complete before moving on to the next one.
-              }
-            } else {
-              directions.push( dictum.directions.on_end( this.screenplay ) );  // Wait for the directions to complete before moving on to confirm the step.
-            }
-            // Confirm this dictum step if all have passed successfully.
-            Promise.all( directions ).then( _=>{
-              this.emit('confirm_dictum', dictum_name);
-            });
-          }
-        } else {
-          dictum.progress.failed++;  // Mark this as failed.
-          await dictum.directions.on_failure( this.screenplay );
-        }
-        // If there is a failure during this dictum step, then emit a failure... else it would have been confirmed above.
-        // NOTE: Failure will need to progress or return to complete the step.
-        if(dictum.progress.completed === count && dictum.progress.failed > 0) this.emit('fail_dictum', dictum_name);
+      // Run the dictum logic
+      let logic_count = 0;
+      if(!dictum.logic) throw new Error('Dictums must be logical.  Declare a void function at least.');   // Feedback for the Dictum writers.
+      logic_count = dictum.logic.length;
+      for( let ndx=0; ndx<logic_count;ndx++ ){
+        this.director.on( `${dictum_name}_idling`, async ()=>{
+          dictum.logic[ndx]( this.screenplay, dictum_name, this.director, ndx )
+        });
+      }
 
-      })
+      this.director.on( `${dictum_name}_progress`, async ( dictum_name, ndx )=>{
+
+        let dictum = this.manifesto[ dictum_name ];
+        dictum.directions.on_progress( this.screenplay );
+        dictum.progress.completed++;
+        dictum.progress.passed++;
+        if( dictum.progress.completed === dictum.logic.length ) {
+          this.director.emit( `${dictum_name}_end`, dictum_name );
+        }
+
+      } );
+
+      this.director.on( `${dictum_name}_failure`, async ( dictum_name, ndx )=>{
+
+        let dictum = this.manifesto[dictum_name];
+        dictum.directions.on_failure( this.screenplay );
+        dictum.progress.completed++;
+        dictum.progress.failed++;
+        if( dictum.progress.completed === dictum.logic.length ) {
+          this.director.emit( `${dictum_name}_end`, dictum_name );
+        }
+
+      } );
+
+      this.director.on( `${dictum_name}_end`, async ( dictum_name )=>{
+
+        let dictum = this.manifesto[dictum_name];
+        let next_emit = (dictum.progress.failed > 0) ? 'fail_dictum' : `confirm_dictum`;
+        this.manifesto[ dictum_name ].directions.on_end( this.screenplay, dictum_name, next_emit, this.director ) ;
+      } );
 
     }
 
     /* Static, Internal Event Functions */
     // EventHandler 'first_dictum': When fired, begins the process by setting the ScreenDirector to the first dictum, then emitting that event immediately.
-    this.on('first_dictum', async function(){
-      let dictum_name = this.dictum_index[0];
-      this.emit(`${dictum_name}`, dictum_name);
+    this.director.on('first_dictum', async ()=>{
+
+      let dictum_name = this.dictum_index[ 0 ];
+      this.director.emit( `${dictum_name}`, dictum_name );
+
     });
 
     // EventHandler 'next_dictum': When fired, increments the ScreenDirector to the next dictum, or past; emitting either that <dictum_name> event, or the 'manifesto_compete' event respectively.
-    this.on('next_dictum', async function(){
+    this.director.on('next_dictum', async ()=>{
+
       this.active_dictum++;
-      let dictum_name = this.dictum_index[this.active_dictum];
-      if(this.active_dictum < this.dictum_index.length){
-        this.emit(`${dictum_name}`, dictum_name);
+      let dictum_name = this.dictum_index[ this.active_dictum ];
+      if( this.active_dictum < this.dictum_index.length ){
+        this.director.emit( `${dictum_name}`, dictum_name );
       } else {
-        this.emit('manifesto_complete');
+        this.director.emit( 'manifesto_complete' );
       }
+
     });
 
     // EventHandler 'prev_dictum': When fired, decrements the ScreenDirector to the previous dictum, until the first; emitting either that <dictum_name> event, or the 'first_dictum' event respectively.
-    this.on('prev_dictum', async function(){
+    this.director.on('prev_dictum', async ()=>{
+
       this.active_dictum--;
-      let dictum_name = this.dictum_index[this.active_dictum];
+      let dictum_name = this.dictum_index[ this.active_dictum ];
       if(this.active_dictum > 0){
-        this.emit(`${dictum_name}`, dictum_name);
+        this.director.emit( `${dictum_name}`, dictum_name );
       } else {
-        this.emit('first_dictum');
+        this.director.emit( 'first_dictum' );
       }
+
     });
 
     // EventHandler 'confirm_dictum': When fired, the ScreenDirector marks this dictum as confirmed, signalling that all dictums succeeded in their task.
     //                                Next, the 'next_dictum' event is fired to continue the production.
-    this.on('confirm_dictum', async function(dictum_name){
+    this.director.on('confirm_dictum', async ( dictum_name )=>{
+
       this.manifesto[dictum_name].result.complete = true;
-      this.emit('next_dictum');
+      this.director.emit('next_dictum');
+
     });
 
     // EventHandler 'fail_dictum':  When fired, the ScreenDirector marks this dictum as failed, signalling that one or more dictums have not failed in their task.
     //                              Next, the 'next_dictum' event is fired to continue the production.
-    this.on('fail_dictum', async function(dictum_name){
-      if(this.manifesto[dictum_name].result.fok){
-        if(this.manifesto[dictum_name].result.retry){
-          this.emit(`${dictum_name}`, dictum_name);
-        } else {
-          this.emit('next_dictum');
-        }
-      } else {
-          this.emit(`${dictum_name}`, dictum_name);
-      }
+    this.director.on('fail_dictum', async ( dictum_name )=>{
+
+      if(this.manifesto[dictum_name].result.fok) this.director.emit('next_dictum');
+      else this.director.emit(`${dictum_name}`, dictum_name);
 
     });
 
     // EventHandler 'manifesto_compete': When fired, the ScreenDirector takes a bow... idles to wait for more... or even closes if so desired.
-    this.on('manifesto_complete', async function(){
+    this.director.on('manifesto_complete', async function(){
+
       // TODO: Take a bow | clean up after yourself.
+
     });
 
-    this.on('error', async function(){}); /* Best Practice: Node exits if not declared and an unhandled 'error' event is thrown. */
+    this.director.on('error', async function(){}); /* Best Practice: Node exits if not declared and an unhandled 'error' event is thrown. */
 
     // Kick off the first dictum now that initialization has completed.
     if(start_now) this.start();
+
   }
 }
 
@@ -294,7 +283,7 @@ class Screenplay{
     this.updatables.set('scene', this.scene.updates );
 
     // Scene Renderer
-    const renderer = new THREE.WebGLRenderer( { antialias: true, logarithmicDepthBuffer: true, physicallyCorrectLights: true } );
+    const renderer = new THREE.WebGLRenderer( { antialias: true, physicallyCorrectLights: true } );
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -379,14 +368,19 @@ class Dictum{
   // logic: Passed on by the Manifesto from it's own construction
   // directions: JSON with functions to run for:
   //    on_enter, on_idle, on_progress, on_failure, on_end.
-  constructor( logic, directions, okay_to_fail, prompt_on_fail ){
+  constructor( logic, directions, okay_to_fail ){
     this.logic = logic;
     this.directions = directions;
 
     this.result = {
-      fok: okay_to_fail,
-      retry: prompt_on_fail
+      fok: okay_to_fail
     }
+    this.progress = {
+      completed: 0,
+      failed: 0,
+      passed: 0
+    };
+
   }
 }
 
