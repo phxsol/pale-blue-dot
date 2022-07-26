@@ -493,7 +493,7 @@ class Screenplay extends _Screenplay{
       })();
     }
 
-  }
+  };
   lights = {
     get point_light(){
       delete this.point_light;
@@ -825,6 +825,16 @@ class Screenplay extends _Screenplay{
 				let textureCube = await loader.load( [ 'corona_lf.png', 'corona_rt.png', 'corona_up_2.png', 'corona_dn_2.png', 'corona_ft.png', 'corona_bk.png'   ] );
 				this.scene.background = textureCube;
   };
+  props = {
+    get Splash_Screen(){
+      let splash_screen = new THREE.Mesh(
+        new THREE.PlaneGeometry( 11, 4 ),
+        new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} )
+      );
+      delete this.Splash_Screen;
+      return this.Splash_Screen = splash_screen;
+    }
+  }
 
   direct = ( delta )=>{
 
@@ -844,8 +854,6 @@ class Screenplay extends _Screenplay{
     // Camera & Controls Setup
     this.active_cam = this.cameras.a = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
     this.cameras.a.name = 'CaptainCam';
-    this.active_cam.layers.enable( 0 );
-    this.active_cam.layers.enable( 1 );
 
   }
 }

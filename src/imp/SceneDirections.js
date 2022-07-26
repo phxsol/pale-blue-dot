@@ -12,17 +12,22 @@ import { CSS3DObject } from '../lib/CSS3DRenderer.js';
     Note: Be sure to override the lazy Getter with the initialized model ( See Screenplay.js for an example ).
 */
 class SceneDirections extends _SceneDirections {
+
   enter_splash = async ( screenplay, dictum_name, next_emit, director )=>{
 
     console.log('SceneDirections.enter_splash');
-    let scene = screenplay.scene;
-    let ui_scene = screenplay.ui_scene;
+
     await screenplay.SetSceneBackground( );
-    ui_scene.background = 0xff0000;
+
+    let scene = screenplay.scene;
+    let splash_screen = screenplay.props.Splash_Screen;
+    scene.add( splash_screen );
+
     director.emit( next_emit, dictum_name );
   };
   idle_on_splash = async ( screenplay, dictum_name, next_emit, director )=>{
     console.log('SceneDirections.idle_on_splash');
+
     let scene = screenplay.scene;
     let ui_scene = screenplay.ui_scene;
 

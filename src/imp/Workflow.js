@@ -313,6 +313,7 @@ class Workflow extends _Workflow{
   };
   visit_sun = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_sun');
+
     screenplay.actions.warp_to( screenplay.actors.Sun, false, {
       director: director,
       dictum_name: dictum_name,
@@ -322,6 +323,7 @@ class Workflow extends _Workflow{
   };
   visit_mercury = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_mercury');
+    
     screenplay.actions.warp_to( screenplay.actors.Mercury, false, {
       director: director,
       dictum_name: dictum_name,
