@@ -18,16 +18,17 @@ class SceneDirections extends _SceneDirections {
     let scene = screenplay.scene;
     let ui_scene = screenplay.ui_scene;
     await screenplay.SetSceneBackground( );
-    let gridHelper = screenplay.gridHelper = new THREE.GridHelper( 14959787070000, 100 );   // Set the grids to equal to 1AU * 1AU;
-    gridHelper.visible = false;
-    scene.add( gridHelper );
-
+    ui_scene.background = 0xff0000;
     director.emit( next_emit, dictum_name );
   };
   idle_on_splash = async ( screenplay, dictum_name, next_emit, director )=>{
     console.log('SceneDirections.idle_on_splash');
     let scene = screenplay.scene;
     let ui_scene = screenplay.ui_scene;
+
+    let gridHelper = screenplay.gridHelper = new THREE.GridHelper( 14959787070000, 100 );   // Set the grids to equal to 1AU * 1AU;
+    gridHelper.visible = false;
+    scene.add( gridHelper );
 
     let ship = await screenplay.actors.Ship;
     screenplay.cameras = ship.cameras;
@@ -36,9 +37,8 @@ class SceneDirections extends _SceneDirections {
     scene.add( screenplay.lights.point_light );
     scene.add( screenplay.lights.ambient_light );
 
-    ship.position.addVectors( screenplay.actors.Earth.position, screenplay.actors.Earth.orbital_vector );
+    ship.position.addVectors( screenplay.actors.Earth.position, screenplay.actors.Earth.orbital_vector);
     ship.lookAt( screenplay.actors.Earth.position );
-
     scene.add( ship.warp_tunnel );
     ship.warp_tunnel.children.forEach( ( warp_shell_cone )=>{
       warp_shell_cone.visible = false;
@@ -228,7 +228,34 @@ class SceneDirections extends _SceneDirections {
    console.log('SceneDirections.prep_failure');
   };
   prepared = async ( screenplay, dictum_name, next_emit, director )=>{
-   console.log('SceneDirections.prepared');
+    console.log('SceneDirections.prepared');
+
+    if( screenplay.take_the_tour ){
+      director.emit( next_emit, dictum_name );
+    } else {
+      let from_dictum_name = dictum_name;
+      dictum_name = `Ready`;
+      director.emit( `goto_dictum`, dictum_name, from_dictum_name );
+    }
+  };
+  enter_tour = async ( screenplay, dictum_name, next_emit, director )=>{
+   console.log('SceneDirections.enter_tour');
+
+   director.emit( next_emit, dictum_name );
+  };
+  idle_on_tour = async ( screenplay, dictum_name, next_emit, director )=>{
+   console.log('SceneDirections.idle_on_tour');
+
+   director.emit( next_emit, dictum_name );
+  };
+  progress_tour = async ( screenplay )=>{
+   console.log('SceneDirections.progress_tour');
+  };
+  tour_failure = async ( screenplay )=>{
+   console.log('SceneDirections.tour_failure');
+  };
+  tour_over = async ( screenplay, dictum_name, next_emit, director )=>{
+   console.log('SceneDirections.tour_over');
 
    director.emit( next_emit, dictum_name );
   };

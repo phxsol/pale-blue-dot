@@ -309,14 +309,14 @@ class Screenplay extends _Screenplay{
             _bulkhead.receiveShadow = true;
             _bulkhead.material = _bulkhead_mat;
             _ship.bulkhead = _bulkhead;
-            _ship.bulkhead.visible = true;
+            _ship.bulkhead.visible = false;
 
             let _bulkhead_open = _ship.getObjectByName( 'BulkheadOpen' );
             _bulkhead_open.castShadow = true;
             _bulkhead_open.receiveShadow = true;
             _bulkhead_open.material = _bulkhead_mat;
             _ship.bulkhead_open = _bulkhead_open;
-            _ship.bulkhead_open.visible = false;
+            _ship.bulkhead_open.visible = true;
 
             let _aft_wall = _ship.getObjectByName( 'Aft_Wall' );
             _aft_wall.castShadow = true;
@@ -337,11 +337,11 @@ class Screenplay extends _Screenplay{
             _ops_station.receiveShadow = true;
             _ops_station.material = _station_mats;
             _ship.ops_station = _ops_station;
-            let _conn_station = _ship.getObjectByName( 'ConnStation' );
-            _conn_station.castShadow = true;
-            _conn_station.receiveShadow = true;
-            _conn_station.material = _station_mats;
-            _ship.conn_station = _conn_station;
+            //let _conn_station = _ship.getObjectByName( 'ConnStation' );
+            //_conn_station.castShadow = true;
+            //_conn_station.receiveShadow = true;
+            //_conn_station.material = _station_mats;
+            //_ship.conn_station = _conn_station;
             let _sec_station = _ship.getObjectByName( 'SecurityStation' );
             _sec_station.castShadow = true;
             _sec_station.receiveShadow = true;
@@ -512,7 +512,7 @@ class Screenplay extends _Screenplay{
   };
   cameras;
   actions = {
-    warp_to: async ( planetary_body, equidistant_orbit = false ) =>{
+    warp_to: async ( planetary_body, equidistant_orbit = false, arrival_emitter ) =>{
       // Find yourself.
       let pov_posi = new THREE.Vector3().copy( this.actors.Ship.position );
       // Set the arrival coordinates.
@@ -568,17 +568,20 @@ class Screenplay extends _Screenplay{
       this.scene.updates.cache.warped = false;
       this.scene.updates.cache.at_destination = false;
       this.scene.updates.cache.completed = false;
+      this.scene.updates.cache.arrival_emitter = arrival_emitter;
       this.scene.updates.update = ()=>{
         let user_control = this.active_cam.user_control;
         // Call this last to clear the function
         if( this.scene.updates.cache.completed ){
 
           this.updatables.delete('scene');
+          let a = this.scene.updates.cache.arrival_emitter;
           delete this.scene.updates;
           this.scene.updates = {
             update: ()=>{},
             cache: {}
           };
+          a.director.emit( `${a.dictum_name}_progress`, a.dictum_name, a.ndx );
         } else {
           // Turn toward the destination.
           if( !this.scene.updates.cache.locked_on && this.scene.updates.cache.frame <= this.scene.updates.cache.turn_duration ){
@@ -839,8 +842,10 @@ class Screenplay extends _Screenplay{
     super( );
 
     // Camera & Controls Setup
-    this.active_cam = this.cameras.camera_a = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
-    this.cameras.camera_a.name = 'CaptainCam';
+    this.active_cam = this.cameras.a = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
+    this.cameras.a.name = 'CaptainCam';
+    this.active_cam.layers.enable( 0 );
+    this.active_cam.layers.enable( 1 );
 
   }
 }

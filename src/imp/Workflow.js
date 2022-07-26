@@ -8,7 +8,15 @@ import { OrbitControls } from '../lib/OrbitControls.js';
 // Workflow Implementation
 class Workflow extends _Workflow{
   elevated_vars = {
-    "u_name": ""
+    "u_name": "",
+    "ups_test": {
+      "ticks": 0,
+      "duration": 0,
+      "stamps": [],
+      "max": -1,
+      "min": -1,
+      "score": 0
+    }
   }
 
   ActivateOrbitControls = async ( screenplay )=>{
@@ -49,23 +57,32 @@ class Workflow extends _Workflow{
   verify_capabilities = async ( screenplay, dictum_name, director, ndx ) => {
     console.log( 'Workflow.verify_capabilities' );
 
+    screenplay.updatables.set( 'ups_test', { update: ( delta )=>{
+      this.elevated_vars.ups_test.ticks++;
+      this.elevated_vars.ups_test.stamps.push( delta );
+    }} );
+    setTimeout( ()=>{
+      screenplay.updatables.delete( 'ups_test' );
+      let test = this.elevated_vars.ups_test;
+      // remove the first entry to normalize
+      test.ticks--;
+      test.stamps.shift();
+      test.duration = test.stamps.reduce( (a,b) => a + b, 0 );
+      test.max = Math.max( ...test.stamps );
+      test.min = Math.min( ...test.stamps );
+      test.score = 1/((test.duration - test.max) / ( test.ticks -1 ));
+
+      if ( test.score > 20 ) director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      else director.emit( `${dictum_name}_failure`, dictum_name, ndx );
+    }, 3000 );
     //  By now, the scene assets have been loaded.
     //  Run some tests to determine system ability.
     //  Adjust performance values in order to optimize the user experience.
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+
   };
   init_controls = async ( screenplay, dictum_name, director, ndx ) => {
     console.log( 'Workflow.init_controls' );
 
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-  };
-  introduction = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.introduction');
-
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-  };
-  user_instruction = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.user_introduction');
     try{
       screenplay.renderer.domElement.addEventListener( 'wheel', (event)=>{
 
@@ -206,6 +223,9 @@ class Workflow extends _Workflow{
       ship_gui.add( shipNav_folder, 'Mercury' ).name('...to Mercury');
       ship_gui.add( shipNav_folder, 'Sun' ).name('...to Sun');
       ship_gui.add( screenplay.gridHelper, 'visible' ).name('Grid Overlay?');
+      ship_gui.add( screenplay, 'fps' ).name('Frames / Second').onChange(()=>{
+        screenplay.interval = 1 / screenplay.fps;
+      });;
 
       let neptune_gui = gui.addFolder( 'Neptune');
       let neptune = screenplay.actors.Neptune;
@@ -274,10 +294,111 @@ class Workflow extends _Workflow{
 
     }
   };
+  introduction = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.introduction');
+
+    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+  };
+  user_instruction = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.user_introduction');
+
+    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+  };
   tour_or_skip = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.tour_or_skip');
 
+    screenplay.take_the_tour = window.confirm( 'Take the tour?' );
+
     director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+  };
+  visit_sun = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_sun');
+    screenplay.actions.warp_to( screenplay.actors.Sun, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
+
+  };
+  visit_mercury = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_mercury');
+    screenplay.actions.warp_to( screenplay.actors.Mercury, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
+  };
+  visit_venus = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_venus');
+
+    screenplay.actions.warp_to( screenplay.actors.Venus, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
+  };
+  visit_earth = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_earth');
+
+    screenplay.actions.warp_to( screenplay.actors.Earth, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
+  };
+  visit_moon = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_moon');
+
+    screenplay.actions.warp_to( screenplay.actors.Moon, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
+  };
+  visit_mars = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_mars');
+
+    screenplay.actions.warp_to( screenplay.actors.Mars, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
+  };
+  visit_jupiter = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_jupiter');
+
+    screenplay.actions.warp_to( screenplay.actors.Jupiter, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
+  };
+  visit_saturn = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_saturn');
+
+    screenplay.actions.warp_to( screenplay.actors.Saturn, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
+  };
+  visit_uranus = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_uranus');
+
+    screenplay.actions.warp_to( screenplay.actors.Uranus, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
+  };
+  visit_neptune = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.visit_neptune');
+
+    screenplay.actions.warp_to( screenplay.actors.Neptune, false, {
+      director: director,
+      dictum_name: dictum_name,
+      ndx: ndx
+    } );
   };
   introduce_phox = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.introduce_phox');

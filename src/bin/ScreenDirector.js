@@ -72,11 +72,9 @@ class ScreenDirector{
       let logic_count = 0;
       if(!dictum.logic) throw new Error('Dictums must be logical.  Declare a void function at least.');   // Feedback for the Dictum writers.
       logic_count = dictum.logic.length;
-      for( let ndx=0; ndx<logic_count;ndx++ ){
-        this.director.on( `${dictum_name}_idling`, async ()=>{
-          dictum.logic[ndx]( this.screenplay, dictum_name, this.director, ndx )
-        });
-      }
+      this.director.on( `${dictum_name}_idling`, async ()=>{
+        dictum.logic[ 0 ]( this.screenplay, dictum_name, this.director, 0 );
+      });
 
       this.director.on( `${dictum_name}_progress`, async ( dictum_name, ndx )=>{
 
@@ -86,6 +84,8 @@ class ScreenDirector{
         dictum.progress.passed++;
         if( dictum.progress.completed === dictum.logic.length ) {
           this.director.emit( `${dictum_name}_end`, dictum_name );
+        } else {
+          this.director.emit( `next_logic`, dictum_name, ++ndx );
         }
 
       } );
@@ -98,6 +98,8 @@ class ScreenDirector{
         dictum.progress.failed++;
         if( dictum.progress.completed === dictum.logic.length ) {
           this.director.emit( `${dictum_name}_end`, dictum_name );
+        } else {
+          this.director.emit( `next_logic`, dictum_name, ++ndx );
         }
 
       } );
@@ -133,6 +135,14 @@ class ScreenDirector{
 
     });
 
+    // EventHandler 'next_dictum': When fired, increments the ScreenDirector to the next dictum, or past; emitting either that <dictum_name> event, or the 'manifesto_compete' event respectively.
+    this.director.on('next_logic', async ( dictum_name, ndx )=>{
+
+      let dictum = this.manifesto[ dictum_name ];
+      dictum.logic[ ndx ]( this.screenplay, dictum_name, this.director, ndx );
+
+    });
+
     // EventHandler 'prev_dictum': When fired, decrements the ScreenDirector to the previous dictum, until the first; emitting either that <dictum_name> event, or the 'first_dictum' event respectively.
     this.director.on('prev_dictum', async ()=>{
 
@@ -146,11 +156,21 @@ class ScreenDirector{
 
     });
 
+    // EventHandler 'next_dictum': When fired, increments the ScreenDirector to the next dictum, or past; emitting either that <dictum_name> event, or the 'manifesto_compete' event respectively.
+    this.director.on('goto_dictum', async ( dictum_name, from_dictum_name )=>{
+
+      this.manifesto[ from_dictum_name ].result.complete = true;
+      this.active_dictum = this.dictum_index.indexOf( dictum_name );
+      dictum_name = this.dictum_index[ this.active_dictum ];
+      this.director.emit( `${dictum_name}`, dictum_name );
+
+    });
+
     // EventHandler 'confirm_dictum': When fired, the ScreenDirector marks this dictum as confirmed, signalling that all dictums succeeded in their task.
     //                                Next, the 'next_dictum' event is fired to continue the production.
     this.director.on('confirm_dictum', async ( dictum_name )=>{
 
-      this.manifesto[dictum_name].result.complete = true;
+      this.manifesto[ dictum_name ].result.complete = true;
       this.director.emit('next_dictum');
 
     });
@@ -190,16 +210,17 @@ class Screenplay{
   active_cam;
   scene; ui_scene; renderer; ui_renderer;
   clock; delta; fps; interval; raycaster; mouse;
-
+  stop_me;
   animate = ()=>{
     requestAnimationFrame( this.animate );
     this.delta += this.clock.getDelta();
     if (this.delta  > this.interval) {
+      let next_delta = this.delta % this.interval;
       this.update( this.delta );
       this.direct( this.delta );
       this.render();
       this.ui_render();
-      this.delta = this.delta % this.interval;
+      this.delta = next_delta;
     }
   }
   controls = {};
@@ -261,9 +282,8 @@ class Screenplay{
     this.clock = clock;
     let delta = 0;
     this.delta = delta;
-    let fps = 30;
-    let interval = 1 / fps;
-    this.interval = interval;
+    let fps = this.fps = 30;
+    let interval = this.interval = 1 / fps;
 
     // Mouse Interaction Capture
     const raycaster = new THREE.Raycaster();
@@ -283,7 +303,7 @@ class Screenplay{
     this.updatables.set('scene', this.scene.updates );
 
     // Scene Renderer
-    const renderer = new THREE.WebGLRenderer( { antialias: true, physicallyCorrectLights: true } );
+    const renderer = new THREE.WebGLRenderer( { antialias: true, logarithmicDepthBuffer: true, physicallyCorrectLights: true } );
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -296,8 +316,6 @@ class Screenplay{
     const ui_renderer = new CSS3DRenderer( );
     ui_renderer.setSize( window.innerWidth, window.innerHeight );
     let ui_canvas = ui_renderer.domElement;
-    ui_canvas.style['background-color'] = 'transparent';
-    ui_canvas.style.position = 'fixed';
     document.body.appendChild( ui_canvas );
     this.ui_renderer = ui_renderer;
   }
