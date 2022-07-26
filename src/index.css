@@ -12,6 +12,6 @@ code {
     monospace;
 }
 
-#root > canvas {
+#theatre {
   position: fixed;
 }

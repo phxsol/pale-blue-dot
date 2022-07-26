@@ -309,6 +309,7 @@ class Screenplay{
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.setPixelRatio( window.devicePixelRatio ? window.devicePixelRatio : 1 );
     let canvas = renderer.domElement;
+    canvas.id = 'theatre';
     document.body.appendChild( canvas );
     this.renderer = renderer;
 
