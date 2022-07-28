@@ -15,3 +15,7 @@ code {
 #theatre {
   position: fixed;
 }
+
+#ui {
+  display: none;
+}

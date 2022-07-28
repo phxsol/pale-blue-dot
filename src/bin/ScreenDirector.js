@@ -317,6 +317,7 @@ class Screenplay{
     const ui_renderer = new CSS3DRenderer( );
     ui_renderer.setSize( window.innerWidth, window.innerHeight );
     let ui_canvas = ui_renderer.domElement;
+    ui_canvas.id = 'ui';
     document.body.appendChild( ui_canvas );
     this.ui_renderer = ui_renderer;
   }
