@@ -21,7 +21,7 @@ class Manifesto extends _Manifesto{
         on_failure: scene_directions.prep_failure,
         on_end: scene_directions.prepared
       }, true );
-    this.Tour = new Dictum( [ workflow.visit_sun, workflow.visit_mercury, workflow.visit_saturn, workflow.visit_moon ],
+    this.Tour = new Dictum( [ workflow.visit_sun, workflow.visit_mercury, workflow.visit_saturn, workflow.visit_moon, workflow.visit_earth ],
       {
         on_enter: scene_directions.enter_tour,
         on_idle: scene_directions.idle_on_tour,
@@ -29,7 +29,7 @@ class Manifesto extends _Manifesto{
         on_failure: scene_directions.tour_failure,
         on_end: scene_directions.tour_over
       }, true );
-    this.Ready = new Dictum( [ workflow.visit_earth, workflow.introduce_phox, workflow.confirm_privileges, workflow.connect ],
+    this.Ready = new Dictum( [ workflow.introduce_phox, workflow.confirm_privileges, workflow.connect ],
       {
         on_enter: scene_directions.enter_ready,
         on_idle: scene_directions.idle_on_ready,

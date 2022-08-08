@@ -1,9 +1,13 @@
 // Screen Director Reference
-import { Workflow as _Workflow } from '../bin/ScreenDirector.js';
+import { Workflow as _Workflow, SceneAsset3D } from '../bin/ScreenDirector.js';
 // Support Library Reference
 import GUI from 'lil-gui';
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/OrbitControls.js';
+import { FirstPersonControls } from '../lib/FirstPersonControls.js';
+import { FlyControls } from '../lib/FlyControls.js';
+import { TrackballControls } from '../lib/TrackballControls.js';
+import { CSS3DRenderer, CSS3DObject } from '../lib/CSS3DRenderer.js';
 
 // Workflow Implementation
 class Workflow extends _Workflow{
@@ -16,26 +20,36 @@ class Workflow extends _Workflow{
       "max": -1,
       "min": -1,
       "score": 0
+    },
+    "resume": {
+      "objects": [],
+      "targets": {
+        "timeline": [],
+        "table": [],
+        "sphere": [],
+        "helix": [],
+        "grid": []
+      }
     }
   }
 
   ActivateOrbitControls = async ( screenplay )=>{
     if( !screenplay.controls.orbit_controls ) {
-      screenplay.controls.orbit_controls = new OrbitControls( screenplay.active_cam, screenplay.renderer.domElement );
-      screenplay.controls.orbit_controls.zoomSpeed = 8;
+      screenplay.controls.orbit_controls = new OrbitControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
+      screenplay.controls.orbit_controls.zoomSpeed = 4;
       screenplay.controls.orbit_controls.enableDamping = true;
       screenplay.controls.orbit_controls.saveState();
     }
-    let _ship = screenplay.actors.Ship;
+    let ship = screenplay.actors.Ship;
     switch( screenplay.active_cam.name ){
-      case 'ConnCam':
-        _ship.conn_station.getWorldPosition( screenplay.controls.orbit_controls.target );
+      case 'Center':
+        screenplay.controls.orbit_controls.target = new THREE.Vector3();
         break;
-      case 'OpsCam':
-        _ship.ops_station.getWorldPosition( screenplay.controls.orbit_controls.target );
+      case '3rdPerson':
+        ship.getWorldPosition( screenplay.controls.orbit_controls.target );
         break;
       case 'CaptainCam':
-        _ship.ops_station.getWorldPosition( screenplay.controls.orbit_controls.target );
+        ship.NavDots.sight_target.getWorldPosition( screenplay.controls.orbit_controls.target );
         break;
     }
     screenplay.controls.orbit_controls.release_distance = 1 + screenplay.controls.orbit_controls.getDistance();
@@ -45,11 +59,82 @@ class Workflow extends _Workflow{
     screenplay.controls.orbit_controls.enabled = true;
 
   }
-
   DeactivateOrbitControls = async ( screenplay )=>{
+    if( !screenplay.controls.orbit_controls ) {
+      screenplay.controls.orbit_controls = new OrbitControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
+    }
     screenplay.controls.orbit_controls.reset();
     screenplay.actions.change_cam( screenplay.active_cam.name );
     screenplay.controls.orbit_controls.enabled = false;
+    screenplay.updatables.delete( 'controls' );
+    screenplay.active_cam.user_control = false;
+  }
+
+  ActivateFirstPersonControls = async ( screenplay )=>{
+    if( !screenplay.controls.first_person_controls ) {
+      screenplay.controls.first_person_controls = new FirstPersonControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
+    }
+    screenplay.controls.first_person_controls.movementSpeed = 1000;
+    screenplay.controls.first_person_controls.lookSpeed = 10 * 0.005;
+    let ship = screenplay.actors.Ship;
+    switch( screenplay.active_cam.name ){
+      case 'Center':
+        //screenplay.controls.first_person_controls.target.copy( screenplay.props.SplashScreen.position );
+        break;
+      case '3rdPerson':
+        //ship.getWorldPosition( screenplay.controls.first_person_controls.target );
+        break;
+      case 'CaptainCam':
+        //ship.NavDots.sight_target.getWorldPosition( screenplay.controls.first_person_controls.target );
+        break;
+    }
+    //screenplay.controls.first_person_controls.release_distance = 1 + screenplay.first_person_controls.orbit_controls.getDistance();
+    screenplay.updatables.set( 'controls', screenplay.controls.first_person_controls );
+    screenplay.active_cam.user_control = true;
+    screenplay.active_cam.updateProjectionMatrix();
+    screenplay.controls.first_person_controls.enabled = true;
+  }
+  DeactivateFirstPersonControls = async ( screenplay )=>{
+    if( !screenplay.controls.first_person_controls ) {
+      screenplay.controls.first_person_controls = new FirstPersonControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
+    }
+    screenplay.actions.change_cam( screenplay.active_cam.name );
+    screenplay.controls.first_person_controls.enabled = false;
+    screenplay.updatables.delete( 'controls' );
+    screenplay.active_cam.user_control = false;
+  }
+
+  ActivateFlyControls = async ( screenplay )=>{
+    if( !screenplay.controls.fly_controls ) {
+      screenplay.controls.fly_controls = new FlyControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
+    }
+    screenplay.controls.fly_controls.movementSpeed = 1000;
+    screenplay.controls.fly_controls.rollSpeed = 10 * 0.005;
+    screenplay.controls.fly_controls.dragToLook = true;
+    let ship = screenplay.actors.Ship;
+    switch( screenplay.active_cam.name ){
+      case 'Center':
+        //screenplay.controls.first_person_controls.target.copy( screenplay.props.SplashScreen.position );
+        break;
+      case '3rdPerson':
+        //ship.getWorldPosition( screenplay.controls.first_person_controls.target );
+        break;
+      case 'CaptainCam':
+        //ship.NavDots.sight_target.getWorldPosition( screenplay.controls.first_person_controls.target );
+        break;
+    }
+    //screenplay.controls.first_person_controls.release_distance = 1 + screenplay.first_person_controls.orbit_controls.getDistance();
+    screenplay.updatables.set( 'controls', screenplay.controls.fly_controls );
+    screenplay.active_cam.user_control = true;
+    screenplay.active_cam.updateProjectionMatrix();
+    screenplay.controls.fly_controls.enabled = true;
+  }
+  DeactivateFlyControls = async ( screenplay )=>{
+    if( !screenplay.controls.fly_controls ) {
+      screenplay.controls.fly_controls = new FlyControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
+    }
+    screenplay.actions.change_cam( screenplay.active_cam.name );
+    screenplay.controls.first_person_controls.enabled = false;
     screenplay.updatables.delete( 'controls' );
     screenplay.active_cam.user_control = false;
   }
@@ -84,7 +169,7 @@ class Workflow extends _Workflow{
     console.log( 'Workflow.init_controls' );
 
     try{
-      screenplay.renderer.domElement.addEventListener( 'wheel', (event)=>{
+      screenplay.ui_renderer.domElement.addEventListener( 'wheel', (event)=>{
 
           if( !screenplay.active_cam.user_control && event.deltaY > 0 ){
             this.ActivateOrbitControls( screenplay );
@@ -93,34 +178,24 @@ class Workflow extends _Workflow{
               this.DeactivateOrbitControls( screenplay );
             }
           }
-      }, { capture: false } );
+      }, { capture: true } );
 
       const gui = new GUI( { title: 'User Interface' });
       const camera_folder = {
-        'Look Up': function() {
-          screenplay.active_cam.rotateOnAxis( new THREE.Vector3( 1, 0, 0), 0.04 );
-        },
-        'Look Down': function() {
-          screenplay.active_cam.rotateOnAxis( new THREE.Vector3( 1, 0, 0), -0.04 );
-        },
-        'Look Left': function() {
-          screenplay.active_cam.rotateOnAxis( new THREE.Vector3( 0, 1, 0), 0.04 );
-        },
-        'Look Right': function() {
-          screenplay.active_cam.rotateOnAxis( new THREE.Vector3( 0, 1, 0), -0.04 );
-        },
-        'CaptainCam': function() {
+        'CaptainCam': ()=>{
           screenplay.actions.change_cam( 'CaptainCam' );
         },
-        'OpsCam': function() {
-          screenplay.actions.change_cam( 'OpsCam' );
+        '3rdPerson': ()=>{
+          screenplay.actions.change_cam( '3rdPerson' );
         },
-        'ConnCam': function() {
-          screenplay.actions.change_cam( 'ConnCam' );
+        'Center': ()=>{
+          screenplay.actions.change_cam( 'Center' );
         }
       }
       let camera_gui = gui.addFolder( 'Camera Controls' );
       camera_gui.add( camera_folder, 'CaptainCam' ).name( 'Captain\'s Chair' );
+      camera_gui.add( camera_folder, '3rdPerson' ).name( '3rd Person' );
+      camera_gui.add( camera_folder, 'Center' ).name( 'Center' );
       const ship_folder = {
         'X: +1': function() {
           //screenplay.actors.Ship.position.add( new THREE.Vector3( 1, 0, 0 ));
@@ -308,6 +383,7 @@ class Workflow extends _Workflow{
     console.log('Workflow.tour_or_skip');
 
     screenplay.take_the_tour = window.confirm( 'Take the tour?' );
+    this.ActivateOrbitControls( screenplay );
 
     director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
@@ -404,8 +480,248 @@ class Workflow extends _Workflow{
   };
   introduce_phox = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.introduce_phox');
+    screenplay.actions.change_cam( 'Center' );
+    
+    let resume_objects = this.elevated_vars.resume.objects;
+    let targets = this.elevated_vars.resume.targets;
+    let minor_dim = Math.min( window.innerWidth, window.innerHeight );
+    let major_dim = Math.max( window.innerWidth, window.innerHeight );
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    let x_offset = -window.innerWidth / 2;
+    let y_offset = -window.innerHeight / 2;
 
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    // Resume 3DObjectification
+    const resume_station = document.querySelectorAll("#resume > .station");
+    let resume_group = new THREE.Group();
+    resume_station.forEach( function( station ) {
+      station.addEventListener( 'click', ()=>{
+        if( cssObject.showcase ) cssObject.showcase = false; else cssObject.showcase = true; // Toggle to track whether on display or not.
+        if (cssObject.showcase ) {
+          let distance = cssObject.element.clientWidth;
+          cssObject.position.addVectors( screenplay.active_cam.position, new THREE.Vector3( 0, 0, -distance ) );
+          cssObject.directions.set( 'lookAt', ()=>{
+            cssObject.lookAt( screenplay.active_cam.position );
+          });
+        } else {
+          switch ( cssObject.arrangement ) {
+            case 'timeline':
+              cssObject.position.copy( targets.timeline[ cssObject.ndx ].position );
+              break;
+
+            case 'table':
+              cssObject.position.copy( targets.table[ cssObject.ndx ].position );
+              break;
+
+            case 'sphere':
+              cssObject.position.copy( targets.sphere[ cssObject.ndx ].position );
+              break;
+
+            case 'helix':
+              cssObject.position.copy( targets.helix[ cssObject.ndx ].position );
+              break;
+
+            case 'grid':
+              cssObject.position.copy( targets.grid[ cssObject.ndx ].position );
+              break;
+          }
+        }
+      }, { capture: true } );
+
+      const cssObject = new CSS3DObject( station );
+      cssObject.directions = new Map();
+      cssObject.directions.set( 'lookAt', ()=>{
+        cssObject.lookAt( screenplay.active_cam.position );
+      });
+      cssObject.ndx = resume_objects.length;
+      screenplay.actives.push( cssObject );
+      resume_group.add( cssObject );
+      resume_objects.push( cssObject );
+    });
+    screenplay.ui_scene.add( resume_group );
+
+    const vector = new THREE.Vector3();
+    let _offset = new THREE.Vector3( (-width / 2),  -(height / 4), (-width) );
+    let time_start = new THREE.Vector3().addVectors( screenplay.active_cam.position, _offset );
+    let time_bend = new THREE.Vector3().addVectors( time_start, new THREE.Vector3( 0, 0, -3 * major_dim ) );
+    let time_end = new THREE.Vector3( (width * 4),  height * 4, -3 * major_dim );
+    const timeline = new THREE.QuadraticBezierCurve3( time_start, time_bend, time_end );
+
+    // Set the Targets for each display orientation
+    let timelength = 2208 - 606;
+    for ( let ndx = 0, len = resume_objects.length; ndx < len; ndx++ ){
+      let start = Number.parseInt( resume_objects[ndx].element.dataset.start );
+      let end = Number.parseInt( resume_objects[ndx].element.dataset.end );
+
+      let prog = (ndx + 1)/len;
+      let element_height = resume_objects[ ndx ].element.clientHeight;
+      let element_width = resume_objects[ ndx ].element.clientWidth;
+
+      // Time-Line Display
+      const timeline_object = new THREE.Object3D();
+      let _at = ( start-606 ) / timelength;
+      let pos_at = new THREE.Vector3();
+      timeline.getPointAt( _at, pos_at );
+      timeline_object.position.copy( pos_at );
+      targets.timeline.push( timeline_object );
+
+      // Table Display
+      const table_object = new THREE.Object3D();
+      let _col = ( ndx % 3 );
+      let _row = ( Math.floor( ndx / 3 ) );
+      let _col_width = ( window.innerWidth / 2 );     // TODO: Add Perspective scalar to fit view frustum.
+      let _row_height = ( window.innerHeight / 2 );   // TODO: Add Perspective scalar to fit view frustum.
+      table_object.position.x = ( _col * _col_width ) + x_offset;  // TODO: Add Perspective scalar to fit view frustum.
+      table_object.position.y = ( _row * _row_height ) + y_offset;  // TODO: Add Perspective scalar to fit view frustum.
+      targets.table.push( table_object );
+
+      // Sphere Display
+      const phi = Math.acos( - 1 + ( 2 * ndx ) / len );
+      const sphere_theta = Math.sqrt( len * Math.PI ) * phi;
+      const sphere_object = new THREE.Object3D();
+      sphere_object.position.setFromSphericalCoords( minor_dim, phi, sphere_theta );
+      targets.sphere.push( sphere_object );
+
+      // Helix Display
+      const helix_theta = (ndx / ( len - 1)) * 2 * Math.PI;
+
+      const y = -( 2 * minor_dim * prog ) + minor_dim;
+      const helix_object = new THREE.Object3D();
+      helix_object.position.setFromCylindricalCoords( major_dim / 2, helix_theta, y );
+
+      targets.helix.push( helix_object );
+
+
+      // Grid Display
+      let ratio = major_dim / minor_dim;
+      const grid_object = new THREE.Object3D();
+      switch( ndx ){
+        case 4:
+          grid_object.position.x = ( 0 * _col_width ) + x_offset;
+          grid_object.position.y = ( 0 * _row_height ) + y_offset;
+          break;
+        case 8:
+          grid_object.position.x = ( 1 * _col_width ) + x_offset;
+          grid_object.position.y = ( 0 * _row_height ) + y_offset;
+          break;
+        case 2:
+          grid_object.position.x = ( 2 * _col_width ) + x_offset;
+          grid_object.position.y = ( 0 * _row_height ) + y_offset;
+          break;
+        case 3:
+          grid_object.position.x = ( 0 * _col_width ) + x_offset;
+          grid_object.position.y = ( 1 * _row_height ) + y_offset;
+          break;
+        case 0:
+          grid_object.position.x = ( 1 * _col_width ) + x_offset;
+          grid_object.position.y = ( 1 * _row_height ) + y_offset;
+          break;
+        case 6:
+          grid_object.position.x = ( 2 * _col_width ) + x_offset;
+          grid_object.position.y = ( 1 * _row_height ) + y_offset;
+          break;
+        case 7:
+          grid_object.position.x = ( 0 * _col_width ) + x_offset;
+          grid_object.position.y = ( 2 * _row_height ) + y_offset;
+          break;
+        case 5:
+          grid_object.position.x = ( 1 * _col_width ) + x_offset;
+          grid_object.position.y = ( 2 * _row_height ) + y_offset;
+          break;
+        case 1:
+          grid_object.position.x = ( 2 * _col_width ) + x_offset;
+          grid_object.position.y = ( 2 * _row_height ) + y_offset;
+          break;
+      }
+      grid_object.position.z = 0;
+
+      targets.grid.push( grid_object );
+
+    }
+
+    const buttonTimeline = document.getElementById( 'timeline' );
+    buttonTimeline.classList.add("show");
+    buttonTimeline.addEventListener( 'click', ( ) => {
+
+      resume_objects.forEach( (obj)=>{
+        obj.arrangement = 'timeline';
+      });
+      screenplay.actions.transform( resume_objects, targets.timeline, 100 );
+      resume_group.directions = new Map();
+      resume_group.up = new THREE.Vector3( 0,1,0 );
+      resume_group.rotation.y = 0;
+      resume_group.rotation.x = 0;
+
+    } );
+
+    const buttonTable = document.getElementById( 'table' );
+    buttonTable.classList.add("show");
+    buttonTable.addEventListener( 'click', ( ) => {
+
+      resume_objects.forEach( (obj)=>{
+        obj.arrangement = 'table';
+      });
+      screenplay.actions.transform( resume_objects, targets.table, 100 );
+      resume_group.directions = new Map();
+      resume_group.up = new THREE.Vector3( 0,1,0 );
+      resume_group.rotation.y = 0;
+      resume_group.rotation.x = 0;
+
+    } );
+
+    const buttonSphere = document.getElementById( 'sphere' );
+    buttonSphere.classList.add("show");
+    buttonSphere.addEventListener( 'click', ( ) => {
+
+      resume_objects.forEach( (obj)=>{
+        obj.arrangement = 'sphere';
+      });
+      screenplay.actions.transform( resume_objects, targets.sphere, 100 );
+      resume_group.directions = new Map();
+      resume_group.directions.set( 'sphere', ()=>{
+        resume_group.rotation.y += .00420;
+      });
+      screenplay.actives.push( resume_group );
+
+    } );
+
+    const buttonHelix = document.getElementById( 'helix' );
+    buttonHelix.classList.add("show");
+    buttonHelix.addEventListener( 'click', ( ) => {
+
+      resume_objects.forEach( (obj)=>{
+        obj.arrangement = 'helix';
+      });
+      screenplay.actions.transform( resume_objects, targets.helix, 100 );
+      resume_group.directions = new Map();
+      resume_group.directions.set( 'helix', ()=>{
+        resume_group.rotation.y -= .00420;
+      });
+      screenplay.actives.push( resume_group );
+
+    } );
+
+    const buttonGrid = document.getElementById( 'grid' );
+    buttonGrid.classList.add("show");
+    buttonGrid.addEventListener( 'click', ( ) => {
+
+      resume_objects.forEach( (obj)=>{
+        obj.arrangement = 'grid';
+      });
+      screenplay.actions.transform( resume_objects, targets.grid, 100 );
+      resume_group.directions = new Map();
+      resume_group.up = new THREE.Vector3( 0,1,0 );
+      resume_group.rotation.y = 0;
+      resume_group.rotation.x = 0;
+
+
+    } );
+
+    buttonGrid.click(); // Replace with call to defined function seperate from event listener declaration.
+
+    this.ActivateOrbitControls( screenplay );
+
+    //director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
   confirm_privileges = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.confirm_privileges');

@@ -20,8 +20,13 @@ class SceneDirections extends _SceneDirections {
     await screenplay.SetSceneBackground( );
 
     let scene = screenplay.scene;
-    let splash_screen = screenplay.props.Splash_Screen;
+
+    let splash_screen = screenplay.props.SplashScreen;
+    splash_screen.visible = false;
     scene.add( splash_screen );
+
+    let home_dome = screenplay.props.HomeDome;
+    scene.add( home_dome );
 
     director.emit( next_emit, dictum_name );
   };
@@ -36,7 +41,9 @@ class SceneDirections extends _SceneDirections {
     scene.add( gridHelper );
 
     let ship = await screenplay.actors.Ship;
-    screenplay.cameras = ship.cameras;
+    ship.cameras.forEach( ( value, key )=>{
+      screenplay.cameras.set( key, value );
+    });
 
     screenplay.lights.point_light.position.set( 0, 0, 0 );
     scene.add( screenplay.lights.point_light );
@@ -52,15 +59,7 @@ class SceneDirections extends _SceneDirections {
 
     // Orient the camera view to that of the ship.
     ship.updateMatrixWorld( true );
-    var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
-    var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
-    ship.up = up_now;
-    screenplay.active_cam.up = up_now;
-    screenplay.active_cam.position.addVectors( ship.position, new THREE.Vector3( 0,0,0 ) );
-    let sight_target = new THREE.Vector3();
-    ship.NavDots.sight_target.getWorldPosition( sight_target );
-    screenplay.active_cam.lookAt( sight_target );
-    screenplay.active_cam.updateProjectionMatrix();
+    await screenplay.actions.change_cam( 'CaptainCam' );
 
     // Create the Navigation Hologram Interface, to represent the system as it currently is.
     let distance_scale = 0.1 / ( screenplay.actors.Neptune.surface_distance ) / 30000;
@@ -266,6 +265,8 @@ class SceneDirections extends _SceneDirections {
   };
   enter_ready = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.enter_ready');
+
+
 
    director.emit( next_emit, dictum_name );
   };

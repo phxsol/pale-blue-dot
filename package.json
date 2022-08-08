@@ -3,6 +3,7 @@
   "version": "0.6.9",
   "description": "The Solar System on display, the ship is yours Captain.",
   "dependencies": {
+    "events": "^3.3.0",
     "lil-gui": "^0.16.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

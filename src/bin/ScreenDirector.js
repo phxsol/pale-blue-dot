@@ -249,6 +249,7 @@ class Screenplay{
   }
 
   direct = ( delta )=>{
+    debugger;
     this.actives.forEach( ( active, name )=>{
       active.directions.forEach( ( direction, name )=>{
         direction( delta );
@@ -295,12 +296,24 @@ class Screenplay{
     this.cameras = new Map();
     this.active_cam = false;
     this.scene = new THREE.Scene();
-    this.ui_scene = new THREE.Scene();
     this.scene.updates = {
       update: ()=>{},
       cache: {}
     };
+    this.ui_scene = new THREE.Scene();
+    this.ui_scene.updates = {
+      update: ()=>{},
+      cache: {}
+    };
     this.updatables.set('scene', this.scene.updates );
+
+    // UI Renderer
+    const ui_renderer = new CSS3DRenderer( );
+    ui_renderer.setSize( window.innerWidth, window.innerHeight );
+    let ui_canvas = ui_renderer.domElement;
+    ui_canvas.id = 'ui';
+    document.body.appendChild( ui_canvas );
+    this.ui_renderer = ui_renderer;
 
     // Scene Renderer
     const renderer = new THREE.WebGLRenderer( { antialias: true, logarithmicDepthBuffer: true, physicallyCorrectLights: true } );
@@ -312,14 +325,6 @@ class Screenplay{
     canvas.id = 'theatre';
     document.body.appendChild( canvas );
     this.renderer = renderer;
-
-    // UI Renderer
-    const ui_renderer = new CSS3DRenderer( );
-    ui_renderer.setSize( window.innerWidth, window.innerHeight );
-    let ui_canvas = ui_renderer.domElement;
-    ui_canvas.id = 'ui';
-    document.body.appendChild( ui_canvas );
-    this.ui_renderer = ui_renderer;
   }
 }
 

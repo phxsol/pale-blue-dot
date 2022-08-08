@@ -1,11 +1,8 @@
 // ScreenDirector Reference
 import { Screenplay as _Screenplay, SceneAsset3D } from '../bin/ScreenDirector.js';
 // Support Library Reference
-import GUI from 'lil-gui';
 import * as THREE from 'three';
 import { GLTFLoader } from '../lib/GLTFLoader.js';
-import { OrbitControls } from '../lib/OrbitControls.js';
-import { FirstPersonControls } from '../lib/FirstPersonControls.js';
 
 // Constant Definitions
 const LIGHT = {
@@ -276,7 +273,7 @@ class Screenplay extends _Screenplay{
       let _spec = new THREE.TextureLoader().load('resources/sunmap.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 695508000, 64, 32 ),
-        new THREE.MeshBasicMaterial( { map: _map } )
+        new THREE.MeshBasicMaterial( { map: _map, side: THREE.DoubleSide, wireframe: true } )
       );
       _mesh.castShadow = false;
 			_mesh.receiveShadow = false;
@@ -301,57 +298,57 @@ class Screenplay extends _Screenplay{
         loader.load( 'models/bridge.glb',
           async ( gltf )=>{
 
-            let _ship = new THREE.Group();
-            _ship = gltf.scene;
+            let ship = new THREE.Group();
+            ship = gltf.scene;
             let _bulkhead_mat = new THREE.MeshStandardMaterial( { color: 0x777777, roughness: 1, metalness: 1, side: THREE.DoubleSide } );
-            let _bulkhead = _ship.getObjectByName( 'Bulkhead' );
+            let _bulkhead = ship.getObjectByName( 'Bulkhead' );
             _bulkhead.castShadow = true;
             _bulkhead.receiveShadow = true;
             _bulkhead.material = _bulkhead_mat;
-            _ship.bulkhead = _bulkhead;
-            _ship.bulkhead.visible = false;
+            ship.bulkhead = _bulkhead;
+            ship.bulkhead.visible = false;
 
-            let _bulkhead_open = _ship.getObjectByName( 'BulkheadOpen' );
+            let _bulkhead_open = ship.getObjectByName( 'BulkheadOpen' );
             _bulkhead_open.castShadow = true;
             _bulkhead_open.receiveShadow = true;
             _bulkhead_open.material = _bulkhead_mat;
-            _ship.bulkhead_open = _bulkhead_open;
-            _ship.bulkhead_open.visible = true;
+            ship.bulkhead_open = _bulkhead_open;
+            ship.bulkhead_open.visible = true;
 
-            let _aft_wall = _ship.getObjectByName( 'Aft_Wall' );
+            let _aft_wall = ship.getObjectByName( 'Aft_Wall' );
             _aft_wall.castShadow = true;
             _aft_wall.receiveShadow = true;
             _aft_wall.material = _bulkhead_mat;
-            _ship.aft_wall = _aft_wall;
+            ship.aft_wall = _aft_wall;
 
-            let _light = _ship.getObjectByName( 'Light' ).children[ 0 ];
+            let _light = ship.getObjectByName( 'Light' ).children[ 0 ];
             _light.intensity = 1;
             _light.distance = 100;
             _light.decay = 1;
             //_light.position.add( new THREE.Vector3( 0, -2, 0) );
-            _ship.light = _light;
+            ship.light = _light;
 
             let _station_mats = new THREE.MeshStandardMaterial( { color: 0x444444, roughness: 1, metalness: 0.5 } );
-            let _ops_station = _ship.getObjectByName( 'OpsStation' );
+            let _ops_station = ship.getObjectByName( 'OpsStation' );
             _ops_station.castShadow = true;
             _ops_station.receiveShadow = true;
             _ops_station.material = _station_mats;
-            _ship.ops_station = _ops_station;
-            //let _conn_station = _ship.getObjectByName( 'ConnStation' );
+            ship.ops_station = _ops_station;
+            //let _conn_station = ship.getObjectByName( 'ConnStation' );
             //_conn_station.castShadow = true;
             //_conn_station.receiveShadow = true;
             //_conn_station.material = _station_mats;
-            //_ship.conn_station = _conn_station;
-            let _sec_station = _ship.getObjectByName( 'SecurityStation' );
+            //ship.conn_station = _conn_station;
+            let _sec_station = ship.getObjectByName( 'SecurityStation' );
             _sec_station.castShadow = true;
             _sec_station.receiveShadow = true;
             _sec_station.material = _station_mats;
-            _ship.sec_station = _sec_station;
-            let _conference_table = _ship.getObjectByName( 'Conference__Table' );
+            ship.sec_station = _sec_station;
+            let _conference_table = ship.getObjectByName( 'Conference__Table' );
             _conference_table.castShadow = true;
             _conference_table.receiveShadow = true;
             _conference_table.material = _station_mats;
-            _ship.conference_table = _conference_table;
+            ship.conference_table = _conference_table;
 
             // Generate the Warp Tunnel Structure and Effects
             let cloud_boiling_texture = new THREE.TextureLoader().load( 'textures/effects/cloud_boiling.jpg' );
@@ -361,13 +358,13 @@ class Screenplay extends _Screenplay{
             let clouds_noclouds_texture = new THREE.TextureLoader().load( 'textures/effects/clouds_noclouds.jpg' );
 
             let _warp_tunnel = []
-            _warp_tunnel.push( _ship.getObjectByName( 'Warp_Cone000' ) );
-            _warp_tunnel.push( _ship.getObjectByName( 'Warp_Cone001' ) );
-            _warp_tunnel.push( _ship.getObjectByName( 'Warp_Cone002' ) );
-            _warp_tunnel.push( _ship.getObjectByName( 'Warp_Cone003' ) );
-            _warp_tunnel.push( _ship.getObjectByName( 'Warp_Cone004' ) );
-            _warp_tunnel.push( _ship.getObjectByName( 'Warp_Cone005' ) );
-            _warp_tunnel.push( _ship.getObjectByName( 'Warp_Cone006' ) );
+            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone000' ) );
+            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone001' ) );
+            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone002' ) );
+            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone003' ) );
+            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone004' ) );
+            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone005' ) );
+            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone006' ) );
 
             let warp_tunnel = new THREE.Group();
             for( let cone_ndx=0; cone_ndx<_warp_tunnel.length; cone_ndx++ ){
@@ -382,34 +379,33 @@ class Screenplay extends _Screenplay{
 
               primary_shell.directions.set( 'revolve', function(){
                 let warp_speed = arguments[1];
-                if( warp_speed > 0 ) primary_shell.rotation.y += 3 / warp_speed;
-
+                if( warp_speed > 0 ) primary_shell.rotation.y += 3 * warp_speed;
               });
               secondary_shell.directions.set( 'revolve', function(){
                 let warp_speed = arguments[1];
-                if( warp_speed > 0 ) secondary_shell.rotation.y -= 1 / warp_speed;
+                if( warp_speed > 0 ) secondary_shell.rotation.y -= 1 * warp_speed;
               });
               tertiary_shell.directions.set( 'revolve', function(){
                 let warp_speed = arguments[1];
-                if( warp_speed > 0 ) tertiary_shell.rotation.y += 0.5 / warp_speed;
+                if( warp_speed > 0 ) tertiary_shell.rotation.y += 0.5 * warp_speed;
               });
 
               warp_tunnel.add( primary_shell );
               warp_tunnel.add( secondary_shell );
               warp_tunnel.add( tertiary_shell );
             }
-            _ship.warp_tunnel = warp_tunnel;
+            ship.warp_tunnel = warp_tunnel;
 
 
             // Define Key Navigation Data
-            let _fwd = _ship.getObjectByName( 'NavdotForward' );
+            let _fwd = ship.getObjectByName( 'NavdotForward' );
             let navdot_forward = new THREE.Mesh(
               new THREE.SphereGeometry( 0.01, 64, 32 ),
               new THREE.MeshBasicMaterial( { color: 0x0000ff } )
             );
             navdot_forward.position.copy( _fwd.position );
 
-            let _awd = _ship.getObjectByName( 'NavdotAftward' );
+            let _awd = ship.getObjectByName( 'NavdotAftward' );
             let navdot_aftward = new THREE.Mesh(
               new THREE.SphereGeometry( 0.01, 64, 32 ),
               new THREE.MeshBasicMaterial( { color: 0xff0000 } )
@@ -449,23 +445,23 @@ class Screenplay extends _Screenplay{
               a_line: a_line,
               sight_line: sight_line
             };
-            _ship.NavDots = nav_dots;
-            _ship.NavLines = nav_lines;
-            _ship.add( sight_target ); // As a child, the position will update.
-            _ship.add( sight_line );
+            ship.NavDots = nav_dots;
+            ship.NavLines = nav_lines;
+            ship.add( sight_target ); // As a child, the position will update.
+            ship.add( sight_line );
 
-            _ship.cameras = new Map();
+            ship.cameras = new Map();
             gltf.cameras.forEach( (camera)=>{
-              _ship.cameras.set( camera.parent.name, camera );
+              ship.cameras.set( camera.parent.name, camera );
             });
-            let _cap_cam = _ship.cameras.get( 'CaptainCam');
+            let _cap_cam = ship.cameras.get( 'CaptainCam');
 
-            _ship.viewscreen = _ship.getObjectByName( 'Viewscreen' );
-            _ship.viewscreen.visible = false;
+            ship.viewscreen = ship.getObjectByName( 'Viewscreen' );
+            ship.viewscreen.visible = false;
 
-            _ship.name = "Ship";
-            let ship = new SceneAsset3D( _ship );
-            resolve( ship );
+            ship.name = "Ship";
+            let ship_asset = new SceneAsset3D( ship );
+            resolve( ship_asset );
           },
           async function ( xhr ) {
             // TODO: Add Repair progress functionality... if needed.
@@ -513,6 +509,14 @@ class Screenplay extends _Screenplay{
   cameras;
   actions = {
     warp_to: async ( planetary_body, equidistant_orbit = false, arrival_emitter ) =>{
+      this.updatables.delete('scene');
+      let a = this.scene.updates.cache.arrival_emitter;
+      delete this.scene.updates;
+      this.scene.updates = {
+        update: ()=>{},
+        cache: {}
+      };
+
       // Find yourself.
       let pov_posi = new THREE.Vector3().copy( this.actors.Ship.position );
       // Set the arrival coordinates.
@@ -546,16 +550,11 @@ class Screenplay extends _Screenplay{
       this.actors.Ship.updateMatrixWorld( true );
       let _quat_diff = iniQ.angleTo( endQ );
 
-      //if ( _quat_diff < 0.01 ) {
-        //debugger;
-        //_quat_diff = iniQ.angleTo( endQ.conjugate() );
-      //}
-
       this.scene.updates.cache.iniQ = iniQ;
       this.scene.updates.cache.endQ = endQ;
       this.scene.updates.cache.path = travel_path;
       this.scene.updates.cache.up_now = this.actors.Ship.up.clone();
-      this.scene.updates.cache.turn_duration = Math.ceil( _quat_diff * ( 250 / Math.PI ) );
+      this.scene.updates.cache.turn_duration = 1 + Math.ceil( _quat_diff * ( 250 / Math.PI ) );
       this.scene.updates.cache.travel_duration = Math.ceil( 100 + ( travel_distance / 15000000000 ) );
       this.scene.updates.cache.warp_duration = 25;
       this.scene.updates.cache.duration = this.scene.updates.cache.turn_duration + this.scene.updates.cache.travel_duration;  // TODO: Vary this by the travel_distance to target
@@ -571,6 +570,8 @@ class Screenplay extends _Screenplay{
       this.scene.updates.cache.arrival_emitter = arrival_emitter;
       this.scene.updates.update = ()=>{
         let user_control = this.active_cam.user_control;
+        let cam_name = this.active_cam.name;
+
         // Call this last to clear the function
         if( this.scene.updates.cache.completed ){
 
@@ -601,35 +602,59 @@ class Screenplay extends _Screenplay{
 
             this.actors.Ship.warp_tunnel.quaternion.copy( curQ );
 
+            let sight_target = new THREE.Vector3();
 
-            if( !user_control ){
+            let cam_pos = new THREE.Vector3();
+            cam_name = this.active_cam.name;
+            switch( cam_name ){
+              case 'Center':
+
+                break;
+              case '3rdPerson':
+                  this.actors.Ship.getWorldPosition( sight_target );
+                  this.active_cam.lookAt( sight_target );
+                break;
+
+              case 'CaptainCam':
+                  this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
+                  this.active_cam.up.lerpVectors( this.scene.updates.cache.up_now, up_now, turn_progress );
+                  this.active_cam.lookAt( sight_target );
+                break;
+            }
+            if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( sight_target );
+            this.active_cam.updateProjectionMatrix();
+/*
               let sight_target = new THREE.Vector3();
               let cam_name = this.active_cam.name;
+              let cam_pos = new THREE.Vector3();
               switch( cam_name ){
-                case 'ConnCam':
-                  this.actors.Ship.conn_station.getWorldPosition( sight_target );
+                case 'Center':
+                  //this.actors.Ship.conn_station.getWorldPosition( sight_target );
                   break;
-                case 'OpsCam':
-                  this.actors.Ship.ops_station.getWorldPosition( sight_target );
+                case '3rdPerson':
+
+                  ship.getWorldPosition( cam_pos );
+                  cam_pos.add( new THREE.Vector3( 100, 100, 100 ) );
+                  ship.getWorldPosition( sight_target );
+                  this.active_cam.position.copy( cam_pos );
+                  this.active_cam.lookAt( sight_target );
                   break;
                 case 'CaptainCam':
                   this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
+                  this.cameras.get( cam_name ).getWorldPosition( cam_pos );
+                  this.active_cam.position.copy( cam_pos );
+                  this.active_cam.up.lerpVectors( this.scene.updates.cache.up_now, up_now, turn_progress );
+                  this.active_cam.lookAt( sight_target );
                   break;
               }
-              let cam_pos = new THREE.Vector3();
-              this.actors.Ship.cameras.get( cam_name ).getWorldPosition( cam_pos );
-              this.active_cam.position.copy( cam_pos );
-              this.active_cam.up.lerpVectors( this.scene.updates.cache.up_now, up_now, turn_progress );
-              this.active_cam.lookAt( sight_target );
-            }
 
+*/
           }
 
           // Target Locked Captain
           else if( !this.scene.updates.cache.locked_on && ! this.scene.updates.cache.locking_on ) {
 
             this.scene.updates.cache.locking_on = true;
-
             setTimeout( ()=>{
               this.scene.updates.cache.locked_on = true;
               this.scene.updates.cache.warping = true;
@@ -647,10 +672,21 @@ class Screenplay extends _Screenplay{
               let _wprog = this.scene.updates.cache.frame / this.scene.updates.cache.warp_duration;
               let warp_progress = _wprog ** (10-(10.05*_wprog));
               let warp_zoom = THREE.MathUtils.lerp( 0.1, 1, warp_progress );
-              if( !user_control ) {
-                this.active_cam.zoom = warp_zoom;
-                this.active_cam.updateProjectionMatrix();
+              cam_name = this.active_cam.name;
+              switch( cam_name ){
+                case 'Center':
+
+                  break;
+                case '3rdPerson':
+                  this.active_cam.zoom = warp_zoom;
+                  break;
+
+                case 'CaptainCam':
+                  this.active_cam.zoom = warp_zoom;
+                  break;
               }
+              this.active_cam.updateProjectionMatrix();
+
               if( this.scene.updates.cache.frame >= this.scene.updates.cache.warp_duration ) {
                 this.scene.updates.cache.warping = false;
                 this.scene.updates.cache.frame = -1;
@@ -664,11 +700,21 @@ class Screenplay extends _Screenplay{
               let _wprog = this.scene.updates.cache.frame / this.scene.updates.cache.warp_duration;
               let warp_progress = _wprog ** (1.5-_wprog);
               let warp_zoom = THREE.MathUtils.lerp( 1.5, 1, warp_progress );
-              // If the camera is in First-Person mode... aka, fully zoomed back in.
-              if( !user_control ){
-                this.active_cam.zoom = warp_zoom;
-                this.active_cam.updateProjectionMatrix();
+              cam_name = this.active_cam.name;
+              switch( cam_name ){
+                case 'Center':
+
+                  break;
+                case '3rdPerson':
+                  this.active_cam.zoom = warp_zoom;
+                  break;
+
+                case 'CaptainCam':
+                  this.active_cam.zoom = warp_zoom;
+                  break;
               }
+
+              this.active_cam.updateProjectionMatrix();
               // Stopped stopping.
               if( this.scene.updates.cache.frame >= this.scene.updates.cache.warp_duration ) {
                 this.scene.updates.cache.warped = false;
@@ -730,21 +776,45 @@ class Screenplay extends _Screenplay{
                 // Define what Warp Speed is for this trip... FYI: Not analalogous to contemporary warp travel mathematics.
                 this.scene.updates.cache.warp_speed = _distance /  1500000000;
 
-                // Calculate this
-                let cam_ship_pos_diff = new THREE.Vector3().subVectors( this.actors.Ship.position, this.active_cam.position );
+                let camship_pos_diff = new THREE.Vector3().subVectors( this.actors.Ship.position, this.active_cam.position );
 
+                let sight_target = new THREE.Vector3();
                 this.actors.Ship.position.copy( next_pos );
                 this.actors.Ship.updateMatrixWorld( true );
                 this.actors.Ship.warp_tunnel.position.copy( next_pos );
+                // TODO: REPLACE WITH CAMERA-INDEPENDANT TRAVEL
+                cam_name = this.active_cam.name;
+                switch( cam_name ){
+                  case 'Center':
+
+                    break;
+                  case '3rdPerson':
+                    this.active_cam.position.subVectors( next_pos, camship_pos_diff );
+
+                    this.actors.Ship.getWorldPosition( sight_target );
+                    this.active_cam.lookAt( sight_target );
+                    break;
+
+                  case 'CaptainCam':
+                    this.active_cam.position.subVectors( next_pos, camship_pos_diff );
+
+                    this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
+                    this.active_cam.lookAt( sight_target );
+                    break;
+                }
+
+                if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( sight_target );
+                this.active_cam.updateProjectionMatrix();
+/*
+
                 if( !user_control ){
-                  this.active_cam.position.subVectors( next_pos, cam_ship_pos_diff );
-                  this.active_cam.updateProjectionMatrix();
+                  this.active_cam.position.subVectors( next_pos, camship_pos_diff );
                 } else {
-                  this.active_cam.position.subVectors( next_pos, cam_ship_pos_diff );
+                  this.active_cam.position.subVectors( next_pos, camship_pos_diff );
                   this.actors.Ship.NavDots.sight_target.getWorldPosition( this.controls.orbit_controls.target );
                   //this.active_cam.updateProjectionMatrix();
                 }
-
+*/
               } else if( !this.scene.updates.cache.at_destination ) {
 
                 this.scene.updates.cache.at_destination = true;
@@ -765,22 +835,27 @@ class Screenplay extends _Screenplay{
                 ship.updateMatrixWorld( true );
                 var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
                 var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
-                let cam_ship_pos_diff = new THREE.Vector3().subVectors( ship.position, this.active_cam.position  );
-                if( !user_control ){
-                  this.active_cam.up = up_now;
-                  this.active_cam.position.subVectors( ship.position, cam_ship_pos_diff );
-                } else {
-                  this.active_cam.position.subVectors( ship.position, cam_ship_pos_diff );
-                }
+                let camship_pos_diff = new THREE.Vector3().subVectors( ship.position, this.active_cam.position  );
                 let sight_target = new THREE.Vector3();
-                ship.NavDots.sight_target.getWorldPosition( sight_target );
-                if( !user_control ){
-                  this.active_cam.lookAt( sight_target );
-                  this.active_cam.updateProjectionMatrix();
-                } else {
-                  this.controls.orbit_controls.target = sight_target;
+                cam_name = this.active_cam.name;
+                switch( cam_name ){
+                  case 'Center':
 
-                  this.active_cam.updateProjectionMatrix();
+                    break;
+                  case '3rdPerson':
+                    this.active_cam.position.subVectors( ship.position, camship_pos_diff );
+                    ship.getWorldPosition( sight_target );
+                    this.active_cam.updateProjectionMatrix();
+                    break;
+
+                  case 'CaptainCam':
+                    this.active_cam.up = up_now;
+                    this.active_cam.position.subVectors( ship.position, camship_pos_diff );
+                    ship.NavDots.sight_target.getWorldPosition( sight_target );
+                    this.active_cam.lookAt( sight_target );
+                    this.active_cam.updateProjectionMatrix();
+
+                    break;
                 }
 
                 this.scene.updates.cache.completed = true;
@@ -796,26 +871,95 @@ class Screenplay extends _Screenplay{
       this.updatables.set('scene', this.scene.updates );
     },
     change_cam: async ( cam_name ) =>{
-      let _ship = this.actors.Ship;
-      let _cam = _ship.cameras.get( cam_name );
-      let _cam_pos = new THREE.Vector3();
-      _cam.getWorldPosition( _cam_pos );
-      this.active_cam.position.copy( _cam_pos );
-      let _target_pos = new THREE.Vector3();
+      let ship = this.actors.Ship;
+      let new_position = new THREE.Vector3();
+      let new_target_position = new THREE.Vector3();
+      let major_dim = Math.max( window.innerHeight, window.innerWidth );
+      let minor_dim = Math.min( window.innerHeight, window.innerWidth );
+
       switch( cam_name ){
-        case 'ConnCam':
-          _ship.conn_station.getWorldPosition( _target_pos );
+        case 'Center':
+          new_position.setY( 2 );
+          new_position.setZ( major_dim );
+          new_target_position = new THREE.Vector3();
+          this.active_cam.up = new THREE.Vector3( 0, 1, 0 );
           break;
-        case 'OpsCam':
-          _ship.ops_station.getWorldPosition( _target_pos );
+        case '3rdPerson':
+          ship.getWorldPosition( new_position );
+          new_position.add( new THREE.Vector3( 100, 200, 100 ) );
+          ship.getWorldPosition( new_target_position );
           break;
         case 'CaptainCam':
-          _ship.NavDots.sight_target.getWorldPosition( _target_pos );
+          ship.getWorldPosition( new_position );
+          ship.NavDots.sight_target.getWorldPosition( new_target_position );
           break;
       }
-      this.active_cam.lookAt( _target_pos );
+      this.active_cam.position.copy( new_position );
+      this.active_cam.lookAt( new_target_position );
+      if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( new_target_position );
       this.active_cam.updateProjectionMatrix();
       this.active_cam.name = cam_name;
+
+    },
+    transform: async ( objects, targets, duration )=>{
+      // Remove actively competing animations by resetting this engine.
+      this.updatables.delete('ui_scene');
+      delete this.ui_scene.updates;
+      this.ui_scene.updates = {
+        update: ()=>{},
+        cache: {}
+      };
+
+      // Set the travel path to their target for each object.
+      let paths = [];
+      for ( let ndx = 0; ndx < objects.length; ndx++ ) {
+        const object = objects[ ndx ];
+        const target = targets[ ndx ];
+        const path = new THREE.Line3( object.position, target.position );
+        paths[ndx] = path;
+      }
+
+      this.ui_scene.updates.cache.objects = objects;
+      this.ui_scene.updates.cache.targets = targets;
+      this.ui_scene.updates.cache.paths = paths;
+      this.ui_scene.updates.cache.duration = duration;
+      this.ui_scene.updates.cache.frame = 0;
+      this.ui_scene.updates.cache.completed = false;
+      this.ui_scene.updates.update = ()=>{
+        // Call this last to clear the function
+        if( this.ui_scene.updates.cache.completed ){
+          this.updatables.delete('ui_scene');
+          delete this.ui_scene.updates;
+          this.ui_scene.updates = {
+            update: ()=>{},
+            cache: {}
+          };
+        } else {
+
+          let objects = this.ui_scene.updates.cache.objects;
+          let targets = this.ui_scene.updates.cache.targets;
+          let paths = this.ui_scene.updates.cache.paths;
+          let _tprog = this.ui_scene.updates.cache.frame / this.ui_scene.updates.cache.duration;
+          let transform_progress = _tprog ** (10-(10.05*_tprog));
+
+          for ( let ndx = 0; ndx < objects.length; ndx++ ) {
+
+            let new_pos = new THREE.Vector3();
+            if ( this.ui_scene.updates.cache.frame === this.ui_scene.updates.cache.duration ) {
+              new_pos = targets[ ndx ].position;
+            } else {
+              paths[ ndx ].at( transform_progress, new_pos );
+            }
+            let object = objects[ ndx ];
+            object.position.copy( new_pos );
+            object.lookAt( this.active_cam.position );
+          }
+
+        }
+        if( ++this.ui_scene.updates.cache.frame >= this.ui_scene.updates.cache.duration ) this.ui_scene.updates.cache.completed = true;
+
+      }
+      this.updatables.set('ui_scene', this.ui_scene.updates );
     }
   };
   SetSceneBackground = async ( )=>{
@@ -826,13 +970,40 @@ class Screenplay extends _Screenplay{
 				this.scene.background = textureCube;
   };
   props = {
-    get Splash_Screen(){
+    get SplashScreen(){
       let splash_screen = new THREE.Mesh(
-        new THREE.PlaneGeometry( 11, 4 ),
+        new THREE.PlaneGeometry( window.innerWidth, window.innerHeight ),
         new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} )
       );
-      delete this.Splash_Screen;
-      return this.Splash_Screen = splash_screen;
+      delete this.SplashScreen;
+      return this.SplashScreen = splash_screen;
+    },
+    get HomeDome(){
+      let major_dim = Math.max( window.innerWidth, window.innerHeight );
+      let minor_dim = Math.min( window.innerWidth, window.innerHeight );
+      let texture = new THREE.TextureLoader().load( 'resources/stone_floor.png' );
+      // TODO: Tesselate a floor at your earliest convenience... currently only makes a single tile.
+      let StageBuilder = ( size )=>{
+        let stage = new THREE.Group();
+        const stage_geometry = new THREE.CircleGeometry( 3 * major_dim, 6 );
+        const stage_material = new THREE.MeshStandardMaterial( { color: 0x442222, side: THREE.DoubleSide, metalness: 1, roughness: 0.9 } );
+        stage.add( new THREE.Mesh( stage_geometry, stage_material ) );
+        stage.rotateX( - Math.PI / 2 );
+        return stage;
+      };
+      let home_stage = StageBuilder( 42 ); // Currently disregards the parameter.
+      home_stage.position.setY( -100 );
+      let _dome = new THREE.Mesh(
+        new THREE.SphereGeometry( major_dim * Math.PI, 64, 32, 0, 2*Math.PI, Math.PI/2, Math.PI ),
+        new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.DoubleSide } )
+      )
+      _dome.position.setY( major_dim - 100 );
+      let home_dome = new THREE.Group();
+      home_dome.add( home_stage );
+      home_dome.add( _dome );
+
+      delete this.HomeDome;
+      return this.HomeDome = home_dome;
     }
   }
 
@@ -851,9 +1022,13 @@ class Screenplay extends _Screenplay{
   constructor( ){
     super( );
 
+    let major_dim = Math.max( window.innerHeight, window.innerWidth );
+    let minor_dim = Math.min( window.innerHeight, window.innerWidth );
+
     // Camera & Controls Setup
-    this.active_cam = this.cameras.a = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
-    this.cameras.a.name = 'CaptainCam';
+    let active_cam = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
+    this.active_cam = active_cam;
+    this.actions.change_cam( 'Center' );
 
   }
 }
