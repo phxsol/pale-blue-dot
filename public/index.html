@@ -6,102 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="A space to demonstrate the profile for Phox." />
     <title>Phox.Solutions | The Pale Blue Dot</title>
-    <style>
 
-    #menu{
-      position: absolute;
-      top: 0; left: 0;
-      z-index: 11;
-      display: grid;
-      grid-auto-flow: dense;
-      background-color: rgba( 69,69,69,0.69 );
-    }
-      #menu button {
-        color: rgba(127,127,127,0.75);
-        background: transparent;
-        outline: 1px solid rgba(127,127,127,0.75);
-        border: 0px;
-        padding: 5px 10px;
-        cursor: pointer;
-        display: none;
-      }
-      #menu button.show {
-        display: block;
-      }
-
-			#menu button:hover {
-				background-color: rgba(0,255,255,0.5);
-			}
-
-			#menu button:active {
-				color: #000000;
-				background-color: rgba(0,255,255,0.75);
-			}
-
-      #resume {
-        position: absolute;
-        z-index: -1;
-      }
-
-      .station {
-        background-color: white;
-        width: 50rem;
-        min-height: 240px;
-        box-shadow: 0px 0px 12px rgba(0,255,255,0.5);
-        border: 1px solid rgba(127,255,255,0.25);
-        text-shadow: 0 0 10px rgba(0,255,255,0.95);
-        font-family: Helvetica, sans-serif;
-        cursor: pointer;
-        display: grid;
-        grid-template-rows: 5rem 1.5rem 2rem 1fr 1fr;
-        grid-template-columns: 1.5fr 1fr 1fr;
-        }
-			}
-
-			.station:hover {
-        background-color: red;
-				box-shadow: 0px 0px 12px rgba(0,255,255,0.75);
-				border: 1px solid rgba(127,255,255,0.75);
-			}
-
-      .station  > .logo {
-        grid-row: 1 / 5;
-        grid-column: 1
-      }
-
-			.station > .position {
-        grid-row: 1;
-        grid-column: 2 / 4;
-        margin-top: 3rem;
-			}
-
-			.station  > .place {
-        grid-row: 2;
-        grid-column: 2 / 4;
-			}
-
-			.station  > .term {
-        grid-row: 3;
-        grid-column: 2 / 4;
-			}
-
-			.station  > .location {
-        grid-row: 4;
-        grid-column: 2 / 4;
-			}
-
-			.station  > .headlines {
-        grid-row: 5;
-        grid-column: 1 / 4;
-        list-style-type: none;
-			}
-
-			.station  > .skills {
-        grid-row: 6;
-        grid-column: 1 / 4;
-        text-align: left;
-			}
-    </style>
   </head>
   <body>
     <div id="root"></div>
@@ -126,7 +31,7 @@
           <li>Emergency Repairs & Systems Mitigation - Tools & Utilities - Web Apps & Sites</li>
         </ul>
         <p class="skills">
-          <b>Skills:</b> Cloud&nbsp;Systems&nbsp;&&nbsp;Management | Web&nbsp;Applications&nbsp;&&nbsp;Cloud&nbsp;Systems | Customer&nbsp;Experience&nbsp;Client&nbsp;Retention&nbsp;Development
+          <b>Skills:</b> Cloud&nbsp;Systems&nbsp;&&nbsp;Management | Web&nbsp;Applications&nbsp;&&nbsp;Cloud&nbsp;Systems | Customer&nbsp;Experience&nbsp;&&nbsp;Retention
         </p>
       </div>
       <div class="station" data-start="1504" data-end="1510">

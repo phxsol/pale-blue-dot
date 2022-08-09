@@ -30,7 +30,8 @@ class Workflow extends _Workflow{
         "helix": [],
         "grid": []
       }
-    }
+    },
+    "lil_gui": {}
   }
 
   ActivateOrbitControls = async ( screenplay )=>{
@@ -180,8 +181,10 @@ class Workflow extends _Workflow{
           }
       }, { capture: true } );
 
-      const gui = new GUI( { title: 'User Interface' });
-      const camera_folder = {
+      const gui = this.elevated_vars.lil_gui = new GUI( { title: 'User Interface' });
+      gui.open( false );
+      let camera_controls_folder = gui.addFolder( 'Camera Controls' );
+      const camera_controls = {
         'CaptainCam': ()=>{
           screenplay.actions.change_cam( 'CaptainCam' );
         },
@@ -192,68 +195,30 @@ class Workflow extends _Workflow{
           screenplay.actions.change_cam( 'Center' );
         }
       }
-      let camera_gui = gui.addFolder( 'Camera Controls' );
-      camera_gui.add( camera_folder, 'CaptainCam' ).name( 'Captain\'s Chair' );
-      camera_gui.add( camera_folder, '3rdPerson' ).name( '3rd Person' );
-      camera_gui.add( camera_folder, 'Center' ).name( 'Center' );
-      const ship_folder = {
-        'X: +1': function() {
-          //screenplay.actors.Ship.position.add( new THREE.Vector3( 1, 0, 0 ));
-          screenplay.active_cam.position.add( new THREE.Vector3( 1, 0, 0 ));
-        },
-        'X: -1': function() {
-          //screenplay.actors.Ship.position.add( new THREE.Vector3( -1, 0, 0 ));
-          screenplay.active_cam.position.add( new THREE.Vector3( -1, 0, 0 ));
-        },
-        'Y: +1': function() {
-          //screenplay.actors.Ship.position.add( new THREE.Vector3( 0, 1, 0 ));
-          screenplay.active_cam.position.add( new THREE.Vector3( 0, 1, 0 ));
-        },
-        'Y: -1': function() {
-          //screenplay.actors.Ship.position.add( new THREE.Vector3( 0, -1, 0 ));
-          screenplay.active_cam.position.add( new THREE.Vector3( 0, -1, 0 ));
-        },
-        'Z: +1': function() {
-          //screenplay.actors.Ship.position.add( new THREE.Vector3( 0, 0, 1 ));
-          screenplay.active_cam.position.add( new THREE.Vector3( 0, 0, 1 ));
-        },
-        'Z: -1': function() {
-          //screenplay.actors.Ship.position.add( new THREE.Vector3( 0, 0, -1 ));
-          screenplay.active_cam.position.add( new THREE.Vector3( 0, 0, -1 ));
-        },
-        'Turn Left': function() {
-          let ship = screenplay.actors.Ship;
-          ship.rotation.y -= 0.1;
-          ship.updateMatrixWorld( true );
-          var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
-          var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
-          let sight_target = new THREE.Vector3();
-          ship.NavDots.sight_target.getWorldPosition( sight_target );
-          screenplay.active_cam.up = up_now;
-          screenplay.active_cam.lookAt( sight_target );
-        },
-        'Turn Right': function() {
-          let ship = screenplay.actors.Ship;
-          ship.rotation.y += 0.1;
-          ship.updateMatrixWorld( true );
-          var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
-          var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix) .normalize();
-          let sight_target = new THREE.Vector3();
-          ship.NavDots.sight_target.getWorldPosition( sight_target );
-          screenplay.active_cam.up = up_now;
-          screenplay.active_cam.lookAt( sight_target );
-        }
-      }
-      let ship_gui = gui.addFolder( 'Ship Controls' );
-      screenplay.scene.updates.cache.warp_speed = 0;
-      ship_gui.add( screenplay.scene.updates.cache, 'warp_speed' ).name( 'Warp Speed').listen();
-      ship_gui.add( screenplay.active_cam, 'zoom' ).onChange(()=>{
+      camera_controls_folder.add( camera_controls, 'CaptainCam' ).name( 'Captain\'s Chair' );
+      camera_controls_folder.add( camera_controls, '3rdPerson' ).name( '3rd Person' );
+      camera_controls_folder.add( camera_controls, 'Center' ).name( 'Center' );
+      camera_controls_folder.add( screenplay.active_cam, 'zoom' ).onChange(()=>{
         screenplay.active_cam.updateProjectionMatrix();
       });
-      ship_gui.add( screenplay.actors.Ship.light, 'intensity' ).name( 'Light Intensity');
-      ship_gui.add( screenplay.actors.Ship.light, 'distance' ).name( 'Light Distance');
-      ship_gui.add( screenplay.actors.Ship.light, 'decay' ).name( 'Light Decay');
-      const shipNav_folder = {
+      camera_controls_folder.add( screenplay.gridHelper, 'visible' ).name('Grid Overlay?');
+      camera_controls_folder.add( screenplay, 'fps' ).name('Frames / Second').onChange(()=>{
+        screenplay.interval = 1 / screenplay.fps;
+      });
+      camera_controls_folder.open( false );
+
+      let ship_settings_folder = gui.addFolder( 'Ship Settings' );
+      ship_settings_folder.add( screenplay.actors.Ship.light, 'intensity' ).name( 'Light Intensity');
+      ship_settings_folder.add( screenplay.actors.Ship.light, 'distance' ).name( 'Light Distance');
+      ship_settings_folder.add( screenplay.actors.Ship.light, 'decay' ).name( 'Light Decay');
+      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open, 'visible' ).onChange(()=>{ screenplay.actors.Ship.bulkhead.visible = !screenplay.actors.Ship.bulkhead_open.visible }).name( 'Show Top?');
+      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'roughness', 0, 1 ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.rougness = screenplay.actors.Ship.bulkhead_open.material.rougness }).name( 'Material Roughness');
+      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'metalness', 0, 1 ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.metalness = screenplay.actors.Ship.bulkhead_open.material.metalness }).name( 'Material Metalness');
+      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'wireframe' ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.wireframe = screenplay.actors.Ship.bulkhead_open.material.wireframe }).name( 'Wireframe Only?');
+      ship_settings_folder.open( false );
+
+      let ship_nav_folder = gui.addFolder( 'Ship Navigation' );
+      const ship_navigation = {
 
       	Neptune: function() {
 
@@ -287,79 +252,98 @@ class Workflow extends _Workflow{
           screenplay.actions.warp_to(screenplay.actors.Sun);
         }
       }
-      ship_gui.add( shipNav_folder, 'Neptune' ).name('...to Neptune');
-      ship_gui.add( shipNav_folder, 'Uranus' ).name('...to Uranus');
-      ship_gui.add( shipNav_folder, 'Saturn' ).name('...to Saturn');
-      ship_gui.add( shipNav_folder, 'Jupiter' ).name('...to Jupiter');
-      ship_gui.add( shipNav_folder, 'Mars' ).name('...to Mars');
-      ship_gui.add( shipNav_folder, 'Earth' ).name('...to Earth');
-      ship_gui.add( shipNav_folder, 'Moon' ).name('...to Moon');
-      ship_gui.add( shipNav_folder, 'Venus' ).name('...to Venus');
-      ship_gui.add( shipNav_folder, 'Mercury' ).name('...to Mercury');
-      ship_gui.add( shipNav_folder, 'Sun' ).name('...to Sun');
-      ship_gui.add( screenplay.gridHelper, 'visible' ).name('Grid Overlay?');
-      ship_gui.add( screenplay, 'fps' ).name('Frames / Second').onChange(()=>{
-        screenplay.interval = 1 / screenplay.fps;
-      });;
+      ship_nav_folder.add( ship_navigation, 'Neptune' ).name('... to Neptune');
+      ship_nav_folder.add( ship_navigation, 'Uranus' ).name('...to Uranus');
+      ship_nav_folder.add( ship_navigation, 'Saturn' ).name('...to Saturn');
+      ship_nav_folder.add( ship_navigation, 'Jupiter' ).name('...to Jupiter');
+      ship_nav_folder.add( ship_navigation, 'Mars' ).name('...to Mars');
+      ship_nav_folder.add( ship_navigation, 'Earth' ).name('...to Earth');
+      ship_nav_folder.add( ship_navigation, 'Moon' ).name('...to Moon');
+      ship_nav_folder.add( ship_navigation, 'Venus' ).name('...to Venus');
+      ship_nav_folder.add( ship_navigation, 'Mercury' ).name('...to Mercury');
+      ship_nav_folder.add( ship_navigation, 'Sun' ).name('...to Sun');
+      ship_nav_folder.open( false );
 
-      let neptune_gui = gui.addFolder( 'Neptune');
+      let neptune_folder = gui.addFolder( 'Neptune');
       let neptune = screenplay.actors.Neptune;
-      neptune_gui.add ( neptune.material, 'roughness', 0, 1 );
-      neptune_gui.add ( neptune.material, 'metalness', 0, 1 );
-      neptune_gui.add ( neptune.material, 'wireframe' );
+      neptune_folder.add ( neptune.material, 'roughness', 0, 1 );
+      neptune_folder.add ( neptune.material, 'metalness', 0, 1 );
+      neptune_folder.add ( neptune.material, 'wireframe' ).name( 'Wireframe Only?');
+      neptune_folder.open( false );
 
-      let uranus_gui = gui.addFolder( 'Uranus');
+      let uranus_folder = gui.addFolder( 'Uranus');
       let uranus = screenplay.actors.Uranus;
-      uranus_gui.add ( uranus.material, 'roughness', 0, 1 );
-      uranus_gui.add ( uranus.material, 'metalness', 0, 1 );
-      uranus_gui.add ( uranus.material, 'wireframe' );
+      uranus_folder.add ( uranus.material, 'roughness', 0, 1 );
+      uranus_folder.add ( uranus.material, 'metalness', 0, 1 );
+      uranus_folder.add ( uranus.material, 'wireframe' ).name( 'Wireframe Only?');
+      uranus_folder.open( false );
 
-      let saturn_gui = gui.addFolder( 'Saturn');
+      let saturn_folder = gui.addFolder( 'Saturn');
       let saturn = screenplay.actors.Saturn;
-      saturn_gui.add ( saturn.material, 'roughness', 0, 1 );
-      saturn_gui.add ( saturn.material, 'metalness', 0, 1 );
-      saturn_gui.add ( saturn.material, 'wireframe' );
-      saturn_gui.add ( saturn.children[0].material, 'roughness', 0, 1 ).name( 'rings roughness');
-      saturn_gui.add ( saturn.children[0].material, 'metalness', 0, 1 ).name( 'rings metalness');
-      saturn_gui.add ( saturn.children[0].material, 'wireframe' ).name( 'rings wireframe');
+      saturn_folder.add ( saturn.material, 'roughness', 0, 1 );
+      saturn_folder.add ( saturn.material, 'metalness', 0, 1 );
+      saturn_folder.add ( saturn.material, 'wireframe' ).name( 'Wireframe Only?');
+      saturn_folder.add ( saturn.children[0].material, 'roughness', 0, 1 ).name( 'rings roughness');
+      saturn_folder.add ( saturn.children[0].material, 'metalness', 0, 1 ).name( 'rings metalness');
+      saturn_folder.add ( saturn.children[0].material, 'wireframe' ).name( 'Rings Wireframe Only?');
+      saturn_folder.open( false );
 
-
-      let jupiter_gui = gui.addFolder( 'Jupiter');
+      let jupiter_folder = gui.addFolder( 'Jupiter');
       let jupiter = screenplay.actors.Jupiter;
-      jupiter_gui.add ( jupiter.material, 'roughness', 0, 1 );
-      jupiter_gui.add ( jupiter.material, 'metalness', 0, 1 );
-      jupiter_gui.add ( jupiter.material, 'wireframe' );
+      jupiter_folder.add ( jupiter.material, 'roughness', 0, 1 );
+      jupiter_folder.add ( jupiter.material, 'metalness', 0, 1 );
+      jupiter_folder.add ( jupiter.material, 'wireframe' ).name( 'Wireframe Only?');
+      jupiter_folder.open( false );
 
-      let mars_gui = gui.addFolder( 'Mars');
+      let mars_folder = gui.addFolder( 'Mars');
       let mars = screenplay.actors.Mars;
-      mars_gui.add ( mars.material, 'roughness', 0, 1 );
-      mars_gui.add ( mars.material, 'metalness', 0, 1 );
-      mars_gui.add ( mars.material, 'wireframe' );
+      mars_folder.add ( mars.material, 'roughness', 0, 1 );
+      mars_folder.add ( mars.material, 'metalness', 0, 1 );
+      mars_folder.add ( mars.material, 'wireframe' ).name( 'Wireframe Only?');
+      mars_folder.open( false );
 
-      let earth_gui = gui.addFolder( 'Earth');
+      let earth_folder = gui.addFolder( 'Earth');
       let earth = screenplay.actors.Earth;
-      earth_gui.add ( earth.material, 'roughness', 0, 1 );
-      earth_gui.add ( earth.material, 'metalness', 0, 1 );
-      earth_gui.add ( earth.material, 'emissiveIntensity', 0, 1 );
-      earth_gui.add ( earth.material, 'wireframe' );
+      earth_folder.add ( earth.material, 'roughness', 0, 1 );
+      earth_folder.add ( earth.material, 'metalness', 0, 1 );
+      earth_folder.add ( earth.material, 'emissiveIntensity', 0, 1 );
+      earth_folder.add ( earth.material, 'wireframe' ).name( 'Wireframe Only?');
+      earth_folder.open( false );
 
-      let moon_gui = gui.addFolder( 'Moon');
+      let moon_folder = gui.addFolder( 'Moon');
       let moon = screenplay.actors.Moon;
-      moon_gui.add ( moon.material, 'roughness', 0, 1 );
-      moon_gui.add ( moon.material, 'metalness', 0, 1 );
-      moon_gui.add ( moon.material, 'wireframe' );
+      moon_folder.add ( moon.material, 'roughness', 0, 1 );
+      moon_folder.add ( moon.material, 'metalness', 0, 1 );
+      moon_folder.add ( moon.material, 'wireframe' ).name( 'Wireframe Only?');
+      moon_folder.open( false );
 
-      let sun_gui = gui.addFolder('Sun');
-      let sunlight_gui = sun_gui.addFolder( 'Light');
+      let venus_folder = gui.addFolder( 'Venus');
+      let venus = screenplay.actors.Venus;
+      venus_folder.add ( venus.material, 'roughness', 0, 1 );
+      venus_folder.add ( venus.material, 'metalness', 0, 1 );
+      venus_folder.add ( venus.material, 'wireframe' ).name( 'Wireframe Only?');
+      venus_folder.open( false );
+
+      let mercury_folder = gui.addFolder( 'Mercury');
+      let mercury = screenplay.actors.Mercury;
+      mercury_folder.add ( mercury.material, 'roughness', 0, 1 );
+      mercury_folder.add ( mercury.material, 'metalness', 0, 1 );
+      mercury_folder.add ( mercury.material, 'wireframe' ).name( 'Wireframe Only?');
+      mercury_folder.open( false );
+
+      let sun_folder = gui.addFolder('Sun');
+      let sunlight_folder = sun_folder.addFolder( 'Light');
       let sunlight = screenplay.lights.point_light;
-      sunlight_gui.add ( sunlight, 'decay', 0, 2, 1 );
-      sunlight_gui.add ( sunlight, 'distance', 0, 4500000000 );
-      sunlight_gui.add ( sunlight, 'intensity', 0, 10 ).listen();
-      sunlight_gui.add ( sunlight, 'power' ).listen();
+      sunlight_folder.add ( sunlight, 'decay', 0, 2, 1 );
+      sunlight_folder.add ( sunlight, 'distance', 0, 4500000000 );
+      sunlight_folder.add ( sunlight, 'intensity', 0, 10 ).listen();
+      sunlight_folder.add ( sunlight, 'power' ).listen();
+      sunlight_folder.open( true );
 
-      let sun_model_gui = sun_gui.addFolder( 'Sun Model ');
+      let sun_model_folder = sun_folder.addFolder( 'Sun Model ');
       let sun = screenplay.actors.Sun;
-      sun_model_gui.add ( sun.material, 'wireframe' );
+      sun_model_folder.add ( sun.material, 'wireframe' ).name( 'Wireframe Only?');
+      sun_model_folder.open( true );
 
       director.emit( `${dictum_name}_progress`, dictum_name, ndx );
 
@@ -385,6 +369,12 @@ class Workflow extends _Workflow{
     screenplay.take_the_tour = window.confirm( 'Take the tour?' );
     this.ActivateOrbitControls( screenplay );
 
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      folder.open( false );
+    });
+
     director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
   visit_sun = async ( screenplay, dictum_name, director, ndx ) => {
@@ -396,6 +386,13 @@ class Workflow extends _Workflow{
       ndx: ndx
     } );
 
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Sun');
+      folder.open( show );
+    });
+
   };
   visit_mercury = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_mercury');
@@ -405,6 +402,13 @@ class Workflow extends _Workflow{
       dictum_name: dictum_name,
       ndx: ndx
     } );
+
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Mercury');
+      folder.open( show );
+    });
   };
   visit_venus = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_venus');
@@ -414,6 +418,13 @@ class Workflow extends _Workflow{
       dictum_name: dictum_name,
       ndx: ndx
     } );
+
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Venus');
+      folder.open( show );
+    });
   };
   visit_earth = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_earth');
@@ -423,6 +434,13 @@ class Workflow extends _Workflow{
       dictum_name: dictum_name,
       ndx: ndx
     } );
+
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Earth');
+      folder.open( show );
+    });
   };
   visit_moon = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_moon');
@@ -432,6 +450,13 @@ class Workflow extends _Workflow{
       dictum_name: dictum_name,
       ndx: ndx
     } );
+
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Moon');
+      folder.open( show );
+    });
   };
   visit_mars = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_mars');
@@ -441,6 +466,13 @@ class Workflow extends _Workflow{
       dictum_name: dictum_name,
       ndx: ndx
     } );
+
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Mars');
+      folder.open( show );
+    });
   };
   visit_jupiter = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_jupiter');
@@ -450,6 +482,13 @@ class Workflow extends _Workflow{
       dictum_name: dictum_name,
       ndx: ndx
     } );
+
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Jupiter');
+      folder.open( show );
+    });
   };
   visit_saturn = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_saturn');
@@ -459,6 +498,13 @@ class Workflow extends _Workflow{
       dictum_name: dictum_name,
       ndx: ndx
     } );
+
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Saturn');
+      folder.open( show );
+    });
   };
   visit_uranus = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_uranus');
@@ -468,6 +514,13 @@ class Workflow extends _Workflow{
       dictum_name: dictum_name,
       ndx: ndx
     } );
+
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Uranus');
+      folder.open( show );
+    });
   };
   visit_neptune = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_neptune');
@@ -477,11 +530,18 @@ class Workflow extends _Workflow{
       dictum_name: dictum_name,
       ndx: ndx
     } );
+
+    const gui = this.elevated_vars.lil_gui;
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Neptune');
+      folder.open( show );
+    });
   };
   introduce_phox = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.introduce_phox');
     screenplay.actions.change_cam( 'Center' );
-    
+
     let resume_objects = this.elevated_vars.resume.objects;
     let targets = this.elevated_vars.resume.targets;
     let minor_dim = Math.min( window.innerWidth, window.innerHeight );
@@ -639,86 +699,86 @@ class Workflow extends _Workflow{
 
     }
 
-    const buttonTimeline = document.getElementById( 'timeline' );
-    buttonTimeline.classList.add("show");
-    buttonTimeline.addEventListener( 'click', ( ) => {
+    const gui = this.elevated_vars.lil_gui;
+    let document_controls_folder = gui.addFolder( 'Document Controls' );
+    const document_controls = {
+      'Timeline_Display': ( ) => {
 
-      resume_objects.forEach( (obj)=>{
-        obj.arrangement = 'timeline';
-      });
-      screenplay.actions.transform( resume_objects, targets.timeline, 100 );
-      resume_group.directions = new Map();
-      resume_group.up = new THREE.Vector3( 0,1,0 );
-      resume_group.rotation.y = 0;
-      resume_group.rotation.x = 0;
+        resume_objects.forEach( (obj)=>{
+          obj.arrangement = 'timeline';
+        });
+        screenplay.actions.transform( resume_objects, targets.timeline, 100 );
+        resume_group.directions = new Map();
+        resume_group.up = new THREE.Vector3( 0,1,0 );
+        resume_group.rotation.y = 0;
+        resume_group.rotation.x = 0;
 
-    } );
+      },
+      'Table_Display': ( ) => {
 
-    const buttonTable = document.getElementById( 'table' );
-    buttonTable.classList.add("show");
-    buttonTable.addEventListener( 'click', ( ) => {
+        resume_objects.forEach( (obj)=>{
+          obj.arrangement = 'table';
+        });
+        screenplay.actions.transform( resume_objects, targets.table, 100 );
+        resume_group.directions = new Map();
+        resume_group.up = new THREE.Vector3( 0,1,0 );
+        resume_group.rotation.y = 0;
+        resume_group.rotation.x = 0;
 
-      resume_objects.forEach( (obj)=>{
-        obj.arrangement = 'table';
-      });
-      screenplay.actions.transform( resume_objects, targets.table, 100 );
-      resume_group.directions = new Map();
-      resume_group.up = new THREE.Vector3( 0,1,0 );
-      resume_group.rotation.y = 0;
-      resume_group.rotation.x = 0;
+      },
+      'Sphere_Display': ( ) => {
 
-    } );
+        resume_objects.forEach( (obj)=>{
+          obj.arrangement = 'sphere';
+        });
+        screenplay.actions.transform( resume_objects, targets.sphere, 100 );
+        resume_group.directions = new Map();
+        resume_group.directions.set( 'sphere', ()=>{
+          resume_group.rotation.y += .00420;
+        });
+        screenplay.actives.push( resume_group );
 
-    const buttonSphere = document.getElementById( 'sphere' );
-    buttonSphere.classList.add("show");
-    buttonSphere.addEventListener( 'click', ( ) => {
+      },
+      'Helix_Display': ( ) => {
 
-      resume_objects.forEach( (obj)=>{
-        obj.arrangement = 'sphere';
-      });
-      screenplay.actions.transform( resume_objects, targets.sphere, 100 );
-      resume_group.directions = new Map();
-      resume_group.directions.set( 'sphere', ()=>{
-        resume_group.rotation.y += .00420;
-      });
-      screenplay.actives.push( resume_group );
+        resume_objects.forEach( (obj)=>{
+          obj.arrangement = 'helix';
+        });
+        screenplay.actions.transform( resume_objects, targets.helix, 100 );
+        resume_group.directions = new Map();
+        resume_group.directions.set( 'helix', ()=>{
+          resume_group.rotation.y -= .00420;
+        });
+        screenplay.actives.push( resume_group );
 
-    } );
+      },
+      'Grid_Display': ( ) => {
 
-    const buttonHelix = document.getElementById( 'helix' );
-    buttonHelix.classList.add("show");
-    buttonHelix.addEventListener( 'click', ( ) => {
-
-      resume_objects.forEach( (obj)=>{
-        obj.arrangement = 'helix';
-      });
-      screenplay.actions.transform( resume_objects, targets.helix, 100 );
-      resume_group.directions = new Map();
-      resume_group.directions.set( 'helix', ()=>{
-        resume_group.rotation.y -= .00420;
-      });
-      screenplay.actives.push( resume_group );
-
-    } );
-
-    const buttonGrid = document.getElementById( 'grid' );
-    buttonGrid.classList.add("show");
-    buttonGrid.addEventListener( 'click', ( ) => {
-
-      resume_objects.forEach( (obj)=>{
-        obj.arrangement = 'grid';
-      });
-      screenplay.actions.transform( resume_objects, targets.grid, 100 );
-      resume_group.directions = new Map();
-      resume_group.up = new THREE.Vector3( 0,1,0 );
-      resume_group.rotation.y = 0;
-      resume_group.rotation.x = 0;
+        resume_objects.forEach( (obj)=>{
+          obj.arrangement = 'grid';
+        });
+        screenplay.actions.transform( resume_objects, targets.grid, 100 );
+        resume_group.directions = new Map();
+        resume_group.up = new THREE.Vector3( 0,1,0 );
+        resume_group.rotation.y = 0;
+        resume_group.rotation.x = 0;
 
 
-    } );
+      }
+    }
+    document_controls_folder.add( document_controls, 'Timeline_Display' ).name( 'Timeline Display' );
+    document_controls_folder.add( document_controls, 'Table_Display' ).name( 'Table Display' );
+    document_controls_folder.add( document_controls, 'Sphere_Display' ).name( 'Sphere Display' );
+    document_controls_folder.add( document_controls, 'Helix_Display' ).name( 'Helix Display' );
+    document_controls_folder.add( document_controls, 'Grid_Display' ).name( 'Grid Display' );
 
-    buttonGrid.click(); // Replace with call to defined function seperate from event listener declaration.
+    gui.open( true );
+    gui.folders.forEach( (folder)=>{
+      folder.open( false );
+    });
+    document_controls_folder.open( true );
 
+    document_controls.Grid_Display();
     this.ActivateOrbitControls( screenplay );
 
     //director.emit( `${dictum_name}_progress`, dictum_name, ndx );
