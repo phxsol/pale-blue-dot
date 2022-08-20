@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
-import { CSS3DRenderer } from '../lib/CSS3DRenderer.js';
+import { CSS3DRenderer, CSS3DObject } from '../lib/CSS3DRenderer.js';
 
 // The ScreenDirector //
 /* ------------------
@@ -43,10 +43,6 @@ class ScreenDirector{
   // start_now: Whether to begin immediately once the ScreenDirector has been generated, or to wait for the .start() method call.
   constructor( screenplay, manifesto, start_now ){
     this.director = new EventEmitter();
-
-    // Listen to environmental changes, adjust accordingly.
-    window.addEventListener( 'pointerdown', this.onPointerDown );
-    window.addEventListener( 'resize', this.resize, { capture: true } );
 
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
@@ -226,6 +222,7 @@ class Screenplay{
   controls = {};
 
   // Grouping Arrays... Add models here to isolate unrelated items during processing (ie. Click / Tap events)
+  updatables_cache;  // Place the parameters for the like-named update routine into this Map for access during each run.
   updatables;  // Place objects which must have their '.update()' function run during the render phase.
   actives = [];
   interactives = [];  // Populate this with the rendered objects which the user may interact with... improving the efficiency of the Raycaster.
@@ -292,6 +289,7 @@ class Screenplay{
     const mouse = new THREE.Vector2();
     this.mouse = mouse;
 
+    this.updatables_cache = new Map();
     this.updatables = new Map();
     this.cameras = new Map();
     this.active_cam = false;
@@ -325,6 +323,10 @@ class Screenplay{
     canvas.id = 'theatre';
     document.body.appendChild( canvas );
     this.renderer = renderer;
+
+    // Listen to environmental changes, adjust accordingly.
+    //window.addEventListener( 'pointerdown', this.onPointerDown );
+    window.addEventListener( 'resize', this.resize, { capture: true } );
   }
 }
 
@@ -339,8 +341,22 @@ class SceneAsset3D extends THREE.Object3D{
 
   constructor( obj3D = new THREE.Object3D() ){
     obj3D.directions = new Map();
-    obj3D.click = ()=>{};
     return obj3D;
+  }
+}
+
+// CSS3DAsset //
+/* ------------
+  In order to optimize the Animate() phase of the ScreenPlay, CSS3DAsset objects own the directions they will be performing... to be called on-demand by the ScreenDirector.
+  Analogous to an actor in real-life learning their part of the production... their Director then simply calls upon them to perform it when the time comes.
+*/
+class CSS3DAsset extends CSS3DObject{
+  directions;  // Override this with a custom set of functions to be called by the ScreenDirector during the Animate() run of the Screenplay.
+
+  constructor( element ){
+    let css3DObj = new CSS3DObject( element )
+    css3DObj.directions = new Map();
+    return css3DObj;
   }
 }
 
@@ -419,4 +435,4 @@ class Manifesto{
 }
 
 
-export { ScreenDirector, Screenplay, SceneAsset3D, SceneDirections, Workflow, Dictum, Manifesto  };
+export { ScreenDirector, Screenplay, SceneAsset3D, CSS3DAsset, SceneDirections, Workflow, Dictum, Manifesto  };

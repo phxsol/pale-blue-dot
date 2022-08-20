@@ -1,5 +1,7 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 // Screen Director Reference
-import { Workflow as _Workflow, SceneAsset3D } from '../bin/ScreenDirector.js';
+import { Workflow as _Workflow, SceneAsset3D, CSS3DAsset } from '../bin/ScreenDirector.js';
 // Support Library Reference
 import GUI from 'lil-gui';
 import * as THREE from 'three';
@@ -7,7 +9,31 @@ import { OrbitControls } from '../lib/OrbitControls.js';
 import { FirstPersonControls } from '../lib/FirstPersonControls.js';
 import { FlyControls } from '../lib/FlyControls.js';
 import { TrackballControls } from '../lib/TrackballControls.js';
-import { CSS3DRenderer, CSS3DObject } from '../lib/CSS3DRenderer.js';
+
+// React Component Error Boundary Class
+// Refer to --> # https://reactjs.org/docs/error-boundaries.html #
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  // Update state so the next render will show the fallback UI.
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+  // You can also log the error to an error reporting service
+  componentDidCatch(error, errorInfo) {
+    console.error( error, errorInfo );
+  }
+
+  render() {
+    // You can render any custom fallback UI
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+    return this.props.children;
+  }
+}
 
 // Workflow Implementation
 class Workflow extends _Workflow{
@@ -33,6 +59,7 @@ class Workflow extends _Workflow{
     },
     "lil_gui": {}
   }
+  react_app;
 
   ActivateOrbitControls = async ( screenplay )=>{
     if( !screenplay.controls.orbit_controls ) {
@@ -143,31 +170,100 @@ class Workflow extends _Workflow{
   verify_capabilities = async ( screenplay, dictum_name, director, ndx ) => {
     console.log( 'Workflow.verify_capabilities' );
 
-    screenplay.updatables.set( 'ups_test', { update: ( delta )=>{
-      this.elevated_vars.ups_test.ticks++;
-      this.elevated_vars.ups_test.stamps.push( delta );
-    }} );
-    setTimeout( ()=>{
-      screenplay.updatables.delete( 'ups_test' );
-      let test = this.elevated_vars.ups_test;
-      // remove the first entry to normalize
-      test.ticks--;
-      test.stamps.shift();
-      test.duration = test.stamps.reduce( (a,b) => a + b, 0 );
-      test.max = Math.max( ...test.stamps );
-      test.min = Math.min( ...test.stamps );
-      test.score = 1/((test.duration - test.max) / ( test.ticks -1 ));
+    class VerifyCapabilitiesModal extends React.Component {
+      componentDidMount(){
+        document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        // User Performance Statistics Test //
+        /* This is where the user's device is tested for a baseline of rendering ability.
+           Initial tests may fail due to loading delays... testing again upon failure ensures that
+           elibigle users are filtered properly.
+           Upon Failure: Display workflow without immersive rendering. */
+        let ups_test = ()=>{
+          screenplay.updatables.delete( 'ups_test' );
+          let test = screenplay.ups_test;
+          // remove the first entry to normalize.
+          let load_test = test.stamps.shift();
+          // ...then adjust ticks to reflect normalization.
+          test.ticks--;
+          // Calculate the actual test duration based upon stamp values.
+          test.duration = test.stamps.reduce( (a,b) => a + b, 0 );
+          // Determine the largest and smallest tick durations, or stamp values.
+          test.max = Math.max( ...test.stamps );
+          test.min = Math.min( ...test.stamps );
+          // ...then calculate the highest and lowest FPS from them.
+          test.max_fps = 1/test.min;
+          test.min_fps = 1/test.max;
+          // Grade the User Performance Statistics
+          test.score = 1/test.min/test.max;
+          // ... then post the results to the console.
+          console.log( test );
 
-      if ( test.score > 20 ) director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-      else director.emit( `${dictum_name}_failure`, dictum_name, ndx );
-    }, 3000 );
-    //  By now, the scene assets have been loaded.
-    //  Run some tests to determine system ability.
-    //  Adjust performance values in order to optimize the user experience.
+          // Performance Filter //
+          /* The score derived from the above UPS test may be used here to lead poorly
+              performing devices into a workflow without immersive rendering. */
+          if ( test.score > 10 || test.max_fps > 20 ) {
+            director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+          } else {
+            director.emit( `${dictum_name}_failure`, dictum_name, ndx );
+          }
+        }
+
+        // This begins the UPS Test, as it is now added to the update() loop
+        screenplay.updatables.set( 'ups_test', { update: ( delta )=>{
+          screenplay.ups_test.ticks++;
+          screenplay.ups_test.stamps.push( delta );
+        }} );
+
+        setTimeout( ups_test , 3000 );
+        //  By now, the benchmark assets have been loaded...
+        //  Run some tests to determine system ability.
+        //  Adjust performance values in order to optimize the user experience.
+      }
+
+      componentWillUnmount(){
+        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+      }
+
+      render(){
+        return (
+          <>
+            <div id="verify_capabilities" className="pip_gui pip_splash">
+              <h1>verify_capabilities</h1>
+            </div>
+          </>
+        );
+      }
+    }
+
+    this.react_app.render( <VerifyCapabilitiesModal /> );
+
+
 
   };
   init_controls = async ( screenplay, dictum_name, director, ndx ) => {
     console.log( 'Workflow.init_controls' );
+
+    class InitControlsModal extends React.Component {
+      componentDidMount(){
+        document.getElementById( 'root' ).classList.add( 'pip_gui' );
+      }
+
+      componentWillUnmount(){
+        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+      }
+
+      render(){
+        return (
+          <>
+            <div id="init_controls" className="pip_gui pip_post">
+              <h1>init_controls</h1>
+            </div>
+          </>
+        );
+      }
+    }
+
+    this.react_app.render( <InitControlsModal /> );
 
     try{
       screenplay.ui_renderer.domElement.addEventListener( 'wheel', (event)=>{
@@ -181,7 +277,7 @@ class Workflow extends _Workflow{
           }
       }, { capture: true } );
 
-      const gui = this.elevated_vars.lil_gui = new GUI( { title: 'User Interface' });
+      const gui = screenplay.lil_gui = new GUI( { title: 'Architect Interface' });
       gui.open( false );
       let camera_controls_folder = gui.addFolder( 'Camera Controls' );
       const camera_controls = {
@@ -208,9 +304,13 @@ class Workflow extends _Workflow{
       camera_controls_folder.open( false );
 
       let ship_settings_folder = gui.addFolder( 'Ship Settings' );
-      ship_settings_folder.add( screenplay.actors.Ship.light, 'intensity' ).name( 'Light Intensity');
-      ship_settings_folder.add( screenplay.actors.Ship.light, 'distance' ).name( 'Light Distance');
-      ship_settings_folder.add( screenplay.actors.Ship.light, 'decay' ).name( 'Light Decay');
+      ship_settings_folder.add( screenplay.actors.Ship.viewscreen, 'visible' ).name( 'Show Viewscreen?');
+      ship_settings_folder.add( screenplay.actors.Ship.viewscreen.material, 'opacity', 0, 1 ).name( 'Viewscreen Opacity');
+      ship_settings_folder.add( screenplay.actors.Ship.viewscreen.material, 'roughness', 0, 1 ).name( 'Viewscreen Roughness');
+      ship_settings_folder.add( screenplay.actors.Ship.viewscreen.material, 'metalness', 0, 1 ).name( 'Viewscreen Metalness');
+      ship_settings_folder.add( screenplay.actors.Ship.light, 'intensity', 0, 100, 0.1 ).name( 'Light Intensity');
+      ship_settings_folder.add( screenplay.actors.Ship.light, 'distance', 0, 100000, 1 ).name( 'Light Distance');
+      ship_settings_folder.add( screenplay.actors.Ship.light, 'decay', 0, 2, 1 ).name( 'Light Decay [0,1,2]');
       ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open, 'visible' ).onChange(()=>{ screenplay.actors.Ship.bulkhead.visible = !screenplay.actors.Ship.bulkhead_open.visible }).name( 'Show Top?');
       ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'roughness', 0, 1 ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.rougness = screenplay.actors.Ship.bulkhead_open.material.rougness }).name( 'Material Roughness');
       ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'metalness', 0, 1 ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.metalness = screenplay.actors.Ship.bulkhead_open.material.metalness }).name( 'Material Metalness');
@@ -338,12 +438,12 @@ class Workflow extends _Workflow{
       sunlight_folder.add ( sunlight, 'distance', 0, 4500000000 );
       sunlight_folder.add ( sunlight, 'intensity', 0, 10 ).listen();
       sunlight_folder.add ( sunlight, 'power' ).listen();
-      sunlight_folder.open( true );
+      sunlight_folder.open( false );
 
       let sun_model_folder = sun_folder.addFolder( 'Sun Model ');
       let sun = screenplay.actors.Sun;
       sun_model_folder.add ( sun.material, 'wireframe' ).name( 'Wireframe Only?');
-      sun_model_folder.open( true );
+      sun_model_folder.open( false );
 
       director.emit( `${dictum_name}_progress`, dictum_name, ndx );
 
@@ -356,194 +456,797 @@ class Workflow extends _Workflow{
   introduction = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.introduction');
 
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+
+    let u_name = screenplay.captain_name;
+
+    let submit = ()=>{
+      screenplay.captain_name = ( !u_name || u_name === '') ? false : u_name;
+      this.react_app.render();
+      this.ActivateOrbitControls( screenplay );
+      alert( `Thank you Captain${(!screenplay.captain_name)?'':' '+screenplay.captain_name}.`)
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    class SubmitButton extends React.Component {
+
+      constructor( props ) {
+        super( props );
+      }
+
+      handleSubmitClick( e ) {
+        submit();
+      }
+
+      handleDefaultClick( e ){
+        u_name = false;
+        submit();
+      }
+
+      render() {
+        const captainName = this.props.captainName;
+
+        return (
+          <div
+              className="user_side"
+              style={{ gridRow: 5, display: 'flex' }}>
+            <button
+              name="submit"
+              className="pip_button"
+              style={{ marginLeft: '1rem' }}
+              type="button"
+              onClick={this.handleSubmitClick}>Submit</button>
+            <button
+              name="default"
+              className="pip_button"
+              style={{ marginLeft: '1rem' }}
+              type="button"
+              onClick={this.handleDefaultClick}>Captain will&nbsp;do.</button>
+          </div>
+        );
+      }
+    }
+
+    class CaptainNameField extends React.Component {
+      constructor(props) {
+        super(props);
+        this.handleCaptainNameChange = this.handleCaptainNameChange.bind( this );
+      }
+
+      handleCaptainNameChange( e ) {
+        this.props.onCaptainNameChange( e.target.value );
+      }
+
+      handleCaptainNameFocus( e ) {
+        e.target.placeholder = '';
+      }
+
+      handleCaptainNameBlur( e ) {
+        e.target.placeholder = "Your name Captain?";
+      }
+
+      render() {
+        return (
+          <input
+            id="captain_name_field"
+            className="pip_reply user_side"
+            style={{ gridRow: 4 }}
+            type="text"
+            placeholder="..."
+            value={this.props.captainName}
+            onChange={this.handleCaptainNameChange}
+            onFocus={this.handleCaptainNameFocus}
+            onBlur={this.handleCaptainNameBlur}
+          />
+        );
+      }
+    }
+
+    class IntroductionForm extends React.Component {
+      constructor( props ) {
+        super( props );
+        this.state = {
+          captainName: ""
+        };
+
+        this.handleCaptainNameChange = this.handleCaptainNameChange.bind( this );
+      }
+
+      handleCaptainNameChange( captainName ) {
+        this.setState({
+          captainName: captainName
+        });
+        u_name = captainName;
+      }
+
+      componentDidMount(){
+        document.getElementById( 'root' ).classList.add( 'pip_gui' );
+      }
+
+      componentWillUnmount(){
+        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+      }
+
+      render() {
+        return (
+          <div id="introduction" className="pip_gui pip_chat">
+            <span className="ui_side pip_text" style={{ gridRow: 2 }}>
+              Greetings Captain.
+            </span>
+            <span className="ui_side pip_text" style={{ gridRow: 3 }}>How do you prefer to be addressed?</span>
+            <CaptainNameField
+              filterText={this.state.captainName}
+              onCaptainNameChange={this.handleCaptainNameChange}
+            />
+            <SubmitButton
+              captainName={this.state.captainName}
+              />
+          </div>
+        );
+      }
+    }
+
+    this.react_app.render( <ErrorBoundary><IntroductionForm /></ErrorBoundary> );
   };
   user_instruction = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.user_introduction');
 
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    class UserInstructionModal extends React.Component {
+      componentDidMount(){
+        document.getElementById( 'root' ).classList.add( 'pip_gui' );
+      }
+
+      componentWillUnmount(){
+        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+      }
+
+      handleAckClick( e ){
+        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      }
+
+      render(){
+        return (
+          <>
+            <div id="user_instruction" className="pip_gui pip_post" >
+              <h1>user_instruction</h1>
+            </div>
+            <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+          </>
+        );
+      }
+    }
+
+    this.react_app.render( <ErrorBoundary><UserInstructionModal /></ErrorBoundary> );
   };
   tour_or_skip = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.tour_or_skip');
 
-    screenplay.take_the_tour = window.confirm( 'Take the tour?' );
-    this.ActivateOrbitControls( screenplay );
+    let engage = ()=>{
+      this.react_app.render();
+      this.ActivateOrbitControls( screenplay );
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      folder.open( false );
-    });
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
 
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    class EngageButton extends React.Component {
+
+      constructor( props ) {
+        super( props );
+      }
+
+      handleEngageClick( e ) {
+        engage();
+      }
+
+      componentDidMount(){
+        document.getElementById( 'root' ).classList.add( 'pip_gui' );
+      }
+
+      componentWillUnmount(){
+        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+      }
+
+      render() {
+        const captainName = this.props.captainName;
+
+        return (
+          <>
+            <button
+              name="engage"
+              className="pip_button user_side"
+              type="button"
+              onClick={this.handleEngageClick}>
+              ENGAGE
+            </button>
+          </>
+        );
+      }
+    }
+
+    class CaptainsOrders extends React.Component {
+
+      constructor( props ) {
+        super( props );
+        this.handleShowTourChange = this.handleShowTourChange.bind( this );
+      }
+
+      handleShowTourChange( e ) {
+        this.props.onShowTourChange( e.target.checked );
+      }
+
+      render() {
+        const captainName = this.props.captainName;
+        const showTour = this.props.showTour;
+
+        return (
+          < div
+              className="user_side"
+              style={{ gridRow: 4, display: 'flex' }}>
+            <label
+              className="pip_text user_side"
+              htmlFor="show_tour"
+              style={{ marginLeft: '1rem' }}
+              >Tour?</label>
+            <input
+              id="show_tour_checkbox"
+              className="pip_toggle user_side"
+              style={{ marginLeft: '1rem' }}
+              type="checkbox"
+              checked={this.props.showTour}
+              onChange={this.handleShowTourChange}
+            />
+            <EngageButton />
+          </div>
+        );
+      }
+    }
+
+    class TourOrSkipForm extends React.Component {
+      constructor( props ) {
+        super( props );
+        this.state = {
+          showTour: false
+        };
+
+        this.handleShowTourChange = this.handleShowTourChange.bind( this );
+      }
+
+      handleShowTourChange( showTour ) {
+        this.setState({
+          showTour: showTour
+        });
+        screenplay.take_the_tour = showTour;
+      }
+
+      componentDidMount(){
+        document.getElementById( 'root' ).classList.add( 'pip_gui' );
+      }
+
+      componentWillUnmount(){
+        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+      }
+
+      render() {
+        return (
+          <div id="tour_or_skip" className="pip_gui pip_chat">
+            <span className="ui_side pip_text" style={{ gridRow: 2 }}>
+              Captain{' '+(!screenplay.captain_name)?'':screenplay.captain_name}.
+            </span>
+            <span className="ui_side pip_text" style={{ gridRow: 3 }}>A tour of the local system is available.<br />Shall I begin, or would you rather continue on to meet the Architect?</span>
+            <CaptainsOrders
+              showTour={this.state.showTour}
+              onShowTourChange={this.handleShowTourChange}
+            />
+          </div>
+        );
+      }
+    }
+
+    this.react_app.render( <ErrorBoundary><TourOrSkipForm /></ErrorBoundary> );
+
   };
   visit_sun = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_sun');
 
-    screenplay.actions.warp_to( screenplay.actors.Sun, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Sun');
-      folder.open( show );
-    });
+      class VisitSunModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+          // TODO: Place this component as if on the viewscreen.
+          /*
+          const visit_sun_modal = document.getElementById( "visit_sun_modal" );
+          const cssObject = new CSS3DAsset( visit_sun_modal );
+
+          let _pos = new THREE.Vector3();
+          screenplay.actors.Ship.NavDots.sight_target.getWorldPosition( _pos );
+          cssObject.up = screenplay.actors.Ship.up;
+          cssObject.position.copy( _pos );
+          cssObject.scale.copy( new THREE.Vector3( 0.1, 0.1, 0.1 ) );
+          cssObject.directions.set( 'lookAt', ()=>{
+            cssObject.lookAt( screenplay.actors.Ship.position );
+          });
+          screenplay.actives.push( cssObject );
+          screenplay.ui_scene.add( cssObject );
+
+          let tour_info_settings_folder = gui.addFolder( 'Tour Info Settings' );
+          tour_info_settings_folder.add( cssObject.position, 'x' ).name( 'Pos X');
+          tour_info_settings_folder.add( cssObject.position, 'y' ).name( 'Pos Y');
+          tour_info_settings_folder.add( cssObject.position, 'z' ).name( 'Pos Z');
+          tour_info_settings_folder.add( cssObject.scale, 'x' ).name( 'Scale X');
+          tour_info_settings_folder.add( cssObject.scale, 'y' ).name( 'Scale Y');
+          tour_info_settings_folder.add( cssObject.scale, 'z' ).name( 'Scale Z');
+
+          tour_info_settings_folder.open( true );
+          */
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_sun_modal = document.getElementById( "visit_sun_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_sun_modal" className="pip_gui pip_import">
+                <iframe src="https://en.wikipedia.org/wiki/Sun#Structure_and_fusion" title="Sun - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitSunModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Sun, false, onArrival );
 
   };
   visit_mercury = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_mercury');
 
-    screenplay.actions.warp_to( screenplay.actors.Mercury, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Mercury');
-      folder.open( show );
-    });
+      class VisitMercuryModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_mercury_modal = document.getElementById( "visit_mercury_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_mercury_modal" className="pip_gui">
+                <iframe src="https://en.wikipedia.org/wiki/Mercury_(planet)#Orbit.2C_rotation.2C_and_longitude" title="Mercury - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitMercuryModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Mercury, false, onArrival );
+
   };
   visit_venus = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_venus');
 
-    screenplay.actions.warp_to( screenplay.actors.Venus, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Venus');
-      folder.open( show );
-    });
+      class VisitVenusModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_venus_modal = document.getElementById( "visit_venus_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_venus_modal" className="pip_gui">
+                <iframe src="https://en.wikipedia.org/wiki/Venus" title="Venus - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitVenusModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Venus, false, onArrival );
+
   };
   visit_earth = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_earth');
 
-    screenplay.actions.warp_to( screenplay.actors.Earth, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Earth');
-      folder.open( show );
-    });
+      class VisitEarthModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_earth_modal = document.getElementById( "visit_earth_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_earth_modal" className="pip_gui">
+                <iframe src="https://en.wikipedia.org/wiki/Earth" title="Earth - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitEarthModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Earth, false, onArrival );
+
   };
   visit_moon = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_moon');
 
-    screenplay.actions.warp_to( screenplay.actors.Moon, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Moon');
-      folder.open( show );
-    });
+      class VisitMoonModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_moon_modal = document.getElementById( "visit_moon_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_moon_modal" className="pip_gui">
+                <iframe src="https://en.wikipedia.org/wiki/Moon#Physical_characteristics" title="Moon - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitMoonModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Moon, false, onArrival );
+
   };
   visit_mars = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_mars');
 
-    screenplay.actions.warp_to( screenplay.actors.Mars, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Mars');
-      folder.open( show );
-    });
+      class VisitMarsModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_mars_modal = document.getElementById( "visit_mars_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_mars_modal" className="pip_gui">
+                <iframe src="https://en.wikipedia.org/wiki/Mars" title="Mars - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitMarsModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Mars, false, onArrival );
+
   };
   visit_jupiter = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_jupiter');
 
-    screenplay.actions.warp_to( screenplay.actors.Jupiter, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Jupiter');
-      folder.open( show );
-    });
+      class VisitJupiterModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_jupiter_modal = document.getElementById( "visit_jupiter_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_jupiter_modal" className="pip_gui">
+                <iframe src="https://en.wikipedia.org/wiki/Jupiter" title="Jupiter - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitJupiterModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Jupiter, false, onArrival );
+
   };
   visit_saturn = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_saturn');
 
-    screenplay.actions.warp_to( screenplay.actors.Saturn, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Saturn');
-      folder.open( show );
-    });
+      class VisitSaturnModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_saturn_modal = document.getElementById( "visit_saturn_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_saturn_modal" className="pip_gui">
+                <iframe src="https://en.wikipedia.org/wiki/Saturn" title="Saturn - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitSaturnModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Saturn, false, onArrival );
+
   };
   visit_uranus = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_uranus');
 
-    screenplay.actions.warp_to( screenplay.actors.Uranus, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Uranus');
-      folder.open( show );
-    });
+      class VisitUranusModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_uranus_modal = document.getElementById( "visit_uranus_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_uranus_modal" className="pip_gui">
+                <iframe src="https://en.wikipedia.org/wiki/Uranus" title="Uranus - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitUranusModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Uranus, false, onArrival );
+
   };
   visit_neptune = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_neptune');
 
-    screenplay.actions.warp_to( screenplay.actors.Neptune, false, {
-      director: director,
-      dictum_name: dictum_name,
-      ndx: ndx
-    } );
+    let onArrival = ()=>{
 
-    const gui = this.elevated_vars.lil_gui;
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      let show = ( folder._title === 'Ship Navigation' || folder._title === 'Neptune');
-      folder.open( show );
-    });
+      class VisitNeptuneModal extends React.Component {
+        constructor( props ){
+          super( props );
+        }
+
+        componentDidMount(){
+
+          // 4NOW: Display as a fullscreen pip_gui.
+          const visit_neptune_modal = document.getElementById( "visit_neptune_modal" );
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+        }
+
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+
+        handleAckClick( e ){
+          onAcknowledge();
+        }
+
+        render(){
+          return (
+            <>
+              <div id="visit_neptune_modal" className="pip_gui">
+                <iframe src="https://en.wikipedia.org/wiki/Neptune" title="Neptune - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+              </div>
+              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+            </>
+          );
+        }
+      }
+      this.react_app.render( <ErrorBoundary><VisitNeptuneModal /></ErrorBoundary>);
+    }
+
+    let onAcknowledge = ()=>{
+      this.react_app.render();
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+
+    screenplay.actions.warp_to( screenplay.actors.Neptune, false, onArrival );
+
   };
   introduce_phox = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.introduce_phox');
     screenplay.actions.change_cam( 'Center' );
 
-    let resume_objects = this.elevated_vars.resume.objects;
-    let targets = this.elevated_vars.resume.targets;
+    // TODO: Convert to React Component, load from resume.html for content
+
+    let resume_objects = screenplay.resume.objects;
+    let targets = screenplay.resume.targets;
     let minor_dim = Math.min( window.innerWidth, window.innerHeight );
     let major_dim = Math.max( window.innerWidth, window.innerHeight );
     let width = window.innerWidth;
@@ -555,7 +1258,9 @@ class Workflow extends _Workflow{
     const resume_station = document.querySelectorAll("#resume > .station");
     let resume_group = new THREE.Group();
     resume_station.forEach( function( station ) {
-      station.addEventListener( 'click', ()=>{
+
+      station.addEventListener( 'click', ( e )=>{
+        e.preventDefault();
         if( cssObject.showcase ) cssObject.showcase = false; else cssObject.showcase = true; // Toggle to track whether on display or not.
         if (cssObject.showcase ) {
           let distance = cssObject.element.clientWidth;
@@ -588,8 +1293,7 @@ class Workflow extends _Workflow{
         }
       }, { capture: true } );
 
-      const cssObject = new CSS3DObject( station );
-      cssObject.directions = new Map();
+      const cssObject = new CSS3DAsset( station );
       cssObject.directions.set( 'lookAt', ()=>{
         cssObject.lookAt( screenplay.active_cam.position );
       });
@@ -609,7 +1313,9 @@ class Workflow extends _Workflow{
 
     // Set the Targets for each display orientation
     let timelength = 2208 - 606;
+    let last_start = 0;
     for ( let ndx = 0, len = resume_objects.length; ndx < len; ndx++ ){
+      last_start = ( ndx > 0 ) ? Number.parseInt( resume_objects[ndx - 1].element.dataset.start ) : 0;
       let start = Number.parseInt( resume_objects[ndx].element.dataset.start );
       let end = Number.parseInt( resume_objects[ndx].element.dataset.end );
 
@@ -620,9 +1326,17 @@ class Workflow extends _Workflow{
       // Time-Line Display
       const timeline_object = new THREE.Object3D();
       let _at = ( start-606 ) / timelength;
+      let _last_at = ( last_start-606 ) / timelength;
       let pos_at = new THREE.Vector3();
-      timeline.getPointAt( _at, pos_at );
-      timeline_object.position.copy( pos_at );
+      if( true ) {
+        timeline.getPointAt( _at, pos_at );
+        timeline_object.position.copy( pos_at );
+      } else {
+        // TODO: Implement this offset, but this needs an overhaul from above.
+        timeline.getPointAt( _last_at, pos_at );
+        let stack_offset = new THREE.Vector3( 0, element_height, 0 );
+        timeline_object.position.addVectors( pos_at, stack_offset );
+      }
       targets.timeline.push( timeline_object );
 
       // Table Display
@@ -699,7 +1413,7 @@ class Workflow extends _Workflow{
 
     }
 
-    const gui = this.elevated_vars.lil_gui;
+    const gui = screenplay.lil_gui;
     let document_controls_folder = gui.addFolder( 'Document Controls' );
     const document_controls = {
       'Timeline_Display': ( ) => {
@@ -781,10 +1495,12 @@ class Workflow extends _Workflow{
     document_controls.Grid_Display();
     this.ActivateOrbitControls( screenplay );
 
-    //director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
   confirm_privileges = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.confirm_privileges');
+
+
 
     director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
@@ -793,6 +1509,11 @@ class Workflow extends _Workflow{
 
     director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
+
+  constructor( react_app ){
+    super();
+    this.react_app = react_app;
+  }
 }
 
 export { Workflow }

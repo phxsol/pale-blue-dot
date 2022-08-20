@@ -2,6 +2,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import './index.portrait.css';
+import './index.landscape.css';
 import App from './App';
 
 // ScreenDirector Reference
@@ -16,17 +18,19 @@ import { Workflow } from  './imp/Workflow.js' ;
 let app = App;
 app.init = ()=>{
 
+  // React-App Root
+  const react_app = ReactDOM.createRoot(document.getElementById('root'));
+
   // Scene Director Implementation
   const screen_play = new Screenplay( );
   const scene_directions = new SceneDirections();
-  const workflow = new Workflow();
+  const workflow = new Workflow( react_app );
   const manifesto = new Manifesto( scene_directions, workflow );
 
   const scene_director = new ScreenDirector(screen_play, manifesto, false);
 
   // Main Logic
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(<React.StrictMode><App /></React.StrictMode>);
+  react_app.render(<React.StrictMode><App /></React.StrictMode>);
   scene_director.start();
 
 }

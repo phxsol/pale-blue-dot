@@ -21,6 +21,9 @@ class SceneDirections extends _SceneDirections {
 
     let scene = screenplay.scene;
 
+    screenplay.lights.point_light.position.set( 0, 0, 0 );
+    scene.add( screenplay.lights.point_light );
+
     let splash_screen = screenplay.props.SplashScreen;
     splash_screen.visible = false;
     scene.add( splash_screen );
@@ -45,8 +48,7 @@ class SceneDirections extends _SceneDirections {
       screenplay.cameras.set( key, value );
     });
 
-    screenplay.lights.point_light.position.set( 0, 0, 0 );
-    scene.add( screenplay.lights.point_light );
+
     scene.add( screenplay.lights.ambient_light );
 
     ship.position.addVectors( screenplay.actors.Earth.position, screenplay.actors.Earth.orbital_vector);

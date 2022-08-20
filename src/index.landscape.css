@@ -1,0 +1,110 @@
+
+@media only screen and (orientation: landscape){
+  body {
+  }
+
+  code {
+  }
+
+  iframe::before{
+  }
+
+  #root{
+  }
+
+  #theatre {
+  }
+
+  #ui {
+  }
+
+  /* BEGIN: PIP GUI Styling */
+  .pip_gui{}
+  .pip_ack{
+  }
+  .pip_ack:hover{
+  }
+  .pip_button{
+  }
+  .pip_text{
+  }
+  .pip_reply{
+  }
+
+  #root.pip_gui{
+  }
+  #root > .pip_gui{
+  }
+
+
+  /* BEGIN: PIP Splash Styling */
+  /* PIP Splash screens are autonomous heads up displays which appear and disappear on their own.
+     This style is useful for displaying the status of running processes, which don't require acknowlegement. */
+  #root > .pip_gui.pip_splash{}
+
+  /* BEGIN: PIP Post Styling */
+  /* PIP Post screens are notification pages which require acknowlegement before moving on.
+     This style allows for the system to post information which the user may wish to examine further before continuing on. */
+  #root > .pip_gui.pip_post{}
+
+  /* BEGIN: PIP Chat Styling */
+  /* PIP Chat screens are forms styled as a dialogue between the system and the user.
+     This style allows for decisions to be made and input to be handled. */
+  #root > .pip_gui.pip_chat{
+  }
+  #root > .pip_gui.pip_chat .ui_side{
+  }
+  #root > .pip_gui.pip_chat .user_side{
+  }
+  #root > .pip_gui.pip_chat .pip_text{
+  }
+  #root > .pip_gui.pip_chat .pip_reply{
+  }
+  #root > .pip_gui.pip_chat .pip_button{
+  }
+  #root > .pip_gui.pip_chat .pip_toggle{
+  }
+
+  /* BEGIN: PIP Import Styling */
+  /* PIP Import screens are externally-sourced
+     This style allows for the system to post information which the user may wish to examine further before continuing on. */
+  #root > .pip_gui.pip_import{
+  }
+  #root > .pip_gui.pip_import > iframe{
+  }
+
+  #verify_capabilities{}
+  #init_controls{}
+  #introduction{
+  }
+  #user_instruction{}
+  #tour_or_skip{
+  }
+  #visit_sun_modal{}
+  #visit_mercury_modal{}
+  #visit_venus_modal{}
+  #visit_earth_modal{}
+  #visit_moon_modal{}
+  #visit_mars_modal{}
+  #visit_jupiter_modal{}
+  #visit_saturn_modal{}
+  #visit_uranus_modal{}
+  #visit_neptune_modal{}
+  #introduce_phox{}
+  #confirm_privileges{}
+  #connect{}
+
+  #menu{
+  }
+
+  #menu button {
+  }
+  #menu button.show {
+  }
+
+  #menu button:hover {
+  }
+
+  #menu button:active {
+  }
+}
