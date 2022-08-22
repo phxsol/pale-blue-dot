@@ -377,16 +377,13 @@ class Screenplay extends _Screenplay{
               secondary_shell.material = new THREE.MeshStandardMaterial( { color: 0x000000, emissive: 0x0000ff,   roughness: 0, side: THREE.DoubleSide, alphaMap: clouds_clouds_clouds_texture, alphaTest: 0.7, transparent: true, opacity: 0.8});
               tertiary_shell.material = new THREE.MeshStandardMaterial( { color: 0x000000, emissive: 0xffffff, wireframe: true, roughness: 0, side: THREE.DoubleSide, alphaMap: cloud_ribbons_texture, alphaTest: 0.7, transparent: true, opacity: 0.9 });
 
-              primary_shell.directions.set( 'revolve', function(){
-                let warp_speed = arguments[1];
+              primary_shell.directions.set( 'revolve', function( delta, warp_speed ){
                 if( warp_speed > 0 ) primary_shell.rotation.y += 1.5 * warp_speed;
               });
-              secondary_shell.directions.set( 'revolve', function(){
-                let warp_speed = arguments[1];
+              secondary_shell.directions.set( 'revolve', function( delta, warp_speed ){
                 if( warp_speed > 0 ) secondary_shell.rotation.y -= 1 * warp_speed;
               });
-              tertiary_shell.directions.set( 'revolve', function(){
-                let warp_speed = arguments[1];
+              tertiary_shell.directions.set( 'revolve', function( delta, warp_speed ){
                 if( warp_speed > 0 ) tertiary_shell.rotation.y += 0.5 * warp_speed;
               });
 
@@ -562,639 +559,313 @@ class Screenplay extends _Screenplay{
         warped: false,
         at_destination: false,
         completed: false,
+        cleanup_phase: false,
         arrival_emitter: arrival_emitter
       }
-      let plotted_course = ( )=>{
-        let user_control = this.active_cam.user_control;
-        let cam_name = this.active_cam.name;
+      let plotted_course = {
+        update: ( )=>{
 
-        // Call this last to clear the function
-        if( this.scene.updates.cache.completed ){
+          let cache = plotted_course.cache;
+          let user_control = this.active_cam.user_control;
+          let cam_name = this.active_cam.name;
 
-          this.updatables.delete('scene');
-          let a = this.scene.updates.cache.arrival_emitter;
-          delete this.scene.updates;
-          this.scene.updates = {
-            update: ()=>{},
-            cache: {}
-          };
-          if ( a && a instanceof Function ) {
-            a();
-          } else if( a && a.dictum_name && a.ndx ) {
-            a.director.emit( `${a.dictum_name}_progress`, a.dictum_name, a.ndx );
-          }
-        } else {
-          // Turn toward the destination.
-          if( !this.scene.updates.cache.locked_on && this.scene.updates.cache.frame <= this.scene.updates.cache.turn_duration ){
+          // Call this last to clear the function
+          if( cache.completed ){
 
-            // Turn the ship toward the target.
-            let _tprog = this.scene.updates.cache.frame / this.scene.updates.cache.turn_duration;
-            let turn_progress = _tprog ** (10-(10.05*_tprog));
-
-            let curQ = new THREE.Quaternion().slerpQuaternions( iniQ, endQ, turn_progress ).normalize();
-            this.actors.Ship.quaternion.copy( curQ );
-
-            this.actors.Ship.updateMatrixWorld( true );
-            var rotationMatrix = new THREE.Matrix4().extractRotation( this.actors.Ship.matrixWorld );
-            var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
-
-            this.actors.Ship.up.lerpVectors( this.scene.updates.cache.up_now, up_now, _tprog );
-
-            this.actors.Ship.warp_tunnel.quaternion.copy( curQ );
-
-            let sight_target = new THREE.Vector3();
-
-            let cam_pos = new THREE.Vector3();
-            cam_name = this.active_cam.name;
-            switch( cam_name ){
-              case 'Center':
-
-                break;
-              case '3rdPerson':
-                  this.actors.Ship.getWorldPosition( sight_target );
-                  this.active_cam.lookAt( sight_target );
-                break;
-
-              case 'CaptainCam':
-                  this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
-                  this.active_cam.up.lerpVectors( this.scene.updates.cache.up_now, up_now, turn_progress );
-                  this.active_cam.lookAt( sight_target );
-                break;
+            this.updatables.delete( 'warp_to' );
+            let a = cache.arrival_emitter;
+            if ( a && a instanceof Function ) {
+              a();
+            } else if( a && a.dictum_name && a.ndx ) {
+              a.director.emit( `${a.dictum_name}_progress`, a.dictum_name, a.ndx );
             }
-            if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( sight_target );
-            this.active_cam.updateProjectionMatrix();
-/*
+          } else {
+            // Turn toward the destination.
+            if( !cache.locked_on && cache.frame <= cache.turn_duration ){
+
+              // Turn the ship toward the target.
+              let _tprog = cache.frame / cache.turn_duration;
+              let turn_progress = _tprog ** (10-(10.05*_tprog));
+
+              let curQ = new THREE.Quaternion().slerpQuaternions( iniQ, endQ, turn_progress ).normalize();
+              this.actors.Ship.quaternion.copy( curQ );
+
+              this.actors.Ship.updateMatrixWorld( true );
+              var rotationMatrix = new THREE.Matrix4().extractRotation( this.actors.Ship.matrixWorld );
+              var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
+
+              this.actors.Ship.up.lerpVectors( cache.up_now, up_now, _tprog );
+
+              this.actors.Ship.warp_tunnel.quaternion.copy( curQ );
+
               let sight_target = new THREE.Vector3();
-              let cam_name = this.active_cam.name;
+
               let cam_pos = new THREE.Vector3();
-              switch( cam_name ){
-                case 'Center':
-                  //this.actors.Ship.conn_station.getWorldPosition( sight_target );
-                  break;
-                case '3rdPerson':
-
-                  ship.getWorldPosition( cam_pos );
-                  cam_pos.add( new THREE.Vector3( 100, 100, 100 ) );
-                  ship.getWorldPosition( sight_target );
-                  this.active_cam.position.copy( cam_pos );
-                  this.active_cam.lookAt( sight_target );
-                  break;
-                case 'CaptainCam':
-                  this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
-                  this.cameras.get( cam_name ).getWorldPosition( cam_pos );
-                  this.active_cam.position.copy( cam_pos );
-                  this.active_cam.up.lerpVectors( this.scene.updates.cache.up_now, up_now, turn_progress );
-                  this.active_cam.lookAt( sight_target );
-                  break;
-              }
-
-*/
-          }
-
-          // Target Locked Captain
-          else if( !this.scene.updates.cache.locked_on && ! this.scene.updates.cache.locking_on ) {
-
-            this.scene.updates.cache.locking_on = true;
-            setTimeout( ()=>{
-              this.scene.updates.cache.locked_on = true;
-              this.scene.updates.cache.warping = true;
-              this.scene.updates.cache.frame = 0;
-            }, 1000);
-
-          }
-
-          // Engage!
-          else if( this.scene.updates.cache.locked_on ) {
-
-            // Distort First-Person Space-Time
-            if( this.scene.updates.cache.warping && this.scene.updates.cache.frame <= this.scene.updates.cache.warp_duration ){
-
-              let _wprog = this.scene.updates.cache.frame / this.scene.updates.cache.warp_duration;
-              let warp_progress = _wprog ** (10-(10.05*_wprog));
-              let warp_zoom = THREE.MathUtils.lerp( 0.1, 1, warp_progress );
               cam_name = this.active_cam.name;
               switch( cam_name ){
                 case 'Center':
 
                   break;
                 case '3rdPerson':
-                  this.active_cam.zoom = warp_zoom;
-                  break;
-
-                case 'CaptainCam':
-                  this.active_cam.zoom = warp_zoom;
-                  break;
-              }
-              this.active_cam.updateProjectionMatrix();
-
-              if( this.scene.updates.cache.frame >= this.scene.updates.cache.warp_duration ) {
-                this.scene.updates.cache.warping = false;
-                this.scene.updates.cache.frame = 0;
-              }
-
-            }
-
-            // Stop the ship!
-            else if( this.scene.updates.cache.warped && this.scene.updates.cache.frame <= this.scene.updates.cache.warp_duration ){
-
-              let _wprog = this.scene.updates.cache.frame / this.scene.updates.cache.warp_duration;
-              let warp_progress = _wprog ** (1.5-_wprog);
-              let warp_zoom = THREE.MathUtils.lerp( 1.5, 1, warp_progress );
-              cam_name = this.active_cam.name;
-              switch( cam_name ){
-                case 'Center':
-
-                  break;
-                case '3rdPerson':
-                  this.active_cam.zoom = warp_zoom;
-                  break;
-
-                case 'CaptainCam':
-                  this.active_cam.zoom = warp_zoom;
-                  break;
-              }
-
-              this.active_cam.updateProjectionMatrix();
-              // Stopped stopping.
-              if( this.scene.updates.cache.frame >= this.scene.updates.cache.warp_duration ) {
-                this.scene.updates.cache.warped = false;
-                this.scene.updates.cache.frame = 0;
-              }
-
-            }
-
-            // Begin travelling within a warp tunnel
-            else {
-
-              if( !this.scene.updates.cache.at_destination && this.scene.updates.cache.frame <= this.scene.updates.cache.travel_duration ){
-
-                // The warp tunnel appears gradually along the process of travelling.
-                let tunnel_progress = ( this.scene.updates.cache.frame<= this.scene.updates.cache.warp_tunnel_buildup ) ? this.scene.updates.cache.frame / this.scene.updates.cache.warp_tunnel_buildup :  1;
-                if( !this.actors.Ship.warp_tunnel.children[0].visible && tunnel_progress > 0.01 ) this.actors.Ship.warp_tunnel.children[0].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[1].visible && tunnel_progress > 0.02 ) this.actors.Ship.warp_tunnel.children[1].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[2].visible && tunnel_progress > 0.03 ) this.actors.Ship.warp_tunnel.children[2].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[3].visible && tunnel_progress > 0.04 ) this.actors.Ship.warp_tunnel.children[3].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[4].visible && tunnel_progress > 0.05 ) this.actors.Ship.warp_tunnel.children[4].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[5].visible && tunnel_progress > 0.06 ) this.actors.Ship.warp_tunnel.children[5].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[6].visible && tunnel_progress > 0.07 ) this.actors.Ship.warp_tunnel.children[6].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[7].visible && tunnel_progress > 0.08 ) this.actors.Ship.warp_tunnel.children[7].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[8].visible && tunnel_progress > 0.09 ) this.actors.Ship.warp_tunnel.children[8].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[9].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[9].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[10].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[10].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[11].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[11].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[12].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[12].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[13].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[13].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[14].visible && tunnel_progress > 0.20 ) this.actors.Ship.warp_tunnel.children[14].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[15].visible && tunnel_progress > 0.20 ) this.actors.Ship.warp_tunnel.children[15].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[16].visible && tunnel_progress > 0.30 ) this.actors.Ship.warp_tunnel.children[16].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[17].visible && tunnel_progress > 0.30 ) this.actors.Ship.warp_tunnel.children[17].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[18].visible && tunnel_progress > 0.40 ) this.actors.Ship.warp_tunnel.children[18].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[19].visible && tunnel_progress > 0.40 ) this.actors.Ship.warp_tunnel.children[19].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[20].visible && tunnel_progress > 0.50 ) this.actors.Ship.warp_tunnel.children[20].visible = true;
-
-                // Increase the opacity of the tunnel as a whole during the ramp-up cycle (<=100 Frames) of the travel process.
-                if( tunnel_progress <= 1){
-                  this.actors.Ship.warp_tunnel.children.forEach( ( cone )=>{
-                    cone.material.opaciy = tunnel_progress / 2;
-                  });
-                }
-                // TODO: Implement a color cycling algorithm for the warp tunnel.
-                for( let wc_ndx = 1; wc_ndx<this.actors.Ship.warp_tunnel.children.length; wc_ndx+=3){
-                  //let color = (16777215 / 500 * this.scene.updates.cache.frame).toString(16);
-                  //this.actors.Ship.warp_tunnel.children[wc_ndx].material.color = color;
-                }
-                // Define progress linearly, and organically.
-                let _dprog = this.scene.updates.cache.frame / this.scene.updates.cache.travel_duration;
-                let travel_progress = _dprog ** ( 1.5-_dprog );
-
-                // Establish the next position to render
-                let next_pos = ( travel_progress < 1 ) ? new THREE.Vector3() : this.scene.updates.cache.path.end;
-                // ... don't over do it.
-                if( travel_progress < 1 ) this.scene.updates.cache.path.at( travel_progress, next_pos );
-
-                let _distance = new THREE.Line3( this.active_cam.position, next_pos ).distance();
-                // Define what Warp Speed is for this trip... FYI: Not analalogous to contemporary warp travel mathematics.
-                this.scene.updates.cache.warp_speed = _distance /  1500000000;
-
-                let camship_pos_diff = new THREE.Vector3().subVectors( this.actors.Ship.position, this.active_cam.position );
-
-                let sight_target = new THREE.Vector3();
-                this.actors.Ship.position.copy( next_pos );
-                this.actors.Ship.updateMatrixWorld( true );
-                this.actors.Ship.warp_tunnel.position.copy( next_pos );
-                // TODO: REPLACE WITH CAMERA-INDEPENDANT TRAVEL
-                cam_name = this.active_cam.name;
-                switch( cam_name ){
-                  case 'Center':
-
-                    break;
-                  case '3rdPerson':
-                    this.active_cam.position.subVectors( next_pos, camship_pos_diff );
-
                     this.actors.Ship.getWorldPosition( sight_target );
                     this.active_cam.lookAt( sight_target );
-                    break;
+                  break;
 
-                  case 'CaptainCam':
-                    this.active_cam.position.subVectors( next_pos, camship_pos_diff );
-
+                case 'CaptainCam':
                     this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
+                    this.active_cam.up.lerpVectors( cache.up_now, up_now, turn_progress );
+                    this.active_cam.lookAt( sight_target );
+                  break;
+              }
+              if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( sight_target );
+              this.active_cam.updateProjectionMatrix();
+  /*
+                let sight_target = new THREE.Vector3();
+                let cam_name = this.active_cam.name;
+                let cam_pos = new THREE.Vector3();
+                switch( cam_name ){
+                  case 'Center':
+                    //this.actors.Ship.conn_station.getWorldPosition( sight_target );
+                    break;
+                  case '3rdPerson':
+
+                    ship.getWorldPosition( cam_pos );
+                    cam_pos.add( new THREE.Vector3( 100, 100, 100 ) );
+                    ship.getWorldPosition( sight_target );
+                    this.active_cam.position.copy( cam_pos );
+                    this.active_cam.lookAt( sight_target );
+                    break;
+                  case 'CaptainCam':
+                    this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
+                    this.cameras.get( cam_name ).getWorldPosition( cam_pos );
+                    this.active_cam.position.copy( cam_pos );
+                    this.active_cam.up.lerpVectors( this.scene.updates.cache.up_now, up_now, turn_progress );
                     this.active_cam.lookAt( sight_target );
                     break;
                 }
 
-                if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( sight_target );
-                this.active_cam.updateProjectionMatrix();
-/*
+  */
+            }
 
-                if( !user_control ){
-                  this.active_cam.position.subVectors( next_pos, camship_pos_diff );
-                } else {
-                  this.active_cam.position.subVectors( next_pos, camship_pos_diff );
-                  this.actors.Ship.NavDots.sight_target.getWorldPosition( this.controls.orbit_controls.target );
-                  //this.active_cam.updateProjectionMatrix();
-                }
-*/
-              } else if( !this.scene.updates.cache.at_destination ) {
+            // Target Locked Captain
+            else if( !cache.locked_on && ! cache.locking_on ) {
 
-                this.scene.updates.cache.at_destination = true;
-                this.scene.updates.cache.frame = 0;
-                this.scene.updates.cache.warped = true;
+              cache.locking_on = true;
+              setTimeout( ()=>{
+                cache.locked_on = true;
+                cache.warping = true;
+                cache.frame = 0;
+              }, 1000);
 
-                let _wd = 35;
-                this.actors.Ship.warp_tunnel.children.forEach( ( cone )=>{
-                  setTimeout( ()=>{
-                    cone.visible = false;
-                  }, _wd+=35);
-                })
-                //alert( ' We have arrived Captain. @ Frame: ' + this.scene.updates.cache.frame.toString() );
+            }
 
-              } else if ( this.scene.updates.cache.at_destination ) {
+            // Engage!
+            else if( cache.locked_on ) {
 
-                let ship = this.actors.Ship;
-                ship.updateMatrixWorld( true );
-                var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
-                var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
-                let camship_pos_diff = new THREE.Vector3().subVectors( ship.position, this.active_cam.position  );
-                let sight_target = new THREE.Vector3();
+              // Distort First-Person Space-Time
+              if( cache.warping && cache.frame <= cache.warp_duration ){
+
+                let _wprog = cache.frame / cache.warp_duration;
+                let warp_progress = _wprog ** (10-(10.05*_wprog));
+                let warp_zoom = THREE.MathUtils.lerp( 0.1, 1, warp_progress );
                 cam_name = this.active_cam.name;
                 switch( cam_name ){
                   case 'Center':
 
                     break;
                   case '3rdPerson':
-                    this.active_cam.position.subVectors( ship.position, camship_pos_diff );
-                    ship.getWorldPosition( sight_target );
-                    this.active_cam.updateProjectionMatrix();
+                    this.active_cam.zoom = warp_zoom;
                     break;
 
                   case 'CaptainCam':
-                    this.active_cam.up = up_now;
-                    this.active_cam.position.subVectors( ship.position, camship_pos_diff );
-                    ship.NavDots.sight_target.getWorldPosition( sight_target );
-                    this.active_cam.lookAt( sight_target );
-                    this.active_cam.updateProjectionMatrix();
+                    this.active_cam.zoom = warp_zoom;
+                    break;
+                }
+                this.active_cam.updateProjectionMatrix();
 
+                if( cache.frame >= cache.warp_duration ) {
+                  cache.warping = false;
+                  cache.frame = 0;
+                }
+
+              }
+
+              // Stop the ship!
+              else if( cache.warped && cache.frame <= cache.warp_duration ){
+
+                let _wprog = cache.frame / cache.warp_duration;
+                let warp_progress = _wprog ** (1.5-_wprog);
+                let warp_zoom = THREE.MathUtils.lerp( 1.5, 1, warp_progress );
+                cam_name = this.active_cam.name;
+                switch( cam_name ){
+                  case 'Center':
+
+                    break;
+                  case '3rdPerson':
+                    this.active_cam.zoom = warp_zoom;
+                    break;
+
+                  case 'CaptainCam':
+                    this.active_cam.zoom = warp_zoom;
                     break;
                 }
 
-                this.scene.updates.cache.completed = true;
-                //alert( `Arrived at corrdinates: [ X:${this.actors.Ship.position.x}, Y:${this.actors.Ship.position.y}, Z:${this.actors.Ship.position.z} ]` );
+                this.active_cam.updateProjectionMatrix();
+                // Stopped stopping.
+                if( cache.frame >= cache.warp_duration ) {
+                  cache.warped = false;
+                  cache.frame = 0;
+                }
 
               }
-            }
-          }
-          this.scene.updates.cache.frame++;
-        }
 
+              // Begin travelling within a warp tunnel
+              else {
+
+                if( !cache.at_destination && cache.frame <= cache.travel_duration ){
+
+                  // The warp tunnel appears gradually along the process of travelling.
+                  let tunnel_progress = ( cache.frame<= cache.warp_tunnel_buildup ) ? cache.frame / cache.warp_tunnel_buildup :  1;
+                  if( !this.actors.Ship.warp_tunnel.children[0].visible && tunnel_progress > 0.01 ) this.actors.Ship.warp_tunnel.children[0].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[1].visible && tunnel_progress > 0.02 ) this.actors.Ship.warp_tunnel.children[1].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[2].visible && tunnel_progress > 0.03 ) this.actors.Ship.warp_tunnel.children[2].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[3].visible && tunnel_progress > 0.04 ) this.actors.Ship.warp_tunnel.children[3].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[4].visible && tunnel_progress > 0.05 ) this.actors.Ship.warp_tunnel.children[4].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[5].visible && tunnel_progress > 0.06 ) this.actors.Ship.warp_tunnel.children[5].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[6].visible && tunnel_progress > 0.07 ) this.actors.Ship.warp_tunnel.children[6].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[7].visible && tunnel_progress > 0.08 ) this.actors.Ship.warp_tunnel.children[7].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[8].visible && tunnel_progress > 0.09 ) this.actors.Ship.warp_tunnel.children[8].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[9].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[9].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[10].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[10].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[11].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[11].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[12].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[12].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[13].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[13].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[14].visible && tunnel_progress > 0.20 ) this.actors.Ship.warp_tunnel.children[14].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[15].visible && tunnel_progress > 0.20 ) this.actors.Ship.warp_tunnel.children[15].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[16].visible && tunnel_progress > 0.30 ) this.actors.Ship.warp_tunnel.children[16].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[17].visible && tunnel_progress > 0.30 ) this.actors.Ship.warp_tunnel.children[17].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[18].visible && tunnel_progress > 0.40 ) this.actors.Ship.warp_tunnel.children[18].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[19].visible && tunnel_progress > 0.40 ) this.actors.Ship.warp_tunnel.children[19].visible = true;
+                  if( !this.actors.Ship.warp_tunnel.children[20].visible && tunnel_progress > 0.50 ) this.actors.Ship.warp_tunnel.children[20].visible = true;
+
+                  // Increase the opacity of the tunnel as a whole during the ramp-up cycle (<=100 Frames) of the travel process.
+                  if( tunnel_progress <= 1){
+                    this.actors.Ship.warp_tunnel.children.forEach( ( cone )=>{
+                      cone.material.opaciy = tunnel_progress / 2;
+                    });
+                  }
+                  // TODO: Implement a color cycling algorithm for the warp tunnel.
+                  for( let wc_ndx = 1; wc_ndx<this.actors.Ship.warp_tunnel.children.length; wc_ndx+=3){
+                    //let color = (16777215 / 500 * this.scene.updates.cache.frame).toString(16);
+                    //this.actors.Ship.warp_tunnel.children[wc_ndx].material.color = color;
+                  }
+                  // Define progress linearly, and organically.
+                  let _dprog = cache.frame / cache.travel_duration;
+                  let travel_progress = _dprog ** ( 1.5-_dprog );
+
+                  // Establish the next position to render
+                  let next_pos = ( travel_progress < 1 ) ? new THREE.Vector3() : cache.path.end;
+                  // ... don't over do it.
+                  if( travel_progress < 1 ) cache.path.at( travel_progress, next_pos );
+
+                  let _distance = new THREE.Line3( this.active_cam.position, next_pos ).distance();
+                  // Define what Warp Speed is for this trip... FYI: Not analalogous to contemporary warp travel mathematics.
+                  this.cache.warp_speed = cache.warp_speed = _distance /  1500000000;
+
+                  let camship_pos_diff = new THREE.Vector3().subVectors( this.actors.Ship.position, this.active_cam.position );
+
+                  let sight_target = new THREE.Vector3();
+                  this.actors.Ship.position.copy( next_pos );
+                  this.actors.Ship.updateMatrixWorld( true );
+                  this.actors.Ship.warp_tunnel.position.copy( next_pos );
+                  // TODO: REPLACE WITH CAMERA-INDEPENDANT TRAVEL
+                  cam_name = this.active_cam.name;
+                  switch( cam_name ){
+                    case 'Center':
+
+                      break;
+                    case '3rdPerson':
+                      this.active_cam.position.subVectors( next_pos, camship_pos_diff );
+
+                      this.actors.Ship.getWorldPosition( sight_target );
+                      this.active_cam.lookAt( sight_target );
+                      break;
+
+                    case 'CaptainCam':
+                      this.active_cam.position.subVectors( next_pos, camship_pos_diff );
+
+                      this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
+                      this.active_cam.lookAt( sight_target );
+                      break;
+                  }
+
+                  if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( sight_target );
+                  this.active_cam.updateProjectionMatrix();
+  /*
+
+                  if( !user_control ){
+                    this.active_cam.position.subVectors( next_pos, camship_pos_diff );
+                  } else {
+                    this.active_cam.position.subVectors( next_pos, camship_pos_diff );
+                    this.actors.Ship.NavDots.sight_target.getWorldPosition( this.controls.orbit_controls.target );
+                    //this.active_cam.updateProjectionMatrix();
+                  }
+  */
+                } else if( !cache.at_destination ) {
+
+                  cache.at_destination = true;
+                  cache.frame = 0;
+                  cache.warped = true;
+
+                  let _wd = 35;
+                  this.actors.Ship.warp_tunnel.children.forEach( ( cone )=>{
+                    setTimeout( ()=>{
+                      cone.visible = false;
+                    }, _wd+=35);
+                  })
+                  //alert( ' We have arrived Captain. @ Frame: ' + this.scene.updates.cache.frame.toString() );
+
+                } else if ( cache.at_destination ) {
+
+                  let ship = this.actors.Ship;
+                  ship.updateMatrixWorld( true );
+                  var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
+                  var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
+                  let camship_pos_diff = new THREE.Vector3().subVectors( ship.position, this.active_cam.position  );
+                  let sight_target = new THREE.Vector3();
+                  cam_name = this.active_cam.name;
+                  switch( cam_name ){
+                    case 'Center':
+
+                      break;
+                    case '3rdPerson':
+                      this.active_cam.position.subVectors( ship.position, camship_pos_diff );
+                      ship.getWorldPosition( sight_target );
+                      this.active_cam.updateProjectionMatrix();
+                      break;
+
+                    case 'CaptainCam':
+                      this.active_cam.up = up_now;
+                      this.active_cam.position.subVectors( ship.position, camship_pos_diff );
+                      ship.NavDots.sight_target.getWorldPosition( sight_target );
+                      this.active_cam.lookAt( sight_target );
+                      this.active_cam.updateProjectionMatrix();
+
+                      break;
+                  }
+
+                  cache.completed = true;
+                  //alert( `Arrived at corrdinates: [ X:${this.actors.Ship.position.x}, Y:${this.actors.Ship.position.y}, Z:${this.actors.Ship.position.z} ]` );
+
+                }
+              }
+            }
+            cache.frame++;
+          }
+        },
+        cache: plotted_course_cache
       }
-      this.updatables_cache.set( 'warp_to', plotted_course_cache );
       this.updatables.set('warp_to', plotted_course );
-/*
-      this.scene.updates.cache.iniQ = iniQ;
-      this.scene.updates.cache.endQ = endQ;
-      this.scene.updates.cache.path = travel_path;
-      this.scene.updates.cache.up_now = this.actors.Ship.up.clone();
-      this.scene.updates.cache.turn_duration = Math.max( 100, Math.ceil( _quat_diff * ( 250 / Math.PI ) ) );
-      this.scene.updates.cache.travel_duration = Math.ceil( 100 + ( travel_distance / 15000000000 ) );
-      this.scene.updates.cache.warp_duration = 15;
-      this.scene.updates.cache.duration = this.scene.updates.cache.turn_duration + this.scene.updates.cache.travel_duration;  // TODO: Vary this by the travel_distance to target
-      this.scene.updates.cache.frame = 0;
-      this.scene.updates.cache.locking_on = false;
-      this.scene.updates.cache.locked_on = false;
-      this.scene.updates.cache.warping = false;
-      this.scene.updates.cache.warp_speed = 0;
-      this.scene.updates.cache.warp_tunnel_buildup = 250;
-      this.scene.updates.cache.warped = false;
-      this.scene.updates.cache.at_destination = false;
-      this.scene.updates.cache.completed = false;
-      this.scene.updates.cache.arrival_emitter = arrival_emitter;
-      this.scene.updates.update = ()=>{
-        let user_control = this.active_cam.user_control;
-        let cam_name = this.active_cam.name;
-
-        // Call this last to clear the function
-        if( this.scene.updates.cache.completed ){
-
-          this.updatables.delete('scene');
-          let a = this.scene.updates.cache.arrival_emitter;
-          delete this.scene.updates;
-          this.scene.updates = {
-            update: ()=>{},
-            cache: {}
-          };
-          if ( a && a instanceof Function ) {
-            a();
-          } else if( a && a.dictum_name && a.ndx ) {
-            a.director.emit( `${a.dictum_name}_progress`, a.dictum_name, a.ndx );
-          }
-        } else {
-          // Turn toward the destination.
-          if( !this.scene.updates.cache.locked_on && this.scene.updates.cache.frame <= this.scene.updates.cache.turn_duration ){
-
-            // Turn the ship toward the target.
-            let _tprog = this.scene.updates.cache.frame / this.scene.updates.cache.turn_duration;
-            let turn_progress = _tprog ** (10-(10.05*_tprog));
-
-            let curQ = new THREE.Quaternion().slerpQuaternions( iniQ, endQ, turn_progress ).normalize();
-            this.actors.Ship.quaternion.copy( curQ );
-
-            this.actors.Ship.updateMatrixWorld( true );
-            var rotationMatrix = new THREE.Matrix4().extractRotation( this.actors.Ship.matrixWorld );
-            var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
-
-            this.actors.Ship.up.lerpVectors( this.scene.updates.cache.up_now, up_now, _tprog );
-
-            this.actors.Ship.warp_tunnel.quaternion.copy( curQ );
-
-            let sight_target = new THREE.Vector3();
-
-            let cam_pos = new THREE.Vector3();
-            cam_name = this.active_cam.name;
-            switch( cam_name ){
-              case 'Center':
-
-                break;
-              case '3rdPerson':
-                  this.actors.Ship.getWorldPosition( sight_target );
-                  this.active_cam.lookAt( sight_target );
-                break;
-
-              case 'CaptainCam':
-                  this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
-                  this.active_cam.up.lerpVectors( this.scene.updates.cache.up_now, up_now, turn_progress );
-                  this.active_cam.lookAt( sight_target );
-                break;
-            }
-            if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( sight_target );
-            this.active_cam.updateProjectionMatrix();
-/*
-              let sight_target = new THREE.Vector3();
-              let cam_name = this.active_cam.name;
-              let cam_pos = new THREE.Vector3();
-              switch( cam_name ){
-                case 'Center':
-                  //this.actors.Ship.conn_station.getWorldPosition( sight_target );
-                  break;
-                case '3rdPerson':
-
-                  ship.getWorldPosition( cam_pos );
-                  cam_pos.add( new THREE.Vector3( 100, 100, 100 ) );
-                  ship.getWorldPosition( sight_target );
-                  this.active_cam.position.copy( cam_pos );
-                  this.active_cam.lookAt( sight_target );
-                  break;
-                case 'CaptainCam':
-                  this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
-                  this.cameras.get( cam_name ).getWorldPosition( cam_pos );
-                  this.active_cam.position.copy( cam_pos );
-                  this.active_cam.up.lerpVectors( this.scene.updates.cache.up_now, up_now, turn_progress );
-                  this.active_cam.lookAt( sight_target );
-                  break;
-              }
-
-*/ /*
-          }
-
-          // Target Locked Captain
-          else if( !this.scene.updates.cache.locked_on && ! this.scene.updates.cache.locking_on ) {
-
-            this.scene.updates.cache.locking_on = true;
-            setTimeout( ()=>{
-              this.scene.updates.cache.locked_on = true;
-              this.scene.updates.cache.warping = true;
-              this.scene.updates.cache.frame = 0;
-            }, 1000);
-
-          }
-
-          // Engage!
-          else if( this.scene.updates.cache.locked_on ) {
-
-            // Distort First-Person Space-Time
-            if( this.scene.updates.cache.warping && this.scene.updates.cache.frame <= this.scene.updates.cache.warp_duration ){
-
-              let _wprog = this.scene.updates.cache.frame / this.scene.updates.cache.warp_duration;
-              let warp_progress = _wprog ** (10-(10.05*_wprog));
-              let warp_zoom = THREE.MathUtils.lerp( 0.1, 1, warp_progress );
-              cam_name = this.active_cam.name;
-              switch( cam_name ){
-                case 'Center':
-
-                  break;
-                case '3rdPerson':
-                  this.active_cam.zoom = warp_zoom;
-                  break;
-
-                case 'CaptainCam':
-                  this.active_cam.zoom = warp_zoom;
-                  break;
-              }
-              this.active_cam.updateProjectionMatrix();
-
-              if( this.scene.updates.cache.frame >= this.scene.updates.cache.warp_duration ) {
-                this.scene.updates.cache.warping = false;
-                this.scene.updates.cache.frame = 0;
-              }
-
-            }
-
-            // Stop the ship!
-            else if( this.scene.updates.cache.warped && this.scene.updates.cache.frame <= this.scene.updates.cache.warp_duration ){
-
-              let _wprog = this.scene.updates.cache.frame / this.scene.updates.cache.warp_duration;
-              let warp_progress = _wprog ** (1.5-_wprog);
-              let warp_zoom = THREE.MathUtils.lerp( 1.5, 1, warp_progress );
-              cam_name = this.active_cam.name;
-              switch( cam_name ){
-                case 'Center':
-
-                  break;
-                case '3rdPerson':
-                  this.active_cam.zoom = warp_zoom;
-                  break;
-
-                case 'CaptainCam':
-                  this.active_cam.zoom = warp_zoom;
-                  break;
-              }
-
-              this.active_cam.updateProjectionMatrix();
-              // Stopped stopping.
-              if( this.scene.updates.cache.frame >= this.scene.updates.cache.warp_duration ) {
-                this.scene.updates.cache.warped = false;
-                this.scene.updates.cache.frame = 0;
-              }
-
-            }
-
-            // Begin travelling within a warp tunnel
-            else {
-
-              if( !this.scene.updates.cache.at_destination && this.scene.updates.cache.frame <= this.scene.updates.cache.travel_duration ){
-
-                // The warp tunnel appears gradually along the process of travelling.
-                let tunnel_progress = ( this.scene.updates.cache.frame<= this.scene.updates.cache.warp_tunnel_buildup ) ? this.scene.updates.cache.frame / this.scene.updates.cache.warp_tunnel_buildup :  1;
-                if( !this.actors.Ship.warp_tunnel.children[0].visible && tunnel_progress > 0.01 ) this.actors.Ship.warp_tunnel.children[0].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[1].visible && tunnel_progress > 0.02 ) this.actors.Ship.warp_tunnel.children[1].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[2].visible && tunnel_progress > 0.03 ) this.actors.Ship.warp_tunnel.children[2].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[3].visible && tunnel_progress > 0.04 ) this.actors.Ship.warp_tunnel.children[3].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[4].visible && tunnel_progress > 0.05 ) this.actors.Ship.warp_tunnel.children[4].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[5].visible && tunnel_progress > 0.06 ) this.actors.Ship.warp_tunnel.children[5].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[6].visible && tunnel_progress > 0.07 ) this.actors.Ship.warp_tunnel.children[6].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[7].visible && tunnel_progress > 0.08 ) this.actors.Ship.warp_tunnel.children[7].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[8].visible && tunnel_progress > 0.09 ) this.actors.Ship.warp_tunnel.children[8].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[9].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[9].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[10].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[10].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[11].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[11].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[12].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[12].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[13].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[13].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[14].visible && tunnel_progress > 0.20 ) this.actors.Ship.warp_tunnel.children[14].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[15].visible && tunnel_progress > 0.20 ) this.actors.Ship.warp_tunnel.children[15].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[16].visible && tunnel_progress > 0.30 ) this.actors.Ship.warp_tunnel.children[16].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[17].visible && tunnel_progress > 0.30 ) this.actors.Ship.warp_tunnel.children[17].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[18].visible && tunnel_progress > 0.40 ) this.actors.Ship.warp_tunnel.children[18].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[19].visible && tunnel_progress > 0.40 ) this.actors.Ship.warp_tunnel.children[19].visible = true;
-                if( !this.actors.Ship.warp_tunnel.children[20].visible && tunnel_progress > 0.50 ) this.actors.Ship.warp_tunnel.children[20].visible = true;
-
-                // Increase the opacity of the tunnel as a whole during the ramp-up cycle (<=100 Frames) of the travel process.
-                if( tunnel_progress <= 1){
-                  this.actors.Ship.warp_tunnel.children.forEach( ( cone )=>{
-                    cone.material.opaciy = tunnel_progress / 2;
-                  });
-                }
-                // TODO: Implement a color cycling algorithm for the warp tunnel.
-                for( let wc_ndx = 1; wc_ndx<this.actors.Ship.warp_tunnel.children.length; wc_ndx+=3){
-                  //let color = (16777215 / 500 * this.scene.updates.cache.frame).toString(16);
-                  //this.actors.Ship.warp_tunnel.children[wc_ndx].material.color = color;
-                }
-                // Define progress linearly, and organically.
-                let _dprog = this.scene.updates.cache.frame / this.scene.updates.cache.travel_duration;
-                let travel_progress = _dprog ** ( 1.5-_dprog );
-
-                // Establish the next position to render
-                let next_pos = ( travel_progress < 1 ) ? new THREE.Vector3() : this.scene.updates.cache.path.end;
-                // ... don't over do it.
-                if( travel_progress < 1 ) this.scene.updates.cache.path.at( travel_progress, next_pos );
-
-                let _distance = new THREE.Line3( this.active_cam.position, next_pos ).distance();
-                // Define what Warp Speed is for this trip... FYI: Not analalogous to contemporary warp travel mathematics.
-                this.scene.updates.cache.warp_speed = _distance /  1500000000;
-
-                let camship_pos_diff = new THREE.Vector3().subVectors( this.actors.Ship.position, this.active_cam.position );
-
-                let sight_target = new THREE.Vector3();
-                this.actors.Ship.position.copy( next_pos );
-                this.actors.Ship.updateMatrixWorld( true );
-                this.actors.Ship.warp_tunnel.position.copy( next_pos );
-                // TODO: REPLACE WITH CAMERA-INDEPENDANT TRAVEL
-                cam_name = this.active_cam.name;
-                switch( cam_name ){
-                  case 'Center':
-
-                    break;
-                  case '3rdPerson':
-                    this.active_cam.position.subVectors( next_pos, camship_pos_diff );
-
-                    this.actors.Ship.getWorldPosition( sight_target );
-                    this.active_cam.lookAt( sight_target );
-                    break;
-
-                  case 'CaptainCam':
-                    this.active_cam.position.subVectors( next_pos, camship_pos_diff );
-
-                    this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
-                    this.active_cam.lookAt( sight_target );
-                    break;
-                }
-
-                if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( sight_target );
-                this.active_cam.updateProjectionMatrix();
-/*
-
-                if( !user_control ){
-                  this.active_cam.position.subVectors( next_pos, camship_pos_diff );
-                } else {
-                  this.active_cam.position.subVectors( next_pos, camship_pos_diff );
-                  this.actors.Ship.NavDots.sight_target.getWorldPosition( this.controls.orbit_controls.target );
-                  //this.active_cam.updateProjectionMatrix();
-                }
-*/ /*
-              } else if( !this.scene.updates.cache.at_destination ) {
-
-                this.scene.updates.cache.at_destination = true;
-                this.scene.updates.cache.frame = 0;
-                this.scene.updates.cache.warped = true;
-
-                let _wd = 35;
-                this.actors.Ship.warp_tunnel.children.forEach( ( cone )=>{
-                  setTimeout( ()=>{
-                    cone.visible = false;
-                  }, _wd+=35);
-                })
-                //alert( ' We have arrived Captain. @ Frame: ' + this.scene.updates.cache.frame.toString() );
-
-              } else if ( this.scene.updates.cache.at_destination ) {
-
-                let ship = this.actors.Ship;
-                ship.updateMatrixWorld( true );
-                var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
-                var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
-                let camship_pos_diff = new THREE.Vector3().subVectors( ship.position, this.active_cam.position  );
-                let sight_target = new THREE.Vector3();
-                cam_name = this.active_cam.name;
-                switch( cam_name ){
-                  case 'Center':
-
-                    break;
-                  case '3rdPerson':
-                    this.active_cam.position.subVectors( ship.position, camship_pos_diff );
-                    ship.getWorldPosition( sight_target );
-                    this.active_cam.updateProjectionMatrix();
-                    break;
-
-                  case 'CaptainCam':
-                    this.active_cam.up = up_now;
-                    this.active_cam.position.subVectors( ship.position, camship_pos_diff );
-                    ship.NavDots.sight_target.getWorldPosition( sight_target );
-                    this.active_cam.lookAt( sight_target );
-                    this.active_cam.updateProjectionMatrix();
-
-                    break;
-                }
-
-                this.scene.updates.cache.completed = true;
-                //alert( `Arrived at corrdinates: [ X:${this.actors.Ship.position.x}, Y:${this.actors.Ship.position.y}, Z:${this.actors.Ship.position.z} ]` );
-
-              }
-            }
-          }
-          this.scene.updates.cache.frame++;
-        }
-
-      }
-      this.updatables.set('warp_to', this.scene.updates );
-      */
     },
     change_cam: async ( cam_name ) =>{
       let ship = this.actors.Ship;
@@ -1229,7 +900,7 @@ class Screenplay extends _Screenplay{
     },
     transform: async ( objects, targets, duration, arrival_emitter = false )=>{
       // Remove actively competing animations by resetting this engine.
-      this.updatables.delete('ui_scene');
+      this.updatables.delete('ui_transform');
       delete this.ui_scene.updates;
       this.ui_scene.updates = {
         update: ()=>{},
@@ -1251,99 +922,50 @@ class Screenplay extends _Screenplay{
         paths: paths,
         duration: duration,
         frame: 0,
-        completed: false
+        completed: false,
+        arrival_emitter: arrival_emitter
       }
-      let ui_transform = ()=>{
-        // Call this last to clear the function
-        if( this.ui_scene.updates.cache.completed ){
-          this.updatables.delete('ui_scene');
-          let a = this.ui_scene.updates.cache.arrival_emitter;
-          delete this.ui_scene.updates;
-          this.ui_scene.updates = {
-            update: ()=>{},
-            cache: {}
-          };
-          if ( a && a instanceof Function ) {
-            a();
-          } else if( a && a.dictum_name && a.ndx ) {
-            a.director.emit( `${a.dictum_name}_progress`, a.dictum_name, a.ndx );
-          }
-        } else {
+      let ui_transform = {
+        update: ()=>{
+          let cache = plotted_course.cache;
 
-          let objects = this.ui_scene.updates.cache.objects;
-          let targets = this.ui_scene.updates.cache.targets;
-          let paths = this.ui_scene.updates.cache.paths;
-          let _tprog = this.ui_scene.updates.cache.frame / this.ui_scene.updates.cache.duration;
-          let transform_progress = _tprog ** (10-(10.05*_tprog));
+          // Call this last to clear the function
+          if( cache.completed ){
 
-          for ( let ndx = 0; ndx < objects.length; ndx++ ) {
-
-            let new_pos = new THREE.Vector3();
-            if ( this.ui_scene.updates.cache.frame === this.ui_scene.updates.cache.duration ) {
-              new_pos = targets[ ndx ].position;
-            } else {
-              paths[ ndx ].at( transform_progress, new_pos );
+            this.updatables.delete( 'ui_transform' );
+            let a = cache.arrival_emitter;
+            if ( a && a instanceof Function ) {
+              a();
+            } else if( a && a.dictum_name && a.ndx ) {
+              a.director.emit( `${a.dictum_name}_progress`, a.dictum_name, a.ndx );
             }
-            let object = objects[ ndx ];
-            object.position.copy( new_pos );
-            object.lookAt( this.active_cam.position );
+          } else {
+
+            let objects = this.ui_scene.updates.cache.objects;
+            let targets = this.ui_scene.updates.cache.targets;
+            let paths = this.ui_scene.updates.cache.paths;
+            let _tprog = this.ui_scene.updates.cache.frame / this.ui_scene.updates.cache.duration;
+            let transform_progress = _tprog ** (10-(10.05*_tprog));
+
+            for ( let ndx = 0; ndx < objects.length; ndx++ ) {
+
+              let new_pos = new THREE.Vector3();
+              if ( this.ui_scene.updates.cache.frame === this.ui_scene.updates.cache.duration ) {
+                new_pos = targets[ ndx ].position;
+              } else {
+                paths[ ndx ].at( transform_progress, new_pos );
+              }
+              let object = objects[ ndx ];
+              object.position.copy( new_pos );
+              object.lookAt( this.active_cam.position );
+            }
+
           }
-
-        }
-        if( ++this.ui_scene.updates.cache.frame >= this.ui_scene.updates.cache.duration ) this.ui_scene.updates.cache.completed = true;
-
+          if( ++this.ui_scene.updates.cache.frame >= this.ui_scene.updates.cache.duration ) this.ui_scene.updates.cache.completed = true;
+        },
+        cache: ui_transform_cache
       }
-      this.updatables_cache.set( 'ui_transform', ui_transform_cache );
       this.updateables.set( 'ui_transform', ui_transform );
-/*
-      this.ui_scene.updates.cache.objects = objects;
-      this.ui_scene.updates.cache.targets = targets;
-      this.ui_scene.updates.cache.paths = paths;
-      this.ui_scene.updates.cache.duration = duration;
-      this.ui_scene.updates.cache.frame = 0;
-      this.ui_scene.updates.cache.completed = false;
-      this.ui_scene.updates.update = ()=>{
-        // Call this last to clear the function
-        if( this.ui_scene.updates.cache.completed ){
-          this.updatables.delete('ui_scene');
-          let a = this.ui_scene.updates.cache.arrival_emitter;
-          delete this.ui_scene.updates;
-          this.ui_scene.updates = {
-            update: ()=>{},
-            cache: {}
-          };
-          if ( a && a instanceof Function ) {
-            a();
-          } else if( a && a.dictum_name && a.ndx ) {
-            a.director.emit( `${a.dictum_name}_progress`, a.dictum_name, a.ndx );
-          }
-        } else {
-
-          let objects = this.ui_scene.updates.cache.objects;
-          let targets = this.ui_scene.updates.cache.targets;
-          let paths = this.ui_scene.updates.cache.paths;
-          let _tprog = this.ui_scene.updates.cache.frame / this.ui_scene.updates.cache.duration;
-          let transform_progress = _tprog ** (10-(10.05*_tprog));
-
-          for ( let ndx = 0; ndx < objects.length; ndx++ ) {
-
-            let new_pos = new THREE.Vector3();
-            if ( this.ui_scene.updates.cache.frame === this.ui_scene.updates.cache.duration ) {
-              new_pos = targets[ ndx ].position;
-            } else {
-              paths[ ndx ].at( transform_progress, new_pos );
-            }
-            let object = objects[ ndx ];
-            object.position.copy( new_pos );
-            object.lookAt( this.active_cam.position );
-          }
-
-        }
-        if( ++this.ui_scene.updates.cache.frame >= this.ui_scene.updates.cache.duration ) this.ui_scene.updates.cache.completed = true;
-
-      }
-      this.updatables.set('ui_scene', this.ui_scene.updates );
-      */
     }
   };
   SetSceneBackground = async ( )=>{
@@ -1391,8 +1013,7 @@ class Screenplay extends _Screenplay{
     }
   }
   direct = ( delta )=>{
-
-    let warp_speed = this.scene.updates.cache.warp_speed;
+    let warp_speed = this.cache.warp_speed;
     warp_speed = ( !warp_speed ) ? 0 : warp_speed;
     this.actives.forEach( ( active, name )=>{
       active.directions.forEach( ( direction, name )=>{
@@ -1402,6 +1023,7 @@ class Screenplay extends _Screenplay{
   }
 
   /* Rendering Loop parameter values */
+  cache = {};
   u_name = "";
   ups_test = {
     ticks: 0,

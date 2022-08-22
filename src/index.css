@@ -162,6 +162,8 @@
   #root > .pip_gui.pip_import > iframe{
     border-radius: 0 10vh 0 10vh;
     grid-row: 2 / -1;
+    height: 100%;
+    width: 100%;
   }
 
   #verify_capabilities{}

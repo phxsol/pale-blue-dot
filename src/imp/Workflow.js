@@ -798,7 +798,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_sun_modal" className="pip_gui pip_import">
-                <iframe src="https://en.wikipedia.org/wiki/Sun#Structure_and_fusion" title="Sun - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
+                <iframe src="https://en.wikipedia.org/wiki/Sun#Structure_and_fusion" title="Sun - Wikipedia" ></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
             </>
@@ -844,7 +844,7 @@ class Workflow extends _Workflow{
         render(){
           return (
             <>
-              <div id="visit_mercury_modal" className="pip_gui">
+              <div id="visit_mercury_modal" className="pip_gui pip_import">
                 <iframe src="https://en.wikipedia.org/wiki/Mercury_(planet)#Orbit.2C_rotation.2C_and_longitude" title="Mercury - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -891,7 +891,7 @@ class Workflow extends _Workflow{
         render(){
           return (
             <>
-              <div id="visit_venus_modal" className="pip_gui">
+              <div id="visit_venus_modal" className="pip_gui pip_import">
                 <iframe src="https://en.wikipedia.org/wiki/Venus" title="Venus - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -938,7 +938,7 @@ class Workflow extends _Workflow{
         render(){
           return (
             <>
-              <div id="visit_earth_modal" className="pip_gui">
+              <div id="visit_earth_modal" className="pip_gui pip_import">
                 <iframe src="https://en.wikipedia.org/wiki/Earth" title="Earth - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -985,7 +985,7 @@ class Workflow extends _Workflow{
         render(){
           return (
             <>
-              <div id="visit_moon_modal" className="pip_gui">
+              <div id="visit_moon_modal" className="pip_gui pip_import">
                 <iframe src="https://en.wikipedia.org/wiki/Moon#Physical_characteristics" title="Moon - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1032,7 +1032,7 @@ class Workflow extends _Workflow{
         render(){
           return (
             <>
-              <div id="visit_mars_modal" className="pip_gui">
+              <div id="visit_mars_modal" className="pip_gui pip_import">
                 <iframe src="https://en.wikipedia.org/wiki/Mars" title="Mars - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1079,7 +1079,7 @@ class Workflow extends _Workflow{
         render(){
           return (
             <>
-              <div id="visit_jupiter_modal" className="pip_gui">
+              <div id="visit_jupiter_modal" className="pip_gui pip_import">
                 <iframe src="https://en.wikipedia.org/wiki/Jupiter" title="Jupiter - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1126,7 +1126,7 @@ class Workflow extends _Workflow{
         render(){
           return (
             <>
-              <div id="visit_saturn_modal" className="pip_gui">
+              <div id="visit_saturn_modal" className="pip_gui pip_import">
                 <iframe src="https://en.wikipedia.org/wiki/Saturn" title="Saturn - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1173,7 +1173,7 @@ class Workflow extends _Workflow{
         render(){
           return (
             <>
-              <div id="visit_uranus_modal" className="pip_gui">
+              <div id="visit_uranus_modal" className="pip_gui pip_import">
                 <iframe src="https://en.wikipedia.org/wiki/Uranus" title="Uranus - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1220,7 +1220,7 @@ class Workflow extends _Workflow{
         render(){
           return (
             <>
-              <div id="visit_neptune_modal" className="pip_gui">
+              <div id="visit_neptune_modal" className="pip_gui pip_import">
                 <iframe src="https://en.wikipedia.org/wiki/Neptune" title="Neptune - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
