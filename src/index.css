@@ -166,7 +166,18 @@
     width: 100%;
   }
 
-  #verify_capabilities{}
+  #verify_capabilities{
+
+  }
+  #verify_capabilities .score{
+    color: white;
+    font-size: 13rem;
+  }
+  #verify_capabilities .speed{
+    color: white;
+    font-size: 8rem;
+  }
+
   #init_controls{}
   #introduction{
     grid-template-rows: auto auto auto auto auto auto;

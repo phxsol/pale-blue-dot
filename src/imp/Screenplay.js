@@ -967,6 +967,7 @@ class Screenplay extends _Screenplay{
       }
       this.updateables.set( 'ui_transform', ui_transform );
     }
+
   };
   SetSceneBackground = async ( )=>{
 

@@ -17,20 +17,25 @@ class SceneDirections extends _SceneDirections {
 
     console.log('SceneDirections.enter_splash');
 
-    await screenplay.SetSceneBackground( );
-
+    let major_dim = Math.max( window.innerHeight, window.innerWidth );
+    let minor_dim = Math.min( window.innerHeight, window.innerWidth );
     let scene = screenplay.scene;
 
-    screenplay.lights.point_light.position.set( 0, 0, 0 );
+    screenplay.active_cam.position.setY( major_dim );
+    await screenplay.SetSceneBackground( );
+
+    screenplay.lights.point_light.position.set( 0, 3*major_dim, 0 );
+    screenplay.lights.point_light.intensity = 2.5;
     scene.add( screenplay.lights.point_light );
+
+    let home_dome = screenplay.props.HomeDome;
+    scene.add( home_dome );
 
     let splash_screen = screenplay.props.SplashScreen;
     splash_screen.visible = false;
     scene.add( splash_screen );
 
-    let home_dome = screenplay.props.HomeDome;
-    scene.add( home_dome );
-
+    // TODO: Lights up over time... rotate up to view the dome... transport to ship?
     director.emit( next_emit, dictum_name );
   };
   idle_on_splash = async ( screenplay, dictum_name, next_emit, director )=>{
@@ -47,7 +52,6 @@ class SceneDirections extends _SceneDirections {
     ship.cameras.forEach( ( value, key )=>{
       screenplay.cameras.set( key, value );
     });
-
 
     scene.add( screenplay.lights.ambient_light );
 

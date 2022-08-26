@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 // Screen Director Reference
-import { Workflow as _Workflow, SceneAsset3D, CSS3DAsset } from '../bin/ScreenDirector.js';
+import { Workflow as _Workflow, SceneAsset3D, CSS3DAsset, SceneTransformation } from '../bin/ScreenDirector.js';
 // Support Library Reference
 import GUI from 'lil-gui';
 import * as THREE from 'three';
@@ -171,53 +171,169 @@ class Workflow extends _Workflow{
     console.log( 'Workflow.verify_capabilities' );
 
     class VerifyCapabilitiesModal extends React.Component {
+      test; result_display;
+
+      displayTestResults(){
+        let test_results = this.result_display.cache.test_results = this.state.test_results;
+
+        console.log( test_results );
+
+        screenplay.updatables.set( 'test_results', this.result_display );
+      }
+
+      constructor( props ){
+        super( props );
+        this.state = {
+          test_results: false,
+          results_display: {
+            score: 0,
+            speed: 0
+          }
+        };
+
+        /* -= User Performance Statistics Test =-
+        ** This is where the user's device is tested for a baseline of rendering ability.
+        ** Initial tests may fail due to loading delays... testing again upon failure ensures that
+        ** elibigle users are filtered properly.
+        ** Upon Failure: Display workflow without immersive rendering. */
+        this.test = new SceneTransformation({
+            update: ( delta )=>{
+              if( this.test.cache.duration-- >= 0 ){
+                this.test.cache.stamps.push( delta );
+              } else {
+                screenplay.updatables.delete( 'ups_test' );
+                this.test.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+              }
+            },
+            cache: {
+              duration: 30,
+              stamps: [],
+              test_results: []
+            },
+            reset: ()=>{
+
+              this.test.cache.duration = 30;
+              this.test.cache.stamps = [];
+
+              screenplay.updatables.set( 'ups_test', this.test );
+            },
+            post: ( )=>{
+
+              // Build the Test Results from the captured test data
+              let test_results = {};
+              test_results.stamps = this.test.cache.stamps;
+              // Calculate the actual test duration based upon stamp values.
+              test_results.time = this.test.cache.stamps.reduce( (a,b) => a + b, 0 );
+              // Determine the largest and smallest tick durations, or stamp values.
+              test_results.max = Math.max( ...this.test.cache.stamps );
+              test_results.min = Math.min( ...this.test.cache.stamps );
+              // ...then calculate the highest and lowest FPS from them.
+              test_results.max_fps = 1/test_results.min;
+              test_results.min_fps = 1/test_results.max;
+              // Grade the User Performance Statistics
+              test_results.score = Math.floor( 1/test_results.min/test_results.max );
+              // ... then post the results to the console and the test_results stack
+              console.log( test_results );
+              this.test.cache.test_results.push( test_results );
+              // Should another test be run?  The max is 3 runs before failure is determined.
+              let runs_so_far = this.test.cache.test_results.length;
+              if ( test_results.score < 10 && test_results.max_fps < 20 && runs_so_far < 3 ) {
+                this.test.reset();
+              } else {
+                let compiled_test_results = {
+                  stamps: [],
+                  time: 0,
+                  max: -10000,
+                  min: 10000
+                };
+
+                for( let results_ndx = 0; results_ndx < this.test.cache.test_results.length; results_ndx++ ){
+                  let test_results = this.test.cache.test_results[results_ndx];
+                  compiled_test_results.stamps.push( ...test_results.stamps );
+                  // Calculate the actual test duration based upon stamp values.
+                  compiled_test_results.time += test_results.stamps.reduce( (a,b) => a + b, 0 );
+                  // Determine the largest and smallest tick durations, or stamp values.
+                  let max = Math.max( ...test_results.stamps, compiled_test_results.max );
+                  compiled_test_results.max = max;
+                  let min = Math.min( ...test_results.stamps, compiled_test_results.min );
+                  compiled_test_results.min = min;
+                }
+                // ...then calculate the highest and lowest FPS from them.
+                compiled_test_results.max_fps = 1/compiled_test_results.min;
+                compiled_test_results.min_fps = 1/compiled_test_results.max;
+                // Grade the User Performance Statistics
+                compiled_test_results.score = Math.floor( 1/compiled_test_results.min/compiled_test_results.max );
+                // ... then post the results to the console and the test_results stack
+                console.log( compiled_test_results );
+                this.setState( { test_results: compiled_test_results, test_complete: true });
+                this.displayTestResults();
+              }
+
+            }
+          });
+        screenplay.updatables.set( 'ups_test', this.test );
+      }
+
       componentDidMount(){
         document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        // User Performance Statistics Test //
-        /* This is where the user's device is tested for a baseline of rendering ability.
-           Initial tests may fail due to loading delays... testing again upon failure ensures that
-           elibigle users are filtered properly.
-           Upon Failure: Display workflow without immersive rendering. */
-        let ups_test = ()=>{
-          screenplay.updatables.delete( 'ups_test' );
-          let test = screenplay.ups_test;
-          // remove the first entry to normalize.
-          let load_test = test.stamps.shift();
-          // ...then adjust ticks to reflect normalization.
-          test.ticks--;
-          // Calculate the actual test duration based upon stamp values.
-          test.duration = test.stamps.reduce( (a,b) => a + b, 0 );
-          // Determine the largest and smallest tick durations, or stamp values.
-          test.max = Math.max( ...test.stamps );
-          test.min = Math.min( ...test.stamps );
-          // ...then calculate the highest and lowest FPS from them.
-          test.max_fps = 1/test.min;
-          test.min_fps = 1/test.max;
-          // Grade the User Performance Statistics
-          test.score = 1/test.min/test.max;
-          // ... then post the results to the console.
-          console.log( test );
+        // Give the results to the next SceneTransformation for display
+        this.result_display = new SceneTransformation({
+          update: ( delta )=>{
+            if( this.state.test_results ){
+              if( this.result_display.cache.duration-- > 0 ){
+                let tick = this.result_display.cache.frames - this.result_display.cache.duration;
+                let prog = tick / this.result_display.cache.frames;
+                let results = this.state.test_results;
+                let score = (prog * results.score);
+                let stamp_ndx = Math.floor( tick * ( results.stamps.length - 1 ) / this.result_display.cache.frames );
+                let speed = Math.ceil( 1 / results.stamps[ stamp_ndx ] );
+                this.setState({
+                  results_display: {
+                    score: score.toFixed( 2 ),
+                    speed: speed.toFixed( 1 )
+                  }
+                });
 
-          // Performance Filter //
-          /* The score derived from the above UPS test may be used here to lead poorly
-              performing devices into a workflow without immersive rendering. */
-          if ( test.score > 10 || test.max_fps > 20 ) {
-            director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-          } else {
-            director.emit( `${dictum_name}_failure`, dictum_name, ndx );
+              } else {
+                this.result_display.update = false;
+                screenplay.updatables.delete( 'test_results' );
+                this.result_display.post( this.state.test_results );
+              }
+            }
+          },
+          cache: {
+           duration: 100,
+           frames: 100,
+           test_results: {
+             stamps: [],
+             time: 0,
+             max: Number.MIN_SAFE_INTEGER,
+             min: Number.MAX_SAFE_INTEGER,
+             max_fps: false,
+             min_fps: false,
+             score: false
+           }
+          },
+
+          post: ( test_results )=>{
+
+            // Performance Filter //
+            /* The score derived from the above UPS test may be used here to lead poorly
+                performing devices into a workflow without immersive rendering. */
+            if ( test_results.score > 10 || test_results.max_fps > 20 ) {
+              setTimeout( ( dictum_name, ndx )=>{
+                director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+              }, 1500, dictum_name, ndx );
+
+
+            } else {
+              setTimeout( ( dictum_name, ndx )=>{
+                director.emit( `${dictum_name}_failure`, dictum_name, ndx );
+              }, 1500, dictum_name, ndx );
+            }
           }
-        }
+        });
 
-        // This begins the UPS Test, as it is now added to the update() loop
-        screenplay.updatables.set( 'ups_test', { update: ( delta )=>{
-          screenplay.ups_test.ticks++;
-          screenplay.ups_test.stamps.push( delta );
-        }} );
-
-        setTimeout( ups_test , 3000 );
-        //  By now, the benchmark assets have been loaded...
-        //  Run some tests to determine system ability.
-        //  Adjust performance values in order to optimize the user experience.
       }
 
       componentWillUnmount(){
@@ -229,15 +345,15 @@ class Workflow extends _Workflow{
           <>
             <div id="verify_capabilities" className="pip_gui pip_splash">
               <h1>verify_capabilities</h1>
+              <h2 className="score">{this.state.results_display.score}</h2>
+              <h2 className="speed">{this.state.results_display.speed}</h2>
             </div>
           </>
         );
       }
     }
 
-    this.react_app.render( <VerifyCapabilitiesModal /> );
-
-
+    this.react_app.render( <ErrorBoundary><VerifyCapabilitiesModal /></ErrorBoundary> );
 
   };
   init_controls = async ( screenplay, dictum_name, director, ndx ) => {
@@ -263,7 +379,7 @@ class Workflow extends _Workflow{
       }
     }
 
-    this.react_app.render( <InitControlsModal /> );
+    this.react_app.render( <ErrorBoundary><InitControlsModal /></ErrorBoundary> );
 
     try{
       screenplay.ui_renderer.domElement.addEventListener( 'wheel', (event)=>{
@@ -463,7 +579,7 @@ class Workflow extends _Workflow{
       screenplay.captain_name = ( !u_name || u_name === '') ? false : u_name;
       this.react_app.render();
       this.ActivateOrbitControls( screenplay );
-      alert( `Thank you Captain${(!screenplay.captain_name)?'':' '+screenplay.captain_name}.`)
+      //alert( `Thank you Captain${(!screenplay.captain_name)?'':' '+screenplay.captain_name}.`)
       director.emit( `${dictum_name}_progress`, dictum_name, ndx );
     }
 
@@ -666,6 +782,9 @@ class Workflow extends _Workflow{
 
       constructor( props ) {
         super( props );
+        this.state = {
+          captainName: props.captainName
+        };
         this.handleShowTourChange = this.handleShowTourChange.bind( this );
       }
 
@@ -704,9 +823,9 @@ class Workflow extends _Workflow{
       constructor( props ) {
         super( props );
         this.state = {
-          showTour: false
+          showTour: false,
+          captainName: screenplay.captain_name
         };
-
         this.handleShowTourChange = this.handleShowTourChange.bind( this );
       }
 
@@ -725,11 +844,11 @@ class Workflow extends _Workflow{
         document.getElementById( 'root' ).classList.remove( 'pip_gui' );
       }
 
-      render() {
+      render( ) {
         return (
           <div id="tour_or_skip" className="pip_gui pip_chat">
             <span className="ui_side pip_text" style={{ gridRow: 2 }}>
-              Captain{' '+(!screenplay.captain_name)?'':screenplay.captain_name}.
+              Captain {(!this.state.captainName)?'':this.state.captainName}.
             </span>
             <span className="ui_side pip_text" style={{ gridRow: 3 }}>A tour of the local system is available.<br />Shall I begin, or would you rather continue on to meet the Architect?</span>
             <CaptainsOrders

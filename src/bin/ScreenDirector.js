@@ -360,6 +360,21 @@ class CSS3DAsset extends CSS3DObject{
   }
 }
 
+class SceneTransformation{
+  update = ()=>{}; // or Function()... depends on what you need the 'this' to refer to.
+  cache = {}; // This persists beyond each run of the .update() during render... holding the values.
+  post = ()=>{};  // same here
+  reset = ()=>{};
+
+  constructor( params ){
+    this.update = params.update;
+    this.setState = params.setState;
+    this.cache = params.cache;
+    this.post = params.post;
+    this.reset = params.reset;
+  }
+}
+
 // SceneDirections //
 /* ---------------
   Directions are declared as child functions of this object upon instantiation... and are defined entirely by the user.
@@ -435,4 +450,4 @@ class Manifesto{
 }
 
 
-export { ScreenDirector, Screenplay, SceneAsset3D, CSS3DAsset, SceneDirections, Workflow, Dictum, Manifesto  };
+export { ScreenDirector, Screenplay, SceneAsset3D, CSS3DAsset, SceneTransformation, SceneDirections, Workflow, Dictum, Manifesto  };
