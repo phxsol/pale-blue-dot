@@ -1,8 +1,36 @@
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
 // ScreenDirector Reference
-import { SceneDirections as _SceneDirections } from '../bin/ScreenDirector.js';
+import { SceneDirections as _SceneDirections, CSS3DAsset, SceneTransformation } from '../bin/ScreenDirector.js';
 // Support Library Reference
+import GUI from 'lil-gui';
 import * as THREE from 'three';
 import { CSS3DObject } from '../lib/CSS3DRenderer.js';
+
+// React Component Error Boundary Class
+// Refer to --> # https://reactjs.org/docs/error-boundaries.html #
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  // Update state so the next render will show the fallback UI.
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+  // You can also log the error to an error reporting service
+  componentDidCatch(error, errorInfo) {
+    console.error( error, errorInfo );
+  }
+
+  render() {
+    // You can render any custom fallback UI
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+    return this.props.children;
+  }
+}
 
 // ScreenDirections Implementation
 /*
@@ -12,6 +40,7 @@ import { CSS3DObject } from '../lib/CSS3DRenderer.js';
     Note: Be sure to override the lazy Getter with the initialized model ( See Screenplay.js for an example ).
 */
 class SceneDirections extends _SceneDirections {
+  react_app;
 
   enter_splash = async ( screenplay, dictum_name, next_emit, director )=>{
 
@@ -22,10 +51,11 @@ class SceneDirections extends _SceneDirections {
     let scene = screenplay.scene;
 
     screenplay.active_cam.position.setY( major_dim );
+    screenplay.active_cam.lookAt( new THREE.Vector3());
     await screenplay.SetSceneBackground( );
 
     screenplay.lights.point_light.position.set( 0, 3*major_dim, 0 );
-    screenplay.lights.point_light.intensity = 2.5;
+    screenplay.lights.point_light.intensity = 0.1;
     scene.add( screenplay.lights.point_light );
 
     let home_dome = screenplay.props.HomeDome;
@@ -36,7 +66,63 @@ class SceneDirections extends _SceneDirections {
     scene.add( splash_screen );
 
     // TODO: Lights up over time... rotate up to view the dome... transport to ship?
-    director.emit( next_emit, dictum_name );
+    let enter_splash = new SceneTransformation({
+      update: function(){
+
+        if( this.cache.duration-- >= 0 ){
+
+          if( this.cache.duration >= 100 ){
+            screenplay.lights.point_light.intensity += 0.015;
+            screenplay.props.HomeDome.stage.children[0].material.roughness += 0.005;
+          }
+
+          // TODO: Something here by what frame it is.
+          if( this.cache.duration < 50 ){
+            screenplay.active_cam.rotateX( Math.PI/4/50 );
+          }
+
+        } else {
+          screenplay.updatables.delete( 'enter_splash' );
+          this.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 250
+      },
+      post: ()=>{
+        setTimeout( ()=>{director.emit( next_emit, dictum_name );}, 1000 );
+
+      }
+    });
+    screenplay.updatables.set( 'enter_splash', enter_splash );
+
+    class SplashLogo extends React.Component {
+
+      constructor( props ){
+        super( props );
+
+      }
+
+      componentDidMount(){
+        let img_element = document.getElementById( 'phox_solutions_splash' ).cloneNode( true );
+        img_element.classList.remove( 'hidden' );
+        img_element.setAttribute( 'id', '' );
+        const cssObject = new CSS3DAsset( img_element );
+        cssObject.rotateX( -Math.PI/4 );
+        screenplay.ui_scene.add( cssObject );
+      }
+
+      componentWillUnmount(){ }
+
+      render(){
+        return (
+          <img id="phox_solutions_splash" className="hidden" src=".\resources\phox.solutions_brand_1k.png" alt="Phox Solutions' logo of a fox observing a Phoenix, then after a short journey in which it leaves tracks, now embued with wings... pounces!" height={window.innerHeight} width={window.innerWidth}/>
+        );
+      }
+    }
+
+    this.react_app.render( <ErrorBoundary><SplashLogo /></ErrorBoundary> );
+
   };
   idle_on_splash = async ( screenplay, dictum_name, next_emit, director )=>{
     console.log('SceneDirections.idle_on_splash');
@@ -65,7 +151,7 @@ class SceneDirections extends _SceneDirections {
 
     // Orient the camera view to that of the ship.
     ship.updateMatrixWorld( true );
-    await screenplay.actions.change_cam( 'CaptainCam' );
+
 
     // Create the Navigation Hologram Interface, to represent the system as it currently is.
     let distance_scale = 0.1 / ( screenplay.actors.Neptune.surface_distance ) / 30000;
@@ -251,6 +337,8 @@ class SceneDirections extends _SceneDirections {
   enter_tour = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.enter_tour');
 
+   await screenplay.actions.change_cam( 'CaptainCam' );
+
    director.emit( next_emit, dictum_name );
   };
   idle_on_tour = async ( screenplay, dictum_name, next_emit, director )=>{
@@ -292,6 +380,11 @@ class SceneDirections extends _SceneDirections {
 
    director.emit( next_emit, dictum_name );
   };
+
+  constructor( react_app ){
+    super();
+    this.react_app = react_app;
+  }
 }
 
 export { SceneDirections }

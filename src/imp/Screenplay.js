@@ -876,7 +876,7 @@ class Screenplay extends _Screenplay{
 
       switch( cam_name ){
         case 'Center':
-          new_position.setY( 2 );
+          new_position.setY( major_dim );
           new_position.setZ( major_dim );
           new_target_position = new THREE.Vector3();
           this.active_cam.up = new THREE.Vector3( 0, 1, 0 );
@@ -993,21 +993,23 @@ class Screenplay extends _Screenplay{
       let StageBuilder = ( size )=>{
         let stage = new THREE.Group();
         const stage_geometry = new THREE.CircleGeometry( 3 * major_dim, 6 );
-        const stage_material = new THREE.MeshStandardMaterial( { color: 0x442222, side: THREE.DoubleSide, metalness: 1, roughness: 0.9 } );
+        const stage_material = new THREE.MeshStandardMaterial( { color: 0x070f54, side: THREE.FrontSide, metalness: 1, roughness: 0 } );
         stage.add( new THREE.Mesh( stage_geometry, stage_material ) );
         stage.rotateX( - Math.PI / 2 );
         return stage;
       };
       let home_stage = StageBuilder( 42 ); // Currently disregards the parameter.
       home_stage.position.setY( -100 );
-      let _dome = new THREE.Mesh(
+      let bowl = new THREE.Mesh(
         new THREE.SphereGeometry( major_dim * Math.PI, 64, 32, 0, 2*Math.PI, Math.PI/2, Math.PI ),
         new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.DoubleSide } )
       )
-      _dome.position.setY( major_dim - 100 );
+      bowl.position.setY( major_dim - 100 );
       let home_dome = new THREE.Group();
+      home_dome.stage = home_stage;
+      home_dome.bowl = bowl;
       home_dome.add( home_stage );
-      home_dome.add( _dome );
+      home_dome.add( bowl );
 
       delete this.HomeDome;
       return this.HomeDome = home_dome;

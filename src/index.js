@@ -23,7 +23,7 @@ app.init = ()=>{
 
   // Scene Director Implementation
   const screen_play = new Screenplay( );
-  const scene_directions = new SceneDirections();
+  const scene_directions = new SceneDirections( react_app );
   const workflow = new Workflow( react_app );
   const manifesto = new Manifesto( scene_directions, workflow );
 

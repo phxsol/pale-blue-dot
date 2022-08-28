@@ -427,7 +427,7 @@ class Workflow extends _Workflow{
       ship_settings_folder.add( screenplay.actors.Ship.light, 'intensity', 0, 100, 0.1 ).name( 'Light Intensity');
       ship_settings_folder.add( screenplay.actors.Ship.light, 'distance', 0, 100000, 1 ).name( 'Light Distance');
       ship_settings_folder.add( screenplay.actors.Ship.light, 'decay', 0, 2, 1 ).name( 'Light Decay [0,1,2]');
-      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open, 'visible' ).onChange(()=>{ screenplay.actors.Ship.bulkhead.visible = !screenplay.actors.Ship.bulkhead_open.visible }).name( 'Show Top?');
+      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open, 'visible', false ).onChange(()=>{ screenplay.actors.Ship.bulkhead.visible = !screenplay.actors.Ship.bulkhead_open.visible }).name( 'Show Top?');
       ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'roughness', 0, 1 ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.rougness = screenplay.actors.Ship.bulkhead_open.material.rougness }).name( 'Material Roughness');
       ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'metalness', 0, 1 ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.metalness = screenplay.actors.Ship.bulkhead_open.material.metalness }).name( 'Material Metalness');
       ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'wireframe' ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.wireframe = screenplay.actors.Ship.bulkhead_open.material.wireframe }).name( 'Wireframe Only?');

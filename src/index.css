@@ -21,10 +21,15 @@
     width: 100%;
   }
 
+  .hidden{
+    opacity: 0;
+    display: none;
+  }
+
   #root{
     position: fixed;
     z-index: 3;
-    background-color: rgba( 11,11,11,0.91 );
+    background-color: rgba( 11,11,11,0.42 );
     display: grid;
   }
 
