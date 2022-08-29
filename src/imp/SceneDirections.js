@@ -54,6 +54,9 @@ class SceneDirections extends _SceneDirections {
     screenplay.active_cam.lookAt( new THREE.Vector3());
     await screenplay.SetSceneBackground( );
 
+    let sun = screenplay.actors.Sun;
+    scene.add( sun );
+
     screenplay.lights.point_light.position.set( 0, 3*major_dim, 0 );
     screenplay.lights.point_light.intensity = 0.1;
     scene.add( screenplay.lights.point_light );
@@ -78,7 +81,9 @@ class SceneDirections extends _SceneDirections {
 
           // TODO: Something here by what frame it is.
           if( this.cache.duration < 50 ){
-            screenplay.active_cam.rotateX( Math.PI/4/50 );
+            let prog = (50 - this.cache.duration) / 50;
+            let t_prog = prog ** (5-(10*prog));
+            screenplay.active_cam.rotateX( Math.PI/180 * t_prog);
           }
 
         } else {
@@ -104,11 +109,13 @@ class SceneDirections extends _SceneDirections {
       }
 
       componentDidMount(){
+        // Clone the node, to add to the UI Renderer.
+        // Note: If not cloned, the UI Renderer will rip it out of React's control... causing it to complain, and possibly fail in some mysterious way.
         let img_element = document.getElementById( 'phox_solutions_splash' ).cloneNode( true );
-        img_element.classList.remove( 'hidden' );
+        img_element.classList.remove( 'hidden' ); // This keeps the React version hidden from view, so it must be removed from the clone if it is to be seen.
         img_element.setAttribute( 'id', '' );
         const cssObject = new CSS3DAsset( img_element );
-        cssObject.rotateX( -Math.PI/4 );
+        cssObject.lookAt( ...screenplay.active_cam.position );
         screenplay.ui_scene.add( cssObject );
       }
 
@@ -148,10 +155,7 @@ class SceneDirections extends _SceneDirections {
       warp_shell_cone.visible = false;
       screenplay.actives.push( warp_shell_cone );
     });
-
-    // Orient the camera view to that of the ship.
     ship.updateMatrixWorld( true );
-
 
     // Create the Navigation Hologram Interface, to represent the system as it currently is.
     let distance_scale = 0.1 / ( screenplay.actors.Neptune.surface_distance ) / 30000;
@@ -281,7 +285,6 @@ class SceneDirections extends _SceneDirections {
     // Sun
     let sun = screenplay.actors.Sun;
     scene.add( sun );
-    screenplay.interactives.push( sun );
     screenplay.actives.push( sun );
     let holo_sun = sun.clone( );
     let sun_scale = 0.04 / ( sun.surface_distance );
@@ -301,20 +304,22 @@ class SceneDirections extends _SceneDirections {
   };
   splash_failure = async ( screenplay )=>{
    console.log('SceneDirections.splash_failure');
+
+   // TODO: Here is the place to switch to lo-fps mode for late-model user systems.
   };
   end_splash = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.end_splash');
+
+   // TODO: Confirm to the user that we are now progressing... either in full-fps or lo-fps
 
    director.emit( next_emit, dictum_name );
   };
   enter_prep = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.enter_prep');
-
    director.emit( next_emit, dictum_name );
   };
   idle_on_prep = async ( screenplay, dictum_name, next_emit, director )=>{
    console.log('SceneDirections.idle_on_prep');
-
    director.emit( next_emit, dictum_name );
   };
   progress_prep = async ( screenplay )=>{

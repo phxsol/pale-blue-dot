@@ -218,12 +218,18 @@ class Workflow extends _Workflow{
               screenplay.updatables.set( 'ups_test', this.test );
             },
             post: ( )=>{
-
               // Build the Test Results from the captured test data
               let test_results = {};
               test_results.stamps = this.test.cache.stamps;
+              let pop_cnt = test_results.stamps.length;
               // Calculate the actual test duration based upon stamp values.
               test_results.time = this.test.cache.stamps.reduce( (a,b) => a + b, 0 );
+              // Calculate Population Mean & Standard Deviation
+              let pop_mean = test_results.mean = test_results.time / pop_cnt;
+              let xi_less_u_2 = this.test.cache.stamps.map( (num)=> { return ( num - pop_mean ) ** 2 } );
+              let sum_xi_less_u_2 = xi_less_u_2.reduce( (a,b) => a + b, 0 );
+              let mean_of_deviation = sum_xi_less_u_2 / pop_cnt;
+              test_results.std_dev = Math.sqrt( mean_of_deviation );
               // Determine the largest and smallest tick durations, or stamp values.
               test_results.max = Math.max( ...this.test.cache.stamps );
               test_results.min = Math.min( ...this.test.cache.stamps );
@@ -231,21 +237,23 @@ class Workflow extends _Workflow{
               test_results.max_fps = 1/test_results.min;
               test_results.min_fps = 1/test_results.max;
               // Grade the User Performance Statistics
-              test_results.score = Math.floor( 1/test_results.min/test_results.max );
-              // ... then post the results to the console and the test_results stack
-              console.log( test_results );
+              let std_fps = 1 / ( pop_mean + test_results.std_dev );
+
+              test_results.score = Math.floor( std_fps );
+              // ... then post the results to the test_results stack
               this.test.cache.test_results.push( test_results );
               // Should another test be run?  The max is 3 runs before failure is determined.
               let runs_so_far = this.test.cache.test_results.length;
-              if ( test_results.score < 10 && test_results.max_fps < 20 && runs_so_far < 3 ) {
-                this.test.reset();
+              if ( test_results.score < 15 && runs_so_far < 3 || test_results.max_fps < 20 && runs_so_far < 3 ) {
+                this.test.reset();  // Rack 'em up and knock 'em down again!
               } else {
+                // Now that has completed, compile the tests ( 1 - 3 ), for scoring.
                 let compiled_test_results = {
                   stamps: [],
                   time: 0,
                   max: -10000,
                   min: 10000
-                };
+                };  // Default values to ensure proper evaluation.
 
                 for( let results_ndx = 0; results_ndx < this.test.cache.test_results.length; results_ndx++ ){
                   let test_results = this.test.cache.test_results[results_ndx];
@@ -258,13 +266,22 @@ class Workflow extends _Workflow{
                   let min = Math.min( ...test_results.stamps, compiled_test_results.min );
                   compiled_test_results.min = min;
                 }
+                // Calculate Population Mean & Standard Deviation
+                let comp_pop_cnt = test_results.stamps.length;
+                let comp_pop_mean = compiled_test_results.mean = compiled_test_results.time / comp_pop_cnt;
+                let comp_xi_less_u_2 = compiled_test_results.stamps.map( (num)=> { return (num - comp_pop_mean) ** 2 } );
+                let comp_sum_xi_less_u_2 = comp_xi_less_u_2.reduce( (a,b) => a + b, 0 );
+                let comp_mean_of_deviation = comp_sum_xi_less_u_2 / comp_pop_cnt;
+                compiled_test_results.std_dev = Math.sqrt( comp_mean_of_deviation );
                 // ...then calculate the highest and lowest FPS from them.
                 compiled_test_results.max_fps = 1/compiled_test_results.min;
                 compiled_test_results.min_fps = 1/compiled_test_results.max;
                 // Grade the User Performance Statistics
-                compiled_test_results.score = Math.floor( 1/compiled_test_results.min/compiled_test_results.max );
+                let comp_std_fps = 1/( comp_pop_mean + compiled_test_results.std_dev );
+                compiled_test_results.score = Math.floor( comp_std_fps );
                 // ... then post the results to the console and the test_results stack
                 console.log( compiled_test_results );
+
                 this.setState( { test_results: compiled_test_results, test_complete: true });
                 this.displayTestResults();
               }
@@ -354,6 +371,7 @@ class Workflow extends _Workflow{
     }
 
     this.react_app.render( <ErrorBoundary><VerifyCapabilitiesModal /></ErrorBoundary> );
+    document.title = 'Workflow.verify_capabilities | The Pale Blue Dot | Phox.Solutions';
 
   };
   init_controls = async ( screenplay, dictum_name, director, ndx ) => {
@@ -380,6 +398,8 @@ class Workflow extends _Workflow{
     }
 
     this.react_app.render( <ErrorBoundary><InitControlsModal /></ErrorBoundary> );
+
+    document.title = 'Workflow.init_controls | The Pale Blue Dot | Phox.Solutions';
 
     try{
       screenplay.ui_renderer.domElement.addEventListener( 'wheel', (event)=>{
@@ -702,6 +722,8 @@ class Workflow extends _Workflow{
     }
 
     this.react_app.render( <ErrorBoundary><IntroductionForm /></ErrorBoundary> );
+
+    document.title = 'Workflow.introduction | The Pale Blue Dot | Phox.Solutions';
   };
   user_instruction = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.user_introduction');
@@ -732,6 +754,8 @@ class Workflow extends _Workflow{
     }
 
     this.react_app.render( <ErrorBoundary><UserInstructionModal /></ErrorBoundary> );
+
+    document.title = 'Workflow.user_introduction | The Pale Blue Dot | Phox.Solutions';
   };
   tour_or_skip = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.tour_or_skip');
@@ -862,6 +886,8 @@ class Workflow extends _Workflow{
 
     this.react_app.render( <ErrorBoundary><TourOrSkipForm /></ErrorBoundary> );
 
+    document.title = 'Workflow.tour_or_skip | The Pale Blue Dot | Phox.Solutions';
+
   };
   visit_sun = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.visit_sun');
@@ -925,6 +951,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitSunModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_sun | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -933,6 +961,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Sun, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   visit_mercury = async ( screenplay, dictum_name, director, ndx ) => {
@@ -972,6 +1002,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitMercuryModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_mercury | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -980,6 +1012,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Mercury, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   visit_venus = async ( screenplay, dictum_name, director, ndx ) => {
@@ -1019,6 +1053,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitVenusModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_venus | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -1027,6 +1063,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Venus, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   visit_earth = async ( screenplay, dictum_name, director, ndx ) => {
@@ -1066,6 +1104,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitEarthModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_earth | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -1074,6 +1114,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Earth, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   visit_moon = async ( screenplay, dictum_name, director, ndx ) => {
@@ -1113,6 +1155,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitMoonModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_moon | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -1121,6 +1165,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Moon, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   visit_mars = async ( screenplay, dictum_name, director, ndx ) => {
@@ -1160,6 +1206,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitMarsModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_mars | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -1168,6 +1216,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Mars, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   visit_jupiter = async ( screenplay, dictum_name, director, ndx ) => {
@@ -1207,6 +1257,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitJupiterModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_jupiter | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -1215,6 +1267,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Jupiter, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   visit_saturn = async ( screenplay, dictum_name, director, ndx ) => {
@@ -1254,6 +1308,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitSaturnModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_saturn | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -1262,6 +1318,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Saturn, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   visit_uranus = async ( screenplay, dictum_name, director, ndx ) => {
@@ -1301,6 +1359,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitUranusModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_uranus | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -1309,6 +1369,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Uranus, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   visit_neptune = async ( screenplay, dictum_name, director, ndx ) => {
@@ -1348,6 +1410,8 @@ class Workflow extends _Workflow{
         }
       }
       this.react_app.render( <ErrorBoundary><VisitNeptuneModal /></ErrorBoundary>);
+
+      document.title = 'Workflow.visit_neptune | The Pale Blue Dot | Phox.Solutions';
     }
 
     let onAcknowledge = ()=>{
@@ -1356,6 +1420,8 @@ class Workflow extends _Workflow{
     }
 
     screenplay.actions.warp_to( screenplay.actors.Neptune, false, onArrival );
+
+    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
 
   };
   introduce_phox = async ( screenplay, dictum_name, director, ndx ) => {
@@ -1614,17 +1680,22 @@ class Workflow extends _Workflow{
     document_controls.Grid_Display();
     this.ActivateOrbitControls( screenplay );
 
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    document.title = 'Workflow.introduce_phox | The Pale Blue Dot | Phox.Solutions';
+
+    //director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
   confirm_privileges = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.confirm_privileges');
 
+    document.title = 'Workflow.confirm_privileges | The Pale Blue Dot | Phox.Solutions';
 
 
     director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
   connect = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.connect');
+
+    document.title = 'Workflow.connect | The Pale Blue Dot | Phox.Solutions';
 
     director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
