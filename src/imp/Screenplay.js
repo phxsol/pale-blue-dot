@@ -546,16 +546,16 @@ class Screenplay extends _Screenplay{
         endQ: endQ,
         path: travel_path,
         up_now: this.actors.Ship.up.clone(),
-        turn_duration: Math.max( 100, Math.ceil( _quat_diff * ( 250 / Math.PI ) ) ),
-        travel_duration: Math.ceil( 100 + ( travel_distance / 15000000000 ) ),
-        warp_duration: 15,
+        turn_duration: 2 * Math.max( 100, Math.ceil( _quat_diff * ( 250 / Math.PI ) ) ),
+        travel_duration: 2 * Math.ceil( 100 + ( travel_distance / 15000000000 ) ),
+        warp_duration: 2 * 15,
         duration: this.turn_duration + this.travel_duration,  // TODO: Vary this by the travel_distance to target
         frame: 0,
         locking_on: false,
         locked_on: false,
         warping: false,
         warp_speed: 0,
-        warp_tunnel_buildup: 250,
+        warp_tunnel_buildup: 2 * 250,
         warped: false,
         at_destination: false,
         completed: false,
@@ -880,6 +880,7 @@ class Screenplay extends _Screenplay{
           new_position.setZ( major_dim );
           new_target_position = new THREE.Vector3();
           this.active_cam.up = new THREE.Vector3( 0, 1, 0 );
+
           break;
         case '3rdPerson':
           ship.getWorldPosition( new_position );
@@ -988,7 +989,6 @@ class Screenplay extends _Screenplay{
     get HomeDome(){
       let major_dim = Math.max( window.innerWidth, window.innerHeight );
       let minor_dim = Math.min( window.innerWidth, window.innerHeight );
-      let texture = new THREE.TextureLoader().load( 'resources/stone_floor.png' );
       // TODO: Tesselate a floor at your earliest convenience... currently only makes a single tile.
       let StageBuilder = ( size )=>{
         let stage = new THREE.Group();

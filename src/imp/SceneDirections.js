@@ -74,16 +74,16 @@ class SceneDirections extends _SceneDirections {
 
         if( this.cache.duration-- >= 0 ){
 
-          if( this.cache.duration >= 100 ){
-            screenplay.lights.point_light.intensity += 0.015;
-            screenplay.props.HomeDome.stage.children[0].material.roughness += 0.005;
+          if( this.cache.duration >= 200 ){
+            screenplay.lights.point_light.intensity += 0.015 / 2;
+            screenplay.props.HomeDome.stage.children[0].material.roughness += 0.005 / 2;
           }
 
           // TODO: Something here by what frame it is.
-          if( this.cache.duration < 50 ){
-            let prog = (50 - this.cache.duration) / 50;
+          if( this.cache.duration < 100 ){
+            let prog = (100 - this.cache.duration) / 100;
             let t_prog = prog ** (5-(10*prog));
-            screenplay.active_cam.rotateX( Math.PI/180 * t_prog);
+            screenplay.active_cam.rotateX( Math.PI/360 * t_prog);
           }
 
         } else {
@@ -92,7 +92,7 @@ class SceneDirections extends _SceneDirections {
         }
       },
       cache: {
-        duration: 250
+        duration: 500
       },
       post: ()=>{
         setTimeout( ()=>{director.emit( next_emit, dictum_name );}, 1000 );
@@ -123,7 +123,7 @@ class SceneDirections extends _SceneDirections {
 
       render(){
         return (
-          <img id="phox_solutions_splash" className="hidden" src=".\resources\phox.solutions_brand_1k.png" alt="Phox Solutions' logo of a fox observing a Phoenix, then after a short journey in which it leaves tracks, now embued with wings... pounces!" height={window.innerHeight} width={window.innerWidth}/>
+          <img id="phox_solutions_splash" className="hidden" src=".\resources\phox.solutions_brand_1k.png" alt="Phox Solutions' logo of a fox observing a Phoenix, then after a short journey in which it leaves tracks, now embued with wings... pounces!" height={major_dim} width={major_dim}/>
         );
       }
     }

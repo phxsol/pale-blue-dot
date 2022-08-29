@@ -13,7 +13,7 @@ class Manifesto extends _Manifesto{
         on_failure: scene_directions.splash_failure,
         on_end: scene_directions.end_splash
       }, true );
-    this.Prep = new Dictum( [ workflow.introduction, workflow.user_instruction, workflow.tour_or_skip ],
+    this.Prep = new Dictum( [ workflow.user_instruction, workflow.introduction, workflow.tour_or_skip ],
       {
         on_enter: scene_directions.enter_prep,
         on_idle: scene_directions.idle_on_prep,

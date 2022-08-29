@@ -210,7 +210,7 @@ class Screenplay{
   animate = ()=>{
     requestAnimationFrame( this.animate );
     this.delta += this.clock.getDelta();
-    if (this.delta  > this.interval) {
+    if (this.delta  >= this.interval) {
       let next_delta = this.delta % this.interval;
       this.update( this.delta );
       this.direct( this.delta );
@@ -280,7 +280,7 @@ class Screenplay{
     this.clock = clock;
     let delta = 0;
     this.delta = delta;
-    let fps = this.fps = 30;
+    let fps = this.fps = 60;
     let interval = this.interval = 1 / fps;
 
     // Mouse Interaction Capture
@@ -325,7 +325,7 @@ class Screenplay{
     this.renderer = renderer;
 
     // Listen to environmental changes, adjust accordingly.
-    //window.addEventListener( 'pointerdown', this.onPointerDown );
+    //window.addEventListener( 'pointerdown', this.onPointerDown );  // This is the canvas raycast handler
     window.addEventListener( 'resize', this.resize, { capture: true } );
   }
 }

@@ -206,13 +206,13 @@ class Workflow extends _Workflow{
               }
             },
             cache: {
-              duration: 30,
+              duration: 60,
               stamps: [],
               test_results: []
             },
             reset: ()=>{
 
-              this.test.cache.duration = 30;
+              this.test.cache.duration = 60;
               this.test.cache.stamps = [];
 
               screenplay.updatables.set( 'ups_test', this.test );
@@ -319,8 +319,8 @@ class Workflow extends _Workflow{
             }
           },
           cache: {
-           duration: 100,
-           frames: 100,
+           duration: 200,
+           frames: 200,
            test_results: {
              stamps: [],
              time: 0,
@@ -337,16 +337,18 @@ class Workflow extends _Workflow{
             // Performance Filter //
             /* The score derived from the above UPS test may be used here to lead poorly
                 performing devices into a workflow without immersive rendering. */
-            if ( test_results.score > 10 || test_results.max_fps > 20 ) {
+            if ( test_results.score > 20 || test_results.max_fps > 30 ) {
+              document.querySelector( '#verify_capabilities .success').classList.remove( 'hidden' );
               setTimeout( ( dictum_name, ndx )=>{
                 director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-              }, 1500, dictum_name, ndx );
+              }, 3000, dictum_name, ndx );
 
 
             } else {
               setTimeout( ( dictum_name, ndx )=>{
+                document.querySelector( '#verify_capabilities .failure').classList.remove( 'hidden' );
                 director.emit( `${dictum_name}_failure`, dictum_name, ndx );
-              }, 1500, dictum_name, ndx );
+              }, 3000, dictum_name, ndx );
             }
           }
         });
@@ -361,9 +363,15 @@ class Workflow extends _Workflow{
         return (
           <>
             <div id="verify_capabilities" className="pip_gui pip_splash">
-              <h1>verify_capabilities</h1>
-              <h2 className="score">{this.state.results_display.score}</h2>
-              <h2 className="speed">{this.state.results_display.speed}</h2>
+              <h1>Verifying Performance Requirements</h1>
+              <span className="description">For a more pleasant experience, a brief performance test must be run.</span>
+              <p className="fps_display">
+                Active&nbsp;FPS:&nbsp;<span className="speed">{this.state.results_display.speed}</span>
+                <br />-<br />
+                Standardized:&nbsp;FPS:&nbsp;<span className="score">{this.state.results_display.score}</span>
+              </p>
+              <h3 className="success hidden">Test Successful!</h3>
+              <h3 className="failure hidden">Low-FPS Mode Required</h3>
             </div>
           </>
         );
@@ -419,12 +427,15 @@ class Workflow extends _Workflow{
       const camera_controls = {
         'CaptainCam': ()=>{
           screenplay.actions.change_cam( 'CaptainCam' );
+          this.DeactivateOrbitControls( screenplay );
         },
         '3rdPerson': ()=>{
           screenplay.actions.change_cam( '3rdPerson' );
+          this.ActivateOrbitControls( screenplay );
         },
         'Center': ()=>{
           screenplay.actions.change_cam( 'Center' );
+          this.ActivateOrbitControls( screenplay );
         }
       }
       camera_controls_folder.add( camera_controls, 'CaptainCam' ).name( 'Captain\'s Chair' );
@@ -745,7 +756,13 @@ class Workflow extends _Workflow{
         return (
           <>
             <div id="user_instruction" className="pip_gui pip_post" >
-              <h1>user_instruction</h1>
+              <h1>Wither-to's and Why-for's</h1>
+              <span className="introduction">
+                Thank you for being here!<br/>
+                Watch your head, so to speak, as this is a work in-progress.<br/>
+                You are welcome to investigate 'under the hood', though the code in your browser is compiled and difficult to traverse.<br/>
+                The full codebase upon which this app is running may be <a href="https://github.com/phxsol/pale-blue-dot" target="_blank">found here on GitHub</a>.<br/>
+              </span>
             </div>
             <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
           </>
@@ -828,7 +845,7 @@ class Workflow extends _Workflow{
               className="pip_text user_side"
               htmlFor="show_tour"
               style={{ marginLeft: '1rem' }}
-              >Tour?</label>
+              >Take the Tour?</label>
             <input
               id="show_tour_checkbox"
               className="pip_toggle user_side"
@@ -872,7 +889,7 @@ class Workflow extends _Workflow{
         return (
           <div id="tour_or_skip" className="pip_gui pip_chat">
             <span className="ui_side pip_text" style={{ gridRow: 2 }}>
-              Captain {(!this.state.captainName)?'':this.state.captainName}.
+              Captain{(!this.state.captainName)?'':' '+this.state.captainName}.
             </span>
             <span className="ui_side pip_text" style={{ gridRow: 3 }}>A tour of the local system is available.<br />Shall I begin, or would you rather continue on to meet the Architect?</span>
             <CaptainsOrders
@@ -943,6 +960,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_sun_modal" className="pip_gui pip_import">
+                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
                 <iframe src="https://en.wikipedia.org/wiki/Sun#Structure_and_fusion" title="Sun - Wikipedia" ></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -994,6 +1012,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_mercury_modal" className="pip_gui pip_import">
+                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
                 <iframe src="https://en.wikipedia.org/wiki/Mercury_(planet)#Orbit.2C_rotation.2C_and_longitude" title="Mercury - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1045,6 +1064,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_venus_modal" className="pip_gui pip_import">
+                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
                 <iframe src="https://en.wikipedia.org/wiki/Venus" title="Venus - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1096,6 +1116,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_earth_modal" className="pip_gui pip_import">
+                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
                 <iframe src="https://en.wikipedia.org/wiki/Earth" title="Earth - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1147,6 +1168,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_moon_modal" className="pip_gui pip_import">
+                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
                 <iframe src="https://en.wikipedia.org/wiki/Moon#Physical_characteristics" title="Moon - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1249,6 +1271,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_jupiter_modal" className="pip_gui pip_import">
+                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
                 <iframe src="https://en.wikipedia.org/wiki/Jupiter" title="Jupiter - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1300,6 +1323,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_saturn_modal" className="pip_gui pip_import">
+                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
                 <iframe src="https://en.wikipedia.org/wiki/Saturn" title="Saturn - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1351,6 +1375,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_uranus_modal" className="pip_gui pip_import">
+                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
                 <iframe src="https://en.wikipedia.org/wiki/Uranus" title="Uranus - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1402,6 +1427,7 @@ class Workflow extends _Workflow{
           return (
             <>
               <div id="visit_neptune_modal" className="pip_gui pip_import">
+                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
                 <iframe src="https://en.wikipedia.org/wiki/Neptune" title="Neptune - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
               </div>
               <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
@@ -1427,9 +1453,13 @@ class Workflow extends _Workflow{
   introduce_phox = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.introduce_phox');
     screenplay.actions.change_cam( 'Center' );
+    this.ActivateOrbitControls( screenplay );
 
+    window.alert(' The Architect Connection is under contruction.  For now you may explore the Solar System with the Architect Interface.  Enjoy!');
+    const gui = screenplay.lil_gui;
+    gui.open( true );
     // TODO: Convert to React Component, load from resume.html for content
-
+/*
     let resume_objects = screenplay.resume.objects;
     let targets = screenplay.resume.targets;
     let minor_dim = Math.min( window.innerWidth, window.innerHeight );
@@ -1677,7 +1707,7 @@ class Workflow extends _Workflow{
     });
     document_controls_folder.open( true );
 
-    document_controls.Grid_Display();
+    document_controls.Grid_Display();*/
     this.ActivateOrbitControls( screenplay );
 
     document.title = 'Workflow.introduce_phox | The Pale Blue Dot | Phox.Solutions';

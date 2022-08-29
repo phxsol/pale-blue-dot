@@ -1,4 +1,8 @@
 @media only screen {
+  a{
+    transition: all 0.2s;
+  }
+
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -6,6 +10,7 @@
       sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color: whitesmoke;
   }
 
   code {
@@ -31,10 +36,9 @@
     z-index: 3;
     background-color: rgba( 11,11,11,0.42 );
     display: grid;
-    width: 100vw;
-    height: 0vw;
+    opacity: 0;
 
-    transition: height 2s .5s;
+    transition: opacity 2s .5s;
   }
 
   #theatre {
@@ -51,21 +55,26 @@
   .pip_ack{
     border-radius: 10%;
     cursor: pointer;
-    background-color: rebeccapurple;
-    border-color: purple;
+    background-color: #040633;
+    border-color: #474B96;
+    color: whitesmoke;
     transition: all 0.1s;
-    font-size: 5rem;
-    color: white;
+    width: 5rem;
+    height: 5rem;
+    font-size: xxx-large;
+    grid-column: 3;
+    grid-row: 5;
+    margin-left: calc( (20vw - 5rem) / 2 );
+    margin-bottom: 2.5rem
   }
   .pip_ack:hover{
     border-radius: 15%;
-    background-color: purple;
-    border-color: rebeccapurple;
+    background-color: #492900;
+    border-color: #995D12;
   }
   .pip_button{
     background-color: red;
     border-radius: 4rem 4rem 4rem 4rem;
-    color: whitesmoke;
     pointer-events: all;
     cursor: pointer;
     height: fit-content;
@@ -81,8 +90,9 @@
   #root.pip_gui{
     height: 100vh;
     width: 100vw;
-    grid-template-columns: auto auto auto;
-    grid-template-rows: auto auto auto auto auto;
+    opacity: 1;
+    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-rows: 5rem auto auto auto 10rem;
   }
   #root > .pip_gui{
     display: grid;
@@ -97,16 +107,19 @@
      This style is useful for displaying the status of running processes, which don't require acknowlegement. */
   #root > .pip_gui.pip_splash{
     grid-column: 2;
-    grid-row: 2 / 5;
+    grid-row: 2 / -2;
     transition: all 1s;
+    border-radius: 0 10vh 0 10vh;
   }
 
   /* BEGIN: PIP Post Styling */
   /* PIP Post screens are notification pages which require acknowlegement before moving on.
      This style allows for the system to post information which the user may wish to examine further before continuing on. */
   #root > .pip_gui.pip_post{
-    grid-column: 2;
+    grid-column: 1 / -1;
+    grid-row: 2 / -2;
     transition: all 1s;
+    border-radius: 0 10vh 0 10vh;
   }
 
   /* BEGIN: PIP Chat Styling */
@@ -118,6 +131,7 @@
     grid-template-columns: auto auto auto auto auto;
     overflow-y: auto;
     grid-column: 2;
+    grid-row: 2 / -2;
   }
   #root > .pip_gui.pip_chat .ui_side{
     grid-column: 1 / 4 !important;
@@ -134,39 +148,38 @@
   }
   #root > .pip_gui.pip_chat .pip_text{
     border: none;
-    color: silver;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
     padding: 1rem;
-    font-size: 2rem;
+    font-size: x-large;
     text-align: center;
   }
   #root > .pip_gui.pip_chat .pip_reply{
     border: none;
-    color: black;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
-    font-size: 2rem;
+    font-size: x-large;
     text-align: center;
     padding: 1rem;
     background-color: whitesmoke;
   }
   #root > .pip_gui.pip_chat .pip_button{
     width: fit-content;
-    font-size: 2rem;
+    font-size: x-large;
     padding: 1rem;
   }
   #root > .pip_gui.pip_chat .pip_toggle{
     grid-row: 3;
     grid-column: 3;
-    width: 5rem;
-    height: 5rem;
+    width: 4rem;
+    height: 4rem;
   }
 
   /* BEGIN: PIP Import Styling */
   /* PIP Import screens are externally-sourced
      This style allows for the system to post information which the user may wish to examine further before continuing on. */
   #root > .pip_gui.pip_import{
+    grid-row: 2 / -1;
     grid-column: 2;
     display: grid;
     grid-template-rows: auto 5rem auto 5rem;
@@ -174,24 +187,44 @@
   #root > .pip_gui.pip_import > iframe{
     border-radius: 0 10vh 0 10vh;
     grid-row: 2 / -1;
-    height: 100%;
+    height: calc( 100vh - 5rem);
     width: 100%;
   }
 
-  #verify_capabilities{
-    color: white;
+  #verify_capabilities{}
+  #verify_capabilities .description,
+  #verify_capabilities .fps_display,
+  #verify_capabilities .success,
+  #verify_capabilities .failure{
+    width: 100%;
+    text-align: center;
   }
-  #verify_capabilities .score{
-
+  #verify_capabilities .description{
+    font-size: 1.5rem;
   }
-  #verify_capabilities .speed{
+  #verify_capabilities .fps_display{
+    font-size: 2rem;
+  }
+  #verify_capabilities .success{
+    font-size: 3rem;
+    color: green;
+  }
+  #verify_capabilities .failure{
+    font-size: 3rem;
+    color: goldenrod;
   }
 
   #init_controls{}
   #introduction{
     grid-template-rows: auto auto auto auto auto auto;
   }
-  #user_instruction{}
+  #user_instruction{
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.91);
+  }
+  #user_instruction .introduction{
+    font-size: x-large;
+    color: #995D12;
+  }
   #tour_or_skip{
     grid-template-rows: auto auto auto auto auto;
   }
@@ -208,35 +241,4 @@
   #introduce_phox{}
   #confirm_privileges{}
   #connect{}
-
-  #menu{
-    position: absolute;
-    top: 0; left: 0;
-    z-index: 11;
-    display: grid;
-    grid-auto-flow: dense;
-    background-color: rgba( 69,69,69,0.69 );
-  }
-
-  #menu button {
-    color: rgba(127,255,255,0.75);
-    background: transparent;
-    outline: 1px solid rgba(127,255,255,0.75);
-    border: 0px;
-    padding: 5px 10px;
-    cursor: pointer;
-    display: none;
-  }
-  #menu button.show {
-    display: block;
-  }
-
-  #menu button:hover {
-    background-color: rgba(0,255,255,0.5);
-  }
-
-  #menu button:active {
-    color: #000000;
-    background-color: rgba(0,255,255,0.75);
-  }
 }
