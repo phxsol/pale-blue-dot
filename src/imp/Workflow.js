@@ -363,7 +363,7 @@ class Workflow extends _Workflow{
         return (
           <>
             <div id="verify_capabilities" className="pip_gui pip_splash">
-              <h1>Verifying Performance Requirements</h1>
+              <h1 className="title">Verifying Performance Requirements</h1>
               <span className="description">For a more pleasant experience, a brief performance test must be run.</span>
               <p className="fps_display">
                 Active&nbsp;FPS:&nbsp;<span className="speed">{this.state.results_display.speed}</span>
@@ -600,6 +600,44 @@ class Workflow extends _Workflow{
 
     }
   };
+  user_instruction = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.user_introduction');
+
+    class UserInstructionModal extends React.Component {
+      componentDidMount(){
+        document.getElementById( 'root' ).classList.add( 'pip_gui' );
+      }
+
+      componentWillUnmount(){
+        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+      }
+
+      handleAckClick( e ){
+        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      }
+
+      render(){
+        return (
+          <>
+            <div id="user_instruction" className="pip_gui pip_post" >
+              <h1>Wither-to's and Why-for's</h1>
+              <span className="introduction">
+                Thank you for being here!<br/>
+                Watch your head, so to speak, as this is a work in-progress.<br/><br/>
+                You are welcome to investigate 'under the hood', though the code in your browser is compiled and difficult to traverse.<br/>
+                The full codebase upon which this app is running may be <a href="https://github.com/phxsol/pale-blue-dot" target="_blank">found here on GitHub</a>.<br/>
+              </span>
+            </div>
+            <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
+          </>
+        );
+      }
+    }
+
+    this.react_app.render( <ErrorBoundary><UserInstructionModal /></ErrorBoundary> );
+
+    document.title = 'Workflow.user_introduction | The Pale Blue Dot | Phox.Solutions';
+  };
   introduction = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.introduction');
 
@@ -735,44 +773,6 @@ class Workflow extends _Workflow{
     this.react_app.render( <ErrorBoundary><IntroductionForm /></ErrorBoundary> );
 
     document.title = 'Workflow.introduction | The Pale Blue Dot | Phox.Solutions';
-  };
-  user_instruction = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.user_introduction');
-
-    class UserInstructionModal extends React.Component {
-      componentDidMount(){
-        document.getElementById( 'root' ).classList.add( 'pip_gui' );
-      }
-
-      componentWillUnmount(){
-        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-      }
-
-      handleAckClick( e ){
-        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-      }
-
-      render(){
-        return (
-          <>
-            <div id="user_instruction" className="pip_gui pip_post" >
-              <h1>Wither-to's and Why-for's</h1>
-              <span className="introduction">
-                Thank you for being here!<br/>
-                Watch your head, so to speak, as this is a work in-progress.<br/>
-                You are welcome to investigate 'under the hood', though the code in your browser is compiled and difficult to traverse.<br/>
-                The full codebase upon which this app is running may be <a href="https://github.com/phxsol/pale-blue-dot" target="_blank">found here on GitHub</a>.<br/>
-              </span>
-            </div>
-            <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-          </>
-        );
-      }
-    }
-
-    this.react_app.render( <ErrorBoundary><UserInstructionModal /></ErrorBoundary> );
-
-    document.title = 'Workflow.user_introduction | The Pale Blue Dot | Phox.Solutions';
   };
   tour_or_skip = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.tour_or_skip');

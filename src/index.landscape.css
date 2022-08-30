@@ -75,11 +75,9 @@
 
   #verify_capabilities{}
   #init_controls{}
-  #introduction{
-  }
   #user_instruction{}
-  #tour_or_skip{
-  }
+  #introduction{}
+  #tour_or_skip{ }
   #visit_sun_modal{}
   #visit_mercury_modal{}
   #visit_venus_modal{}
@@ -94,17 +92,4 @@
   #confirm_privileges{}
   #connect{}
 
-  #menu{
-  }
-
-  #menu button {
-  }
-  #menu button.show {
-  }
-
-  #menu button:hover {
-  }
-
-  #menu button:active {
-  }
 }
