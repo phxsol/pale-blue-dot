@@ -22,7 +22,6 @@ class ScreenDirector{
   // GUI Interactions
   raycaster; mouse;
   onPointerDown = ( event )=> {
-
     this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
@@ -325,7 +324,7 @@ class Screenplay{
     this.renderer = renderer;
 
     // Listen to environmental changes, adjust accordingly.
-    //window.addEventListener( 'pointerdown', this.onPointerDown );  // This is the canvas raycast handler
+    window.addEventListener( 'pointerdown', this.onPointerDown );  // This is the canvas raycast handler
     window.addEventListener( 'resize', this.resize, { capture: true } );
   }
 }

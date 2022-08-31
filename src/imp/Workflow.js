@@ -64,7 +64,7 @@ class Workflow extends _Workflow{
   ActivateOrbitControls = async ( screenplay )=>{
     if( !screenplay.controls.orbit_controls ) {
       screenplay.controls.orbit_controls = new OrbitControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
-      screenplay.controls.orbit_controls.zoomSpeed = 4;
+      screenplay.controls.orbit_controls.zoomSpeed = 3;
       screenplay.controls.orbit_controls.enableDamping = true;
       screenplay.controls.orbit_controls.saveState();
     }

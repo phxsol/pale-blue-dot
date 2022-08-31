@@ -41,7 +41,7 @@ class Screenplay extends _Screenplay{
       _mesh.name = 'Neptune';
       let neptune = new SceneAsset3D( _mesh );
       neptune.directions.set( 'revolve', function(){
-        neptune.rotation.y += .0000036135;
+        neptune.rotation.y += .00036135;
       });
       neptune.surface_distance = 24622000;
       neptune.orbital_distance = 3 * 34820000;
@@ -65,7 +65,7 @@ class Screenplay extends _Screenplay{
       //_mesh.position.set( 2870933609000, 0, 0 );
       let uranus = new SceneAsset3D( _mesh );
       uranus.directions.set( 'revolve', function(){
-        uranus.rotation.y -= .0000033824;
+        uranus.rotation.y -= .00033824;
       });
       uranus.surface_distance = 25362000;
       uranus.orbital_distance = 3 * 35867000;
@@ -110,7 +110,7 @@ class Screenplay extends _Screenplay{
       _mesh.add( _rings_mesh );
       let saturn = new SceneAsset3D( _mesh );
       saturn.directions.set( 'revolve', function(){
-        saturn.rotation.y += .000005437;
+        saturn.rotation.y += .0005437;
       });
       saturn.surface_distance = 58232000;
       saturn.orbital_distance = 3 * 82352000;
@@ -133,7 +133,7 @@ class Screenplay extends _Screenplay{
       //_mesh.position.set( 778477400000, 0, 0 );
       let jupiter = new SceneAsset3D( _mesh );
       jupiter.directions.set( 'revolve', function(){
-        jupiter.rotation.y += .0000058765;
+        jupiter.rotation.y += .00058765;
       });
       jupiter.surface_distance = 69911000;
       jupiter.orbital_distance = 3 * 98869000;
@@ -157,7 +157,7 @@ class Screenplay extends _Screenplay{
       //_mesh.position.set( 227939366000, 0, 0 );
       let mars = new SceneAsset3D( _mesh );
       mars.directions.set( 'revolve', function(){
-        mars.rotation.y += .0000023649;
+        mars.rotation.y += .00023649;
       });
       mars.surface_distance = 3389000;
       mars.orbital_distance = 3 * 4792000;
@@ -187,7 +187,7 @@ class Screenplay extends _Screenplay{
       let earth = new SceneAsset3D( _mesh );
       earth.name = 'Earth';
       earth.directions.set( 'revolve', function(){
-        earth.rotation.y += .000002424;
+        earth.rotation.y += .0002424;
       });
       earth.surface_distance = 6371000;
       earth.orbital_distance = 3 * 9009000;
@@ -210,7 +210,7 @@ class Screenplay extends _Screenplay{
       let moon = new SceneAsset3D( _mesh );
       moon.name = 'Moon';
       moon.directions.set( 'revolve', function(){
-        moon.rotation.y += .000000088726;
+        moon.rotation.y += .0000088726;
       });
       moon.surface_distance = 1735500;
       moon.orbital_distance = 3 * 2454000;
@@ -234,7 +234,7 @@ class Screenplay extends _Screenplay{
       let venus = new SceneAsset3D( _mesh );
       venus.name = 'Venus';
       venus.directions.set( 'revolve', function(){
-        venus.rotation.y -= .00000000997;
+        venus.rotation.y -= .000000997;
       });
       venus.surface_distance = 6052000;
       venus.orbital_distance = 3 * 8558820;
@@ -258,7 +258,7 @@ class Screenplay extends _Screenplay{
       let mercury = new SceneAsset3D( _mesh );
       mercury.name = 'Mercury';
       mercury.directions.set( 'revolve', function(){
-        mercury.rotation.y += .00000004133;
+        mercury.rotation.y += .000004133;
       });
       mercury.surface_distance = 2439500;
       mercury.orbital_distance = 3 * 3449973;
@@ -281,7 +281,7 @@ class Screenplay extends _Screenplay{
       _mesh.position.set( 0, 0, 0 );
       let sun = new SceneAsset3D( _mesh );
       sun.directions.set( 'revolve', function(){
-        sun.rotation.y += .00000008978;
+        sun.rotation.y += .00008978;
       });
       sun.surface_distance = 695508000;
       sun.orbital_distance = 3 * 983596000;
