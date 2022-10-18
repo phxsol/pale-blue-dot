@@ -30,7 +30,7 @@ app.init = ()=>{
   const scene_director = new ScreenDirector(screen_play, manifesto, false);
 
   // Main Logic
-  react_app.render(<React.StrictMode><App /></React.StrictMode>);
+  react_app.render(<App />);
   scene_director.start();
 
 }
