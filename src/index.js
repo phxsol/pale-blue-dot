@@ -1,9 +1,6 @@
-// React Initialization
+// P2P client code
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import './index.portrait.css';
-import './index.landscape.css';
 import App from './App';
 
 // ScreenDirector Reference
@@ -14,24 +11,43 @@ import { Screenplay } from  './imp/Screenplay.js' ;
 import { SceneDirections } from  './imp/SceneDirections.js' ;
 import { Manifesto } from  './imp/Manifesto.js' ;
 import { Workflow } from  './imp/Workflow.js' ;
+import { Shard } from './imp/Shard.js';
 
 let app = App;
-app.init = ()=>{
+app.init = async ()=>{
+
+
+
+  //const shard = new Shard();
+  let shard = false;  // Plug for now till the shard is operational.
 
   // React-App Root
   const react_app = ReactDOM.createRoot(document.getElementById('root'));
 
   // Scene Director Implementation
-  const screen_play = new Screenplay( );
+  const screenplay = new Screenplay( );
   const scene_directions = new SceneDirections( react_app );
-  const workflow = new Workflow( react_app );
+  const workflow = new Workflow( react_app, screenplay, shard );
   const manifesto = new Manifesto( scene_directions, workflow );
 
-  const scene_director = new ScreenDirector(screen_play, manifesto, false);
+  const screen_director = new ScreenDirector(screenplay, manifesto, false);
 
-  // Main Logic
+  /* Handle PopState events to trigger page navigation in response to History Navigation (Back/Forward buttons)  */
+  const doSomeThing = () => {
+    alert( 'State Popped! ');
+  }
+  window.addEventListener("popstate", (event) => {
+    setTimeout(doSomeThing, 0); // Running this way ensures last-on the processing stack... ensuring a more predictable page state every time.
+  });
+
+
   react_app.render(<App />);
-  scene_director.start();
+  let IAMROOT = document.getElementById('root');
+  document.body.appendChild(IAMROOT);
+  IAMROOT = null;
+  screen_director.start();
+
+
 
 }
 

@@ -1,42 +1,32 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
 // Screen Director Reference
 import { Workflow as _Workflow, SceneAsset3D, CSS3DAsset, SceneTransformation } from '../bin/ScreenDirector.js';
-// Support Library Reference
+// Component Library Reference
+import { ErrorBoundary, GlyphScanner, RoomOfARequiredNature, PostClassified, PostServices, PostCatalog, PostCalendar, PostContacts, WeTheMenu, WeTheHeader, ViewScreenDisplay } from '../components/wethe_core.js';
+// React Module Reference
+import { createRef, useState, useEffect, useRef, Component } from 'react';
+import ReactDOM from 'react-dom/client';
+// Node Module Reference
 import GUI from 'lil-gui';
+import { Peer } from "peerjs";
+
 import * as THREE from 'three';
+// Support Library Reference
 import { OrbitControls } from '../lib/OrbitControls.js';
 import { FirstPersonControls } from '../lib/FirstPersonControls.js';
 import { FlyControls } from '../lib/FlyControls.js';
 import { TrackballControls } from '../lib/TrackballControls.js';
+import { CSS3DRenderer, CSS3DObject } from '../lib/CSS3DRenderer.js';
+import { GLTFLoader } from '../lib/GLTFLoader.js';
+import { GLTFExporter } from '../lib/GLTFExporter.js';
+
 
 // React Component Error Boundary Class
 // Refer to --> # https://reactjs.org/docs/error-boundaries.html #
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  // Update state so the next render will show the fallback UI.
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-  // You can also log the error to an error reporting service
-  componentDidCatch(error, errorInfo) {
-    console.error( error, errorInfo );
-  }
 
-  render() {
-    // You can render any custom fallback UI
-    if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
-    }
-    return this.props.children;
-  }
-}
 
 // Workflow Implementation
 class Workflow extends _Workflow{
+  enigmus; stc; ship_key;
   elevated_vars = {
     "u_name": "",
     "ups_test": {
@@ -60,1679 +50,2025 @@ class Workflow extends _Workflow{
     "lil_gui": {}
   }
   react_app;
+  shard;
+  menu;
 
-  ActivateOrbitControls = async ( screenplay )=>{
-    if( !screenplay.controls.orbit_controls ) {
-      screenplay.controls.orbit_controls = new OrbitControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
-      screenplay.controls.orbit_controls.zoomSpeed = 3;
-      screenplay.controls.orbit_controls.enableDamping = true;
-      screenplay.controls.orbit_controls.saveState();
+  // Hash a sensitive string into a cryptic one
+  HashThis = async (toBeHashed, key)=>{
+    let crypto;
+    try {
+      crypto = window.crypto.subtle;
+    } catch (err) {
+      console.error('crypto support is disabled!');
     }
-    let ship = screenplay.actors.Ship;
-    switch( screenplay.active_cam.name ){
-      case 'Center':
-        screenplay.controls.orbit_controls.target = new THREE.Vector3();
-        break;
-      case '3rdPerson':
-        ship.getWorldPosition( screenplay.controls.orbit_controls.target );
-        break;
-      case 'CaptainCam':
-        ship.NavDots.sight_target.getWorldPosition( screenplay.controls.orbit_controls.target );
-        break;
+    if(typeof(toBeHashed) == 'string' && toBeHashed.length > 0){
+      let encoder = new TextEncoder();
+      let encoded = encoder.encode( toBeHashed );
+      let hash = await crypto.sign("HMAC", key, encoded);
+      return hash;
+    } else {
+      return false;
     }
-    screenplay.controls.orbit_controls.release_distance = 1 + screenplay.controls.orbit_controls.getDistance();
-    screenplay.updatables.set( 'controls', screenplay.controls.orbit_controls );
-    screenplay.active_cam.user_control = true;
-    screenplay.active_cam.updateProjectionMatrix();
-    screenplay.controls.orbit_controls.enabled = true;
+  };
+  // [ On-New || !CAN_SAVE ] Test the user's device performance and adjust the app to match.
+  test_client = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log( 'Workflow.test_client' );
+    document.title = 'Workflow.test_client | MySpace';
 
-  }
-  DeactivateOrbitControls = async ( screenplay )=>{
-    if( !screenplay.controls.orbit_controls ) {
-      screenplay.controls.orbit_controls = new OrbitControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
-    }
-    screenplay.controls.orbit_controls.reset();
-    screenplay.actions.change_cam( screenplay.active_cam.name );
-    screenplay.controls.orbit_controls.enabled = false;
-    screenplay.updatables.delete( 'controls' );
-    screenplay.active_cam.user_control = false;
-  }
+    // Performance Test the client if untested.
+    let performance_results = ( screenplay.CAN_SAVE ) ? localStorage.getItem("ups_test") : false;
+    if( typeof(performance_results) === 'undefined' || !performance_results ){
 
-  ActivateFirstPersonControls = async ( screenplay )=>{
-    if( !screenplay.controls.first_person_controls ) {
-      screenplay.controls.first_person_controls = new FirstPersonControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
-    }
-    screenplay.controls.first_person_controls.movementSpeed = 1000;
-    screenplay.controls.first_person_controls.lookSpeed = 10 * 0.005;
-    let ship = screenplay.actors.Ship;
-    switch( screenplay.active_cam.name ){
-      case 'Center':
-        //screenplay.controls.first_person_controls.target.copy( screenplay.props.SplashScreen.position );
-        break;
-      case '3rdPerson':
-        //ship.getWorldPosition( screenplay.controls.first_person_controls.target );
-        break;
-      case 'CaptainCam':
-        //ship.NavDots.sight_target.getWorldPosition( screenplay.controls.first_person_controls.target );
-        break;
-    }
-    //screenplay.controls.first_person_controls.release_distance = 1 + screenplay.first_person_controls.orbit_controls.getDistance();
-    screenplay.updatables.set( 'controls', screenplay.controls.first_person_controls );
-    screenplay.active_cam.user_control = true;
-    screenplay.active_cam.updateProjectionMatrix();
-    screenplay.controls.first_person_controls.enabled = true;
-  }
-  DeactivateFirstPersonControls = async ( screenplay )=>{
-    if( !screenplay.controls.first_person_controls ) {
-      screenplay.controls.first_person_controls = new FirstPersonControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
-    }
-    screenplay.actions.change_cam( screenplay.active_cam.name );
-    screenplay.controls.first_person_controls.enabled = false;
-    screenplay.updatables.delete( 'controls' );
-    screenplay.active_cam.user_control = false;
-  }
+      class VerifyCapabilitiesModal extends Component {
+        test; result_display;
 
-  ActivateFlyControls = async ( screenplay )=>{
-    if( !screenplay.controls.fly_controls ) {
-      screenplay.controls.fly_controls = new FlyControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
-    }
-    screenplay.controls.fly_controls.movementSpeed = 1000;
-    screenplay.controls.fly_controls.rollSpeed = 10 * 0.005;
-    screenplay.controls.fly_controls.dragToLook = true;
-    let ship = screenplay.actors.Ship;
-    switch( screenplay.active_cam.name ){
-      case 'Center':
-        //screenplay.controls.first_person_controls.target.copy( screenplay.props.SplashScreen.position );
-        break;
-      case '3rdPerson':
-        //ship.getWorldPosition( screenplay.controls.first_person_controls.target );
-        break;
-      case 'CaptainCam':
-        //ship.NavDots.sight_target.getWorldPosition( screenplay.controls.first_person_controls.target );
-        break;
-    }
-    //screenplay.controls.first_person_controls.release_distance = 1 + screenplay.first_person_controls.orbit_controls.getDistance();
-    screenplay.updatables.set( 'controls', screenplay.controls.fly_controls );
-    screenplay.active_cam.user_control = true;
-    screenplay.active_cam.updateProjectionMatrix();
-    screenplay.controls.fly_controls.enabled = true;
-  }
-  DeactivateFlyControls = async ( screenplay )=>{
-    if( !screenplay.controls.fly_controls ) {
-      screenplay.controls.fly_controls = new FlyControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
-    }
-    screenplay.actions.change_cam( screenplay.active_cam.name );
-    screenplay.controls.first_person_controls.enabled = false;
-    screenplay.updatables.delete( 'controls' );
-    screenplay.active_cam.user_control = false;
-  }
+        displayTestResults(){
+          let test_results = this.result_display.cache.test_results = this.state.test_results;
+          console.log( test_results );
+          screenplay.updatables.set( 'test_results', this.result_display );
+        }
 
-  verify_capabilities = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log( 'Workflow.verify_capabilities' );
+        constructor( props ){
+          super( props );
+          this.state = {
+            test_results: false,
+            results_display: {
+              score: 0,
+              speed: 0
+            }
+          };
+          /* -= User Performance Statistics Test =-
+          ** This is where the user's device is tested for a baseline of rendering ability.
+          ** Initial tests may fail due to loading delays... testing again upon failure ensures that
+          ** elibigle users are filtered properly.
+          ** Upon Failure: Display workflow without immersive rendering. */
+          this.test = new SceneTransformation({
+              update: ( delta )=>{
+                if( this.test.cache.duration-- >= 0 ){
+                  this.test.cache.stamps.push( delta );
+                } else {
+                  screenplay.updatables.delete( 'ups_test' );
+                  this.test.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+                }
+              },
+              cache: {
+                duration: 60,
+                stamps: [],
+                test_results: []
+              },
+              reset: ()=>{
+                this.test.cache.duration = 60;
+                this.test.cache.stamps = [];
+                screenplay.updatables.set( 'ups_test', this.test );
+              },
+              post: ( )=>{
+                // Build the Test Results from the captured test data
+                let test_results = {};
+                test_results.stamps = this.test.cache.stamps;
+                let pop_cnt = test_results.stamps.length;
+                // Calculate the actual test duration based upon stamp values.
+                test_results.time_total = this.test.cache.stamps.reduce( (a,b) => a + b, 0 );
+                // Calculate Population Mean & Standard Deviation
+                let pop_mean = test_results.time_total / pop_cnt;
+                let xi_less_u_2 = this.test.cache.stamps.map( (num)=> { return ( num - pop_mean ) ** 2 } );
+                let sum_xi_less_u_2 = xi_less_u_2.reduce( (a,b) => a + b, 0 );
+                let mean_of_deviation = sum_xi_less_u_2 / pop_cnt;
+                test_results.std_dev = Math.sqrt( mean_of_deviation );
+                let test_frames = test_results.test_frames = this.test.cache.stamps.filter( (num)=> { return Math.abs( num - pop_mean ) < Math.abs( mean_of_deviation - pop_mean ) } );
+                // Determine the largest and smallest tick durations, or stamp values.
+                let test_pop_cnt = test_frames.length;
+                test_results.time = test_frames.reduce( (a,b) => a + b, 0 );
+                test_results.max = Math.max( ...test_frames );
+                test_results.mean = test_results.time /test_pop_cnt;
+                test_results.min = Math.min( ...test_frames );
+                // ...then calculate the highest and lowest FPS from them.
+                test_results.max_fps = 1/test_results.min;
+                test_results.mean_fps = 1/test_results.mean;
+                test_results.min_fps = 1/test_results.max;
+                let qt = test_results.time / test_results.time_total;
+                test_results.score = Math.floor( test_results.mean_fps * qt );
 
-    class VerifyCapabilitiesModal extends React.Component {
-      test; result_display;
+                // ... then post the results to the test_results stack
+                this.test.cache.test_results.push( test_results );
+                // Should another test be run?  The max is 3 runs before failure is determined.
+                let runs_so_far = this.test.cache.test_results.length;
+                if ( test_results.score < 15 && runs_so_far < 3 || test_results.max_fps < 20 && runs_so_far < 3 ) {
+                  this.test.reset();  // Rack 'em up and knock 'em down again!
+                } else {
+                  // Now that has completed, compile the tests ( up to 3 ), for scoring.
+                  // Default values
+                  let compiled_test_results = {
+                    stamps: [],
+                    time: 0,
+                    time_total: 0,
+                    max: -10000,
+                    mean: 0,
+                    min: 10000
+                  };
+                  // Knit the accumulated test results into a unified source.
+                  for( let results_ndx = 0; results_ndx < this.test.cache.test_results.length; results_ndx++ ){
+                    let test_results = this.test.cache.test_results[results_ndx];
+                    compiled_test_results.stamps.push( ...test_results.test_frames );
+                    // Calculate the actual test duration based upon stamp values.
+                    compiled_test_results.time += test_results.test_frames.reduce( (a,b) => a + b, 0 );
+                    compiled_test_results.time_total += test_results.stamps.reduce( (a,b) => a + b, 0 );
+                  }
+                  // Determine the largest and smallest tick durations, or stamp values.
+                  compiled_test_results.max = Math.max( ...test_results.test_frames );
+                  compiled_test_results.mean = compiled_test_results.time / test_results.test_frames.length;
+                  compiled_test_results.min = Math.min( ...test_results.test_frames );
 
-      displayTestResults(){
-        let test_results = this.result_display.cache.test_results = this.state.test_results;
-
-        console.log( test_results );
-
-        screenplay.updatables.set( 'test_results', this.result_display );
-      }
-
-      constructor( props ){
-        super( props );
-        this.state = {
-          test_results: false,
-          results_display: {
-            score: 0,
-            speed: 0
-          }
-        };
-
-        /* -= User Performance Statistics Test =-
-        ** This is where the user's device is tested for a baseline of rendering ability.
-        ** Initial tests may fail due to loading delays... testing again upon failure ensures that
-        ** elibigle users are filtered properly.
-        ** Upon Failure: Display workflow without immersive rendering. */
-        this.test = new SceneTransformation({
+                  // ...then calculate the highest and lowest FPS from them.
+                  compiled_test_results.max_fps = 1/compiled_test_results.min;
+                  compiled_test_results.mean_fps = 1/compiled_test_results.mean;
+                  compiled_test_results.min_fps = 1/compiled_test_results.max;
+                  // Grade the User Performance Statistics
+                  let cqt = compiled_test_results.time / compiled_test_results.time_total;
+                  compiled_test_results.score = Math.floor( test_results.mean_fps * cqt );
+                  // ... then post the results to the console and the test_results stack
+                  console.log( compiled_test_results );
+                  this.setState( { test_results: compiled_test_results, test_complete: true });
+                  if ( screenplay.CAN_SAVE ) localStorage.setItem( "ups_test", JSON.stringify(compiled_test_results) );
+                  this.displayTestResults();
+                }
+              }
+            });
+          screenplay.updatables.set( 'ups_test', this.test );
+        }
+        componentDidMount(){
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+          // Give the results to the next SceneTransformation for display
+          this.result_display = new SceneTransformation({
             update: ( delta )=>{
-              if( this.test.cache.duration-- >= 0 ){
-                this.test.cache.stamps.push( delta );
-              } else {
-                screenplay.updatables.delete( 'ups_test' );
-                this.test.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+              if( this.state.test_results ){
+                if( this.result_display.cache.duration-- > 0 ){
+                  let tick = this.result_display.cache.frames - this.result_display.cache.duration;
+                  let prog = tick / this.result_display.cache.frames;
+                  let results = this.state.test_results;
+                  let score = (prog * results.score);
+                  let stamp_ndx = Math.floor( tick * ( results.stamps.length - 1 ) / this.result_display.cache.frames );
+                  let speed = Math.ceil( 1 / results.stamps[ stamp_ndx ] );
+                  this.setState({
+                    results_display: {
+                      score: score.toFixed( 2 ),
+                      speed: speed.toFixed( 1 )
+                    }
+                  });
+                } else {
+                  this.result_display.update = false;
+                  screenplay.updatables.delete( 'test_results' );
+                  this.result_display.post( this.state.test_results );
+                }
               }
             },
             cache: {
-              duration: 60,
-              stamps: [],
-              test_results: []
+             duration: 200,
+             frames: 200,
+             test_results: {
+               stamps: [],
+               time: 0,
+               max: Number.MIN_SAFE_INTEGER,
+               min: Number.MAX_SAFE_INTEGER,
+               max_fps: false,
+               min_fps: false,
+               score: false
+             }
             },
-            reset: ()=>{
-
-              this.test.cache.duration = 60;
-              this.test.cache.stamps = [];
-
-              screenplay.updatables.set( 'ups_test', this.test );
-            },
-            post: ( )=>{
-              // Build the Test Results from the captured test data
-              let test_results = {};
-              test_results.stamps = this.test.cache.stamps;
-              let pop_cnt = test_results.stamps.length;
-              // Calculate the actual test duration based upon stamp values.
-              test_results.time = this.test.cache.stamps.reduce( (a,b) => a + b, 0 );
-              // Calculate Population Mean & Standard Deviation
-              let pop_mean = test_results.mean = test_results.time / pop_cnt;
-              let xi_less_u_2 = this.test.cache.stamps.map( (num)=> { return ( num - pop_mean ) ** 2 } );
-              let sum_xi_less_u_2 = xi_less_u_2.reduce( (a,b) => a + b, 0 );
-              let mean_of_deviation = sum_xi_less_u_2 / pop_cnt;
-              test_results.std_dev = Math.sqrt( mean_of_deviation );
-              // Determine the largest and smallest tick durations, or stamp values.
-              test_results.max = Math.max( ...this.test.cache.stamps );
-              test_results.min = Math.min( ...this.test.cache.stamps );
-              // ...then calculate the highest and lowest FPS from them.
-              test_results.max_fps = 1/test_results.min;
-              test_results.min_fps = 1/test_results.max;
-              // Grade the User Performance Statistics
-              let std_fps = 1 / ( pop_mean + test_results.std_dev );
-
-              test_results.score = Math.floor( std_fps );
-              // ... then post the results to the test_results stack
-              this.test.cache.test_results.push( test_results );
-              // Should another test be run?  The max is 3 runs before failure is determined.
-              let runs_so_far = this.test.cache.test_results.length;
-              if ( test_results.score < 15 && runs_so_far < 3 || test_results.max_fps < 20 && runs_so_far < 3 ) {
-                this.test.reset();  // Rack 'em up and knock 'em down again!
+            post: ( test_results )=>{
+              // Performance Filter //
+              /* The score derived from the above UPS test may be used here to lead poorly
+                  performing devices into a workflow without immersive rendering. */
+              if ( test_results.score > 20 || test_results.max_fps > 30 ) {
+                document.querySelector( '#verify_capabilities .success').classList.remove( 'hidden' );
+                setTimeout( ( dictum_name, ndx )=>{
+                  director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+                }, 3000, dictum_name, ndx );
               } else {
-                // Now that has completed, compile the tests ( 1 - 3 ), for scoring.
-                let compiled_test_results = {
-                  stamps: [],
-                  time: 0,
-                  max: -10000,
-                  min: 10000
-                };  // Default values to ensure proper evaluation.
-
-                for( let results_ndx = 0; results_ndx < this.test.cache.test_results.length; results_ndx++ ){
-                  let test_results = this.test.cache.test_results[results_ndx];
-                  compiled_test_results.stamps.push( ...test_results.stamps );
-                  // Calculate the actual test duration based upon stamp values.
-                  compiled_test_results.time += test_results.stamps.reduce( (a,b) => a + b, 0 );
-                  // Determine the largest and smallest tick durations, or stamp values.
-                  let max = Math.max( ...test_results.stamps, compiled_test_results.max );
-                  compiled_test_results.max = max;
-                  let min = Math.min( ...test_results.stamps, compiled_test_results.min );
-                  compiled_test_results.min = min;
-                }
-                // Calculate Population Mean & Standard Deviation
-                let comp_pop_cnt = test_results.stamps.length;
-                let comp_pop_mean = compiled_test_results.mean = compiled_test_results.time / comp_pop_cnt;
-                let comp_xi_less_u_2 = compiled_test_results.stamps.map( (num)=> { return (num - comp_pop_mean) ** 2 } );
-                let comp_sum_xi_less_u_2 = comp_xi_less_u_2.reduce( (a,b) => a + b, 0 );
-                let comp_mean_of_deviation = comp_sum_xi_less_u_2 / comp_pop_cnt;
-                compiled_test_results.std_dev = Math.sqrt( comp_mean_of_deviation );
-                // ...then calculate the highest and lowest FPS from them.
-                compiled_test_results.max_fps = 1/compiled_test_results.min;
-                compiled_test_results.min_fps = 1/compiled_test_results.max;
-                // Grade the User Performance Statistics
-                let comp_std_fps = 1/( comp_pop_mean + compiled_test_results.std_dev );
-                compiled_test_results.score = Math.floor( comp_std_fps );
-                // ... then post the results to the console and the test_results stack
-                console.log( compiled_test_results );
-
-                this.setState( { test_results: compiled_test_results, test_complete: true });
-                this.displayTestResults();
+                setTimeout( ( dictum_name, ndx )=>{
+                  document.querySelector( '#verify_capabilities .failure').classList.remove( 'hidden' );
+                  director.emit( `${dictum_name}_failure`, dictum_name, ndx );
+                }, 3000, dictum_name, ndx );
               }
-
             }
           });
-        screenplay.updatables.set( 'ups_test', this.test );
+        }
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+        render(){
+          return (
+            <>
+              <style>{`
+                #verify_capabilities{
+                  grid-template-rows: auto 1fr 1fr 1fr;
+                  text-align: center;
+                }
+                #verify_capabilities .pip_title{
+                  grid-row: 1;
+                  grid-column: 1 / -1;
+                }
+                #verify_capabilities .description{
+                  text-align: center;
+                  grid-row: 2;
+                  grid-column: 1 / -1;
+                }
+                #verify_capabilities .fps_display{
+                  font-size: 2rem;
+                  grid-row: 3;
+                  color: var(--b2);
+                }
+                #verify_capabilities .success{
+                  font-size: 3rem;
+                  color: var(--g2);
+                  grid-row: 4;
+                  grid-column: 1 / -1;
+                }
+                #verify_capabilities .failure{
+                  font-size: 3rem;
+                  color: var(--r2);
+                  grid-row: 4;
+                  grid-column: 1 / -1;
+                }
+                #verify_capabilities .hidden{
+                  display: none;
+                }
+                `}</style>
+              <div id="verify_capabilities" className="pip_gui pip_splash">
+                <h1 className="pip_title">Verifying Performance Requirements</h1>
+                <span className="pip_text description">For a more pleasant experience, a brief performance test must be run.</span>
+                <p className="fps_display">
+                  Active&nbsp;FPS:&nbsp;<span className="speed">{this.state.results_display.speed}</span>
+                  <br />-<br />
+                  Standardized:&nbsp;FPS:&nbsp;<span className="score">{this.state.results_display.score}</span>
+                </p>
+                <h3 className="success hidden">Test Successful!</h3>
+                <h3 className="failure hidden">Low-FPS Mode Required</h3>
+              </div>
+            </>
+          );
+        }
       }
+      this.react_app.render( <ErrorBoundary><VerifyCapabilitiesModal /></ErrorBoundary> );
+    } else {
+      // TODO: If low performance, switch to lo-fps mode.
+      // TODO: Make a 'lo-fps' mode.
+      // FORNOW: Move to next dictum.
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+  };
 
-      componentDidMount(){
-        document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        // Give the results to the next SceneTransformation for display
-        this.result_display = new SceneTransformation({
-          update: ( delta )=>{
-            if( this.state.test_results ){
-              if( this.result_display.cache.duration-- > 0 ){
-                let tick = this.result_display.cache.frames - this.result_display.cache.duration;
-                let prog = tick / this.result_display.cache.frames;
-                let results = this.state.test_results;
-                let score = (prog * results.score);
-                let stamp_ndx = Math.floor( tick * ( results.stamps.length - 1 ) / this.result_display.cache.frames );
-                let speed = Math.ceil( 1 / results.stamps[ stamp_ndx ] );
-                this.setState({
-                  results_display: {
-                    score: score.toFixed( 2 ),
-                    speed: speed.toFixed( 1 )
-                  }
-                });
+  tutorial = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.tutorial');
+    document.title = 'Workflow.tutorial | MySpace';
+
+    // Performance Test the client if untested.
+    let last_shown_tutorial = ( screenplay.CAN_SAVE ) ? localStorage.getItem("last_shown_tutorial") : false;
+    if( typeof(last_shown_tutorial) === 'undefined' || !last_shown_tutorial ){
+
+      class UserInstructionModal extends Component {
+        constructor(props){
+          super(props);
+          this.panel = createRef();
+          this.onDisplay = true;
+          this.entrance_transition = new SceneTransformation({
+              update: ( delta )=>{
+                let cache = this.entrance_transition.cache;
+                if( ++cache.frame <= cache.duration ){
+                  let progress = cache.frame / cache.duration;
+                  let panel = cache.panel.current;
+                  panel.style.scale = progress;
+
+                } else {
+                  this.entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+                }
+              },
+              cache: {
+                duration: 15, /* do something in 60 frames */
+                frame: 0,
+                panel: this.panel,
+                manual_control: false,
+                og_transition: false
+              },
+              reset: ()=>{
+                this.entrance_transition.cache.duration = 15;
+                this.entrance_transition.cache.frame = 0;
+                screenplay.updatables.set( 'UserInstructionModal_entrance_transition', this.entrance_transition );
+              },
+              post: ( )=>{
+                let cache = this.entrance_transition.cache;
+                let panel = cache.panel.current;
+                screenplay.updatables.delete( 'UserInstructionModal_entrance_transition' );
+                panel.style.transform = `scale(1)`;
+              }
+            });
+          this.exit_transition = new SceneTransformation({
+            update: ( delta )=>{
+              let cache = this.exit_transition.cache;
+              if( ++cache.frame <= cache.duration ){
+                let progress = 1 - cache.frame / cache.duration;
+                let panel = cache.panel.current;
+                panel.style.scale = progress;
 
               } else {
-                this.result_display.update = false;
-                screenplay.updatables.delete( 'test_results' );
-                this.result_display.post( this.state.test_results );
+                this.exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
               }
+            },
+            cache: {
+              duration: 15, /* do something in 60 frames */
+              frame: 0,
+              panel: this.panel,
+              manual_control: false,
+              og_transition: false
+            },
+            reset: ()=>{
+              this.exit_transition.cache.duration = 15;
+              this.exit_transition.cache.frame = 0;
+              screenplay.updatables.set( 'UserInstructionModal_exit_transition', this.exit_transition );
+            },
+            post: ( )=>{
+              let cache = this.exit_transition.cache;
+              let panel = cache.panel.current;
+              screenplay.updatables.delete( 'UserInstructionModal_exit_transition' );
+              panel.style.transform = `scale(0)`;
+
+              director.emit( `${dictum_name}_progress`, dictum_name, ndx );
             }
-          },
-          cache: {
-           duration: 200,
-           frames: 200,
-           test_results: {
-             stamps: [],
-             time: 0,
-             max: Number.MIN_SAFE_INTEGER,
-             min: Number.MAX_SAFE_INTEGER,
-             max_fps: false,
-             min_fps: false,
-             score: false
-           }
-          },
+          });
+        }
 
-          post: ( test_results )=>{
+        componentDidMount(){
+          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+          screenplay.updatables.set( 'UserInstructionModal_entrance_transition', this.entrance_transition );
+        }
+        componentWillUnmount(){
+          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+        }
+        handleAckClick = ( e )=>{
+          if ( screenplay.CAN_SAVE ) localStorage.setItem( "last_shown_tutorial", JSON.stringify( Date.now() ) );
+          screenplay.updatables.set( 'UserInstructionModal_exit_transition', this.exit_transition );
+        }
+        render(){
+          return (
+            this.onDisplay ?
+            <>
+            <style>{`
+              #user_instruction{
+                grid-template-rows: auto 1fr 1fr;
+                grid-template-columns: auto auto;
+                text-align: center;
+              }
+              #user_instruction .pip_title{
+                grid-row: 1;
+                grid-column: 1 / -1;
+              }
+              #user_instruction .introduction{
+                text-align: center;
+                grid-row: 2;
+                grid-column: 1 / -1;
+              }
+              #user_instruction .pip_continue{
+                grid-row: 3;
+                grid-column: 2;
+              }
+              `}</style>
+              <div style={{ overflow: 'auto'}} id="user_instruction" ref={ this.panel } className="pip_gui pip_post" >
+                <h1 className="pip_title">Wither-to's and Why-for's</h1>
+                <span className="introduction pip_text">
+                  Thank you for being here!<br/>
+                  Watch your head, so to speak, as this is a work in-progress.<br/><br/>
+                  You are welcome to investigate 'under the hood', though the code in your browser is compiled and difficult to traverse.<br/>
+                  The full codebase upon which this app is running may be <a href="https://github.com/phxsol/pale-blue-dot" target="_blank">found here on GitHub</a>.<br/>
+                </span>
+                <input name="ack_user_instruction" className="pip_continue" type="button" onClick={this.handleAckClick} value="OK" />
 
-            // Performance Filter //
-            /* The score derived from the above UPS test may be used here to lead poorly
-                performing devices into a workflow without immersive rendering. */
-            if ( test_results.score > 20 || test_results.max_fps > 30 ) {
-              document.querySelector( '#verify_capabilities .success').classList.remove( 'hidden' );
-              setTimeout( ( dictum_name, ndx )=>{
-                director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-              }, 3000, dictum_name, ndx );
 
-
-            } else {
-              setTimeout( ( dictum_name, ndx )=>{
-                document.querySelector( '#verify_capabilities .failure').classList.remove( 'hidden' );
-                director.emit( `${dictum_name}_failure`, dictum_name, ndx );
-              }, 3000, dictum_name, ndx );
-            }
-          }
-        });
-
+              </div>
+            </>
+            : null
+          );
+        }
       }
 
-      componentWillUnmount(){
-        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-      }
-
-      render(){
-        return (
-          <>
-            <div id="verify_capabilities" className="pip_gui pip_splash">
-              <h1 className="title">Verifying Performance Requirements</h1>
-              <span className="description">For a more pleasant experience, a brief performance test must be run.</span>
-              <p className="fps_display">
-                Active&nbsp;FPS:&nbsp;<span className="speed">{this.state.results_display.speed}</span>
-                <br />-<br />
-                Standardized:&nbsp;FPS:&nbsp;<span className="score">{this.state.results_display.score}</span>
-              </p>
-              <h3 className="success hidden">Test Successful!</h3>
-              <h3 className="failure hidden">Low-FPS Mode Required</h3>
-            </div>
-          </>
-        );
-      }
+      this.react_app.render( <ErrorBoundary><UserInstructionModal /></ErrorBoundary> );
+    } else {
+      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
     }
 
-    this.react_app.render( <ErrorBoundary><VerifyCapabilitiesModal /></ErrorBoundary> );
-    document.title = 'Workflow.verify_capabilities | The Pale Blue Dot | Phox.Solutions';
+
 
   };
-  init_controls = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log( 'Workflow.init_controls' );
+  // Load the WeThe Node System according to the user's preferences
+  load_wethe = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.load_wethe');
+    document.title = 'Workflow.load_wethe | MySpace';
 
-    class InitControlsModal extends React.Component {
-      componentDidMount(){
-        document.getElementById( 'root' ).classList.add( 'pip_gui' );
-      }
+    //this.react_app.render( <ErrorBoundary><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /></ErrorBoundary> );
+    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+  };
+  // Load and resume the user's experience ( @Time-Space Coordinates + difference )
+  resume_user = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.resume_user');
+    document.title = 'Workflow.resume_user | MySpace';
 
-      componentWillUnmount(){
-        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-      }
+    const verifyToken = async ( uname, token ) => {
+      if( !uname && !token ) return false;
 
-      render(){
-        return (
-          <>
-            <div id="init_controls" className="pip_gui pip_post">
-              <h1>init_controls</h1>
-            </div>
-          </>
-        );
-      }
+      let login = new Request("/tokens",{
+        method:"POST",
+        headers: {
+          "Content-Type": "application/json",
+          "username": uname.toString(),
+          "token": token.toString()
+        }
+      });
+
+      return await fetch( login ).then( async res => {
+        let status = res.status;
+        if(status==200) return {
+          valid: true,
+          tokens: res.headers.get('token')
+        }
+        else return false
+      });
     }
 
-    this.react_app.render( <ErrorBoundary><InitControlsModal /></ErrorBoundary> );
+    let saving = ( screenplay.CAN_SAVE && screenplay.SHOULD_SAVE );
+    let validation = false;
+    let uname = '';
+    let token = '';
+    if( saving ){
+      uname = ( typeof(localStorage.getItem("uname")) !== 'undefined' ) ? localStorage.getItem("uname") : false;
+      token = ( typeof(localStorage.getItem("token")) !== 'undefined' ) ? localStorage.getItem("token") : false;
+      validation = await verifyToken( uname, token );
+    }
+    await validation;
+    let auto_resumed = ( validation ) ? validation.valid: false;
+    let tokens = ( validation ) ? validation.tokens: false;
 
-    document.title = 'Workflow.init_controls | The Pale Blue Dot | Phox.Solutions';
+    console.log( 'auto_resumed?: ', auto_resumed );
+    function ResumeUser( uname, token ){
 
-    try{
-      screenplay.ui_renderer.domElement.addEventListener( 'wheel', (event)=>{
+      let resume = new Request("/a",{
+        method:"POST",
+        headers: {
+          "Content-Type": "application/json",
+          "username": uname,
+          "token": token
+        },
+        body: ""
+      });
+      fetch( resume ).then( async res => {
+        if( res.status == 200 ){
+          let resume = await res.json();
 
-          if( !screenplay.active_cam.user_control && event.deltaY > 0 ){
-            this.ActivateOrbitControls( screenplay );
-          } else if( screenplay.active_cam.user_control && event.deltaY < 0 ){
-            if( screenplay.controls.orbit_controls.getDistance() < screenplay.controls.orbit_controls.release_distance ){
-              this.DeactivateOrbitControls( screenplay );
+          // Space-Time Coordination
+          let positions = resume.positions;
+          let starship_position = new THREE.Vector3( positions.s.p.x, positions.s.p.y, positions.s.p.z );
+          screenplay.actors.Starship.position.copy( starship_position );
+          let starship_quaternion = new THREE.Quaternion( positions.s.q.x, positions.s.q.y, positions.s.q.z, positions.s.q.w );
+          screenplay.actors.Starship.quaternion.copy( starship_quaternion );
+
+          // Permissions Coordination
+          // Do an initial check to see what the notification permission state is
+          if (Notification.permission === 'denied' || Notification.permission === 'default') {
+            // TODO: Request permission if saved to do so... or NOT saved to not ask again.
+            // NOTE: As notifications will be useful to most users, a reminder request should be regularly sent out to users saved to Not Ask
+
+          } else {
+
+          }
+        }
+      });
+
+    }
+
+    if( !auto_resumed ){
+      function LoginForm() {
+          const [uname, setUname] = useState("");
+          const [pword, setPword] = useState("");
+          const [saveu, setSaveu] = useState(false);
+          const [phase, setPhase] = useState(0);
+          const [enter, setEnter] = useState(false);
+          const [exit, setExit] = useState(false);
+          const panel = useRef();
+          const submitButton = useRef(null);
+
+          function cleanup(){
+            document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+          }
+
+          // Initialization --> Singleton
+          useEffect(()=>{
+            document.getElementById( 'root' ).classList.add( 'pip_gui' );
+
+            const entrance_transition = new SceneTransformation({
+              update: ( delta )=>{
+                let cache = entrance_transition.cache;
+                if( ++cache.frame <= cache.duration ){
+                  let progress = cache.frame / cache.duration;
+                  panel.current.style.scale = progress;
+
+                } else {
+                  entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+                }
+              },
+              cache: {
+                duration: 15, /* do something in 60 frames */
+                frame: 0,
+                manual_control: false,
+                og_transition: false
+              },
+              reset: ()=>{
+                entrance_transition.cache.duration = 15;
+                entrance_transition.cache.frame = 0;
+                screenplay.updatables.set( 'ResumeUserModal_entrance_transition', entrance_transition );
+              },
+              post: ( )=>{
+                let cache = entrance_transition.cache;
+                screenplay.updatables.delete( 'ResumeUserModal_entrance_transition' );
+                panel.current.style.transform = `scale(1)`;
+              }
+            });
+            setEnter( entrance_transition );
+            const exit_transition = new SceneTransformation({
+              update: ( delta )=>{
+                let cache = exit_transition.cache;
+                if( ++cache.frame <= cache.duration ){
+                  let progress = 1 - cache.frame / cache.duration;
+                  panel.current.style.scale = progress;
+
+                } else {
+                  exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+                }
+              },
+              cache: {
+                duration: 15, /* do something in this many frames */
+                frame: 0,
+                manual_control: false,
+                og_transition: false
+              },
+              reset: ()=>{
+                exit_transition.cache.duration = 15;
+                exit_transition.cache.frame = 0;
+                screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit_transition );
+              },
+              post: ( )=>{
+                let cache = exit_transition.cache;
+                screenplay.updatables.delete( 'ResumeUserModal_exit_transition' );
+                panel.current.style.transform = `scale(0)`;
+                director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+              }
+            });
+            setExit( exit_transition );
+
+            screenplay.updatables.set( 'ResumeUserModal_entrance_transition', entrance_transition );
+
+            return cleanup;
+          },[]);
+
+          const handleSubmitResumeUser = async ( event ) => {
+            event.preventDefault();
+            submitButton.disabled = true;
+            submitButton.autocomplete = 'off'; // --> Fix for Firefox. It persists the dynamic disabled state without this hack.
+
+            await uname;
+            await pword;
+            await saveu;
+            let login = new Request("/tokens",{
+              method:"PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                username:uname,
+                password:pword,
+                saveu:saveu})
+              });
+
+            fetch( login ).then( async res => {
+              submitButton.disabled = false
+
+              if( res.status == 200 ){
+
+                let _uname = res.headers.get("uname");
+                if ( screenplay.CAN_SAVE ) localStorage.setItem( "uname", _uname );
+                let _token = res.headers.get("token");
+                if ( screenplay.CAN_SAVE ) localStorage.setItem( "token", _token );
+                ResumeUser( _uname, _token );
+                screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+              } else {
+                alert( 'Invalid Login!  Try harder.');
+              }
+            });
+          }
+
+          const handleSubmitNewUser = async ( event ) => {
+            event.preventDefault();
+            submitButton.disabled = true;
+            submitButton.autocomplete = 'off'; // --> Fix for Firefox. It persists the dynamic disabled state without this hack.
+
+            await uname;
+            await pword;
+            let register = new Request("/users",{
+              method:"POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: await JSON.stringify({
+                username:uname,
+                password:pword,
+                contactPath:{ email:'sjaycgf@gmail.com'}
+              })
+            });
+
+            fetch( register ).then( res => {
+              submitButton.disabled = false
+
+              // TODO: Validate this shit! Then close up shop.
+
+              screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+            });
+          }
+
+          const handleAnonymousUser = async ( event ) => {
+
+            screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+          }
+
+          const changeInputs = async ( event, which_input ) => {
+            switch(which_input){
+              case 1:
+                setUname(event.target.value);
+                break;
+
+              case 2:
+                setPword(event.target.value);
+                break;
+
+              case 3:
+                setSaveu(!saveu);
+                break;
             }
           }
-      }, { capture: true } );
 
-      const gui = screenplay.lil_gui = new GUI( { title: 'Architect Interface' });
-      gui.open( false );
-      let camera_controls_folder = gui.addFolder( 'Camera Controls' );
-      const camera_controls = {
-        'CaptainCam': ()=>{
-          screenplay.actions.change_cam( 'CaptainCam' );
-          this.DeactivateOrbitControls( screenplay );
-        },
-        '3rdPerson': ()=>{
-          screenplay.actions.change_cam( '3rdPerson' );
-          this.ActivateOrbitControls( screenplay );
-        },
-        'Center': ()=>{
-          screenplay.actions.change_cam( 'Center' );
-          this.ActivateOrbitControls( screenplay );
+          switch(phase){
+            case 0: // Top-Level Options
+              return (
+                <div ref={ panel } className="pip_gui pip_chat" >
+                  <span className="ui_side pip_text" style={{ gridRow: 2 }}>
+                  Greetings Captain.
+                  </span>
+                  <span className="ui_side pip_text" style={{ gridRow: 3 }}>What are your orders?</span>
+                  <div className="user_side" style={{ gridRow: 5, display: 'flex' }}>
+                    <input
+                      name="login_button"
+                      className="pip_accept"
+                      type="button"
+                      value="login"
+                      onClick={(e) => setPhase( 1 )}/>
+                    <input
+                      name="new_user_button"
+                      className="pip_accept"
+                      type="button"
+                      value="New"
+                      onClick={(e) => setPhase( 2 )} />
+                    <input
+                      name="anonymous_button"
+                      className="pip_cancel"
+                      type="button"
+                      value="Anon"
+                      onClick={(e) => setPhase( 3 )} />
+                  </div>
+
+                </div>);
+              break;
+
+            case 1: // Login Captain
+
+              return (
+                <div ref={ panel } className="pip_gui pip_chat" >
+                  <span className="ui_side pip_text" style={{ gridRow: 2 }}>
+                  Greetings Captain.
+                  </span>
+                  <span className="ui_side pip_text" style={{ gridRow: 3 }}>How do you prefer to be addressed?</span>
+                  <form onSubmit={handleSubmitResumeUser} className="user_side" style={{ gridRow: 5 }}>
+                    <label htmlFor="username">User:</label>
+                      <input
+                        name="username"
+                        type="text"
+                        autoComplete="username"
+                        value={uname}
+                        onChange={(e) => changeInputs(e, 1)}
+
+                      />
+                    <label htmlFor="password">Pass:</label>
+                      <input
+                        name="password"
+                        type="password"
+                        autoComplete="current-password"
+                        value={pword}
+                        onChange={(e) => changeInputs(e, 2)}
+                      />
+                    <input type="submit" className="pip_accept" ref={ submitButton } />
+                    <label htmlFor="keep_logged">Keep me logged in:</label>
+                      <input
+                        name="keep_logged"
+                        type="checkbox"
+                        value={saveu}
+                        onChange={(e) => changeInputs(e, 3)}
+                      />
+                  </form>
+                </div>);
+              break;
+
+            case 2: // Register New Captain
+              return (
+                <div ref={ panel } className="pip_gui pip_chat" >
+                  <span className="ui_side pip_text" style={{ gridRow: 2 }}>
+                  Greetings Captain.
+                  </span>
+                  <span className="ui_side pip_text" style={{ gridRow: 3 }}>How do you prefer to be addressed?</span>
+                  <form onSubmit={handleSubmitNewUser} className="user_side" style={{ gridRow: 5 }}>
+                  <label htmlFor="username">User:</label>
+                    <input
+                      name="username"
+                      type="text"
+                      autoComplete="username"
+                      value={uname}
+                      onChange={(e) => changeInputs(e, 1)}
+
+                    />
+                  <label htmlFor="password">Pass:</label>
+                    <input
+                      name="password"
+                      type="password"
+                      autoComplete="new-password"
+                      value={pword}
+                      onChange={(e) => changeInputs(e, 2)}
+                    />
+                  <input type="submit" className="pip_accept" ref={ submitButton } />
+                  <label htmlFor="keep_logged">Keep me logged in:</label>
+                    <input
+                      name="keep_logged"
+                      type="checkbox"
+                      value={saveu}
+                      onChange={(e) => changeInputs(e, 3)}
+                    />
+                  </form>
+                </div>);
+              break;
+
+            case 3: // Proceed Anonymously
+              return (
+                <div ref={ panel } className="pip_gui pip_chat" >
+                  <span className="ui_side pip_text" style={{ gridRow: 2 }}>
+                  As you wish Captain.
+                  </span>
+                  <span className="ui_side pip_text" style={{ gridRow: 3 }}>I must inform you that persistant changes won't be available to you until you choose to login to a registered Captain's chair.</span>
+                  <div className="user_side" style={{ gridRow: 5, display: 'flex' }}>
+                    <label>Acknowledge:<input
+                      name="ack"
+                      className="pip_accept"
+                      style={{ marginLeft: '1rem' }}
+                      type="button"
+                      onClick={handleAnonymousUser}/></label>
+                    <label>Reconsider:<input
+                      name="back"
+                      className="pip_accept"
+                      style={{ marginLeft: '1rem' }}
+                      type="button"
+                      onClick={(e) => setPhase( 0 )}/></label>
+                  </div>
+                </div>);
+              break;
+
+          }
         }
-      }
-      camera_controls_folder.add( camera_controls, 'CaptainCam' ).name( 'Captain\'s Chair' );
-      camera_controls_folder.add( camera_controls, '3rdPerson' ).name( '3rd Person' );
-      camera_controls_folder.add( camera_controls, 'Center' ).name( 'Center' );
-      camera_controls_folder.add( screenplay.active_cam, 'zoom' ).onChange(()=>{
-        screenplay.active_cam.updateProjectionMatrix();
-      });
-      camera_controls_folder.add( screenplay.gridHelper, 'visible' ).name('Grid Overlay?');
-      camera_controls_folder.add( screenplay, 'fps' ).name('Frames / Second').onChange(()=>{
-        screenplay.interval = 1 / screenplay.fps;
-      });
-      camera_controls_folder.open( false );
-
-      let ship_settings_folder = gui.addFolder( 'Ship Settings' );
-      ship_settings_folder.add( screenplay.actors.Ship.viewscreen, 'visible' ).name( 'Show Viewscreen?');
-      ship_settings_folder.add( screenplay.actors.Ship.viewscreen.material, 'opacity', 0, 1 ).name( 'Viewscreen Opacity');
-      ship_settings_folder.add( screenplay.actors.Ship.viewscreen.material, 'roughness', 0, 1 ).name( 'Viewscreen Roughness');
-      ship_settings_folder.add( screenplay.actors.Ship.viewscreen.material, 'metalness', 0, 1 ).name( 'Viewscreen Metalness');
-      ship_settings_folder.add( screenplay.actors.Ship.light, 'intensity', 0, 100, 0.1 ).name( 'Light Intensity');
-      ship_settings_folder.add( screenplay.actors.Ship.light, 'distance', 0, 100000, 1 ).name( 'Light Distance');
-      ship_settings_folder.add( screenplay.actors.Ship.light, 'decay', 0, 2, 1 ).name( 'Light Decay [0,1,2]');
-      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open, 'visible', false ).onChange(()=>{ screenplay.actors.Ship.bulkhead.visible = !screenplay.actors.Ship.bulkhead_open.visible }).name( 'Show Top?');
-      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'roughness', 0, 1 ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.rougness = screenplay.actors.Ship.bulkhead_open.material.rougness }).name( 'Material Roughness');
-      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'metalness', 0, 1 ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.metalness = screenplay.actors.Ship.bulkhead_open.material.metalness }).name( 'Material Metalness');
-      ship_settings_folder.add ( screenplay.actors.Ship.bulkhead_open.material, 'wireframe' ).onChange(()=>{ screenplay.actors.Ship.bulkhead.material.wireframe = screenplay.actors.Ship.bulkhead_open.material.wireframe }).name( 'Wireframe Only?');
-      ship_settings_folder.open( false );
-
-      let ship_nav_folder = gui.addFolder( 'Ship Navigation' );
-      const ship_navigation = {
-
-      	Neptune: function() {
-
-          screenplay.actions.warp_to(screenplay.actors.Neptune);
-        },
-       	Uranus: function() {
-          screenplay.actions.warp_to(screenplay.actors.Uranus);
-        },
-       	Saturn: function() {
-          screenplay.actions.warp_to(screenplay.actors.Saturn);
-        },
-       	Jupiter: function() {
-          screenplay.actions.warp_to(screenplay.actors.Jupiter);
-        },
-       	Mars: function() {
-          screenplay.actions.warp_to(screenplay.actors.Mars);
-        },
-       	Earth: function() {
-          screenplay.actions.warp_to(screenplay.actors.Earth);
-        },
-       	Moon: function() {
-          screenplay.actions.warp_to(screenplay.actors.Moon);
-        },
-       	Venus: function() {
-          screenplay.actions.warp_to(screenplay.actors.Venus);
-        },
-       	Mercury: function() {
-          screenplay.actions.warp_to(screenplay.actors.Mercury);
-        },
-       	Sun: function() {
-          screenplay.actions.warp_to(screenplay.actors.Sun);
-        }
-      }
-      ship_nav_folder.add( ship_navigation, 'Neptune' ).name('... to Neptune');
-      ship_nav_folder.add( ship_navigation, 'Uranus' ).name('...to Uranus');
-      ship_nav_folder.add( ship_navigation, 'Saturn' ).name('...to Saturn');
-      ship_nav_folder.add( ship_navigation, 'Jupiter' ).name('...to Jupiter');
-      ship_nav_folder.add( ship_navigation, 'Mars' ).name('...to Mars');
-      ship_nav_folder.add( ship_navigation, 'Earth' ).name('...to Earth');
-      ship_nav_folder.add( ship_navigation, 'Moon' ).name('...to Moon');
-      ship_nav_folder.add( ship_navigation, 'Venus' ).name('...to Venus');
-      ship_nav_folder.add( ship_navigation, 'Mercury' ).name('...to Mercury');
-      ship_nav_folder.add( ship_navigation, 'Sun' ).name('...to Sun');
-      ship_nav_folder.open( false );
-
-      let neptune_folder = gui.addFolder( 'Neptune');
-      let neptune = screenplay.actors.Neptune;
-      neptune_folder.add ( neptune.material, 'roughness', 0, 1 );
-      neptune_folder.add ( neptune.material, 'metalness', 0, 1 );
-      neptune_folder.add ( neptune.material, 'wireframe' ).name( 'Wireframe Only?');
-      neptune_folder.open( false );
-
-      let uranus_folder = gui.addFolder( 'Uranus');
-      let uranus = screenplay.actors.Uranus;
-      uranus_folder.add ( uranus.material, 'roughness', 0, 1 );
-      uranus_folder.add ( uranus.material, 'metalness', 0, 1 );
-      uranus_folder.add ( uranus.material, 'wireframe' ).name( 'Wireframe Only?');
-      uranus_folder.open( false );
-
-      let saturn_folder = gui.addFolder( 'Saturn');
-      let saturn = screenplay.actors.Saturn;
-      saturn_folder.add ( saturn.material, 'roughness', 0, 1 );
-      saturn_folder.add ( saturn.material, 'metalness', 0, 1 );
-      saturn_folder.add ( saturn.material, 'wireframe' ).name( 'Wireframe Only?');
-      saturn_folder.add ( saturn.children[0].material, 'roughness', 0, 1 ).name( 'rings roughness');
-      saturn_folder.add ( saturn.children[0].material, 'metalness', 0, 1 ).name( 'rings metalness');
-      saturn_folder.add ( saturn.children[0].material, 'wireframe' ).name( 'Rings Wireframe Only?');
-      saturn_folder.open( false );
-
-      let jupiter_folder = gui.addFolder( 'Jupiter');
-      let jupiter = screenplay.actors.Jupiter;
-      jupiter_folder.add ( jupiter.material, 'roughness', 0, 1 );
-      jupiter_folder.add ( jupiter.material, 'metalness', 0, 1 );
-      jupiter_folder.add ( jupiter.material, 'wireframe' ).name( 'Wireframe Only?');
-      jupiter_folder.open( false );
-
-      let mars_folder = gui.addFolder( 'Mars');
-      let mars = screenplay.actors.Mars;
-      mars_folder.add ( mars.material, 'roughness', 0, 1 );
-      mars_folder.add ( mars.material, 'metalness', 0, 1 );
-      mars_folder.add ( mars.material, 'wireframe' ).name( 'Wireframe Only?');
-      mars_folder.open( false );
-
-      let earth_folder = gui.addFolder( 'Earth');
-      let earth = screenplay.actors.Earth;
-      earth_folder.add ( earth.material, 'roughness', 0, 1 );
-      earth_folder.add ( earth.material, 'metalness', 0, 1 );
-      earth_folder.add ( earth.material, 'emissiveIntensity', 0, 1 );
-      earth_folder.add ( earth.material, 'wireframe' ).name( 'Wireframe Only?');
-      earth_folder.open( false );
-
-      let moon_folder = gui.addFolder( 'Moon');
-      let moon = screenplay.actors.Moon;
-      moon_folder.add ( moon.material, 'roughness', 0, 1 );
-      moon_folder.add ( moon.material, 'metalness', 0, 1 );
-      moon_folder.add ( moon.material, 'wireframe' ).name( 'Wireframe Only?');
-      moon_folder.open( false );
-
-      let venus_folder = gui.addFolder( 'Venus');
-      let venus = screenplay.actors.Venus;
-      venus_folder.add ( venus.material, 'roughness', 0, 1 );
-      venus_folder.add ( venus.material, 'metalness', 0, 1 );
-      venus_folder.add ( venus.material, 'wireframe' ).name( 'Wireframe Only?');
-      venus_folder.open( false );
-
-      let mercury_folder = gui.addFolder( 'Mercury');
-      let mercury = screenplay.actors.Mercury;
-      mercury_folder.add ( mercury.material, 'roughness', 0, 1 );
-      mercury_folder.add ( mercury.material, 'metalness', 0, 1 );
-      mercury_folder.add ( mercury.material, 'wireframe' ).name( 'Wireframe Only?');
-      mercury_folder.open( false );
-
-      let sun_folder = gui.addFolder('Sun');
-      let sunlight_folder = sun_folder.addFolder( 'Light');
-      let sunlight = screenplay.lights.point_light;
-      sunlight_folder.add ( sunlight, 'decay', 0, 2, 1 );
-      sunlight_folder.add ( sunlight, 'distance', 0, 4500000000 );
-      sunlight_folder.add ( sunlight, 'intensity', 0, 10 ).listen();
-      sunlight_folder.add ( sunlight, 'power' ).listen();
-      sunlight_folder.open( false );
-
-      let sun_model_folder = sun_folder.addFolder( 'Sun Model ');
-      let sun = screenplay.actors.Sun;
-      sun_model_folder.add ( sun.material, 'wireframe' ).name( 'Wireframe Only?');
-      sun_model_folder.open( false );
-
+      this.react_app.render( <ErrorBoundary><LoginForm /></ErrorBoundary> );
+    } else {
+      ResumeUser( uname, token );
       director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+    }
+  };
+
+  init_controls = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.init_controls');
+    document.title = 'Workflow.init_controls | MySpace';
+    function WorkingViewScreenDisplay( props ){
+      const screenplay = props.screenplay;
+      const panel = useRef();
+
+      function cleanup(){
+
+      }
+
+      useEffect( ()=>{
+        viewScreenVideo = document.getElementById( 'viewScreenVideo' );
+        const texture = new THREE.VideoTexture( viewScreenVideo );
+        //texture.colorSpace = THREE.SRGBColorSpace;
+        const material = new THREE.MeshBasicMaterial( { map: texture, side: THREE.BackSide } );
+        screenplay.actors.Starship.Viewscreen.material = material;
+
+        if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
+
+          const constraints = { video: { facingMode: 'user' } };
+          debugger;
+          navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
+
+            // apply the stream to the video element used in the texture
+
+            viewScreenVideo.srcObject = stream;
+            viewScreenVideo.play();
+
+          } ).catch( function ( error ) {
+
+            console.error( 'Unable to access the camera/webcam.', error );
+
+          } );
+
+        } else {
+
+          console.error( 'MediaDevices interface not available.' );
+
+        }
+
+        return cleanup();
+      }, [] );
+
+      return(
+        <>
+        <style>{`
+          #viewScreenRoot{
+
+          }
+          #viewScreen{
+
+          }
+          `}</style>
+          <div id="viewScreen"  ref={ panel } >
+            <video id="viewScreenVideo" style={{display:'none'}} autoPlay playsInline></video>
+          </div>
+        </>
+      );
+    }
+
+    let selfCamStream = false;
+    let videoStreams = [];
+    /*if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
+      const constraints = { video: { facingMode: 'user' } };
+
+      await navigator.mediaDevices.getUserMedia( constraints ).then( async function ( stream ) {
+
+        // apply the stream to the video element used in the texture
+        selfCamStream = stream;
+        videoStreams.push( stream, stream );
+
+      } );
+    }*/
+
+    try{
+
+      // Instantiate a exporter
+      let sys_ve_scene = screenplay.sys_ve_scene;
+      let sys_ui_scene = screenplay.sys_ui_scene;
+      let page_ve_scene = screenplay.page_ve_scene;
+      let page_ui_scene = screenplay.page_ui_scene;
 
     } catch( e ) {
 
       director.emit( `${dictum_name}_failure`, dictum_name, ndx );
 
-    }
-  };
-  user_instruction = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.user_introduction');
-
-    class UserInstructionModal extends React.Component {
-      componentDidMount(){
-        document.getElementById( 'root' ).classList.add( 'pip_gui' );
-      }
-
-      componentWillUnmount(){
-        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-      }
-
-      handleAckClick( e ){
-        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-      }
-
-      render(){
-        return (
-          <>
-            <div id="user_instruction" className="pip_gui pip_post" >
-              <h1>Wither-to's and Why-for's</h1>
-              <span className="introduction">
-                Thank you for being here!<br/>
-                Watch your head, so to speak, as this is a work in-progress.<br/><br/>
-                You are welcome to investigate 'under the hood', though the code in your browser is compiled and difficult to traverse.<br/>
-                The full codebase upon which this app is running may be <a href="https://github.com/phxsol/pale-blue-dot" target="_blank">found here on GitHub</a>.<br/>
-              </span>
-            </div>
-            <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-          </>
-        );
-      }
-    }
-
-    this.react_app.render( <ErrorBoundary><UserInstructionModal /></ErrorBoundary> );
-
-    document.title = 'Workflow.user_introduction | The Pale Blue Dot | Phox.Solutions';
-  };
-  introduction = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.introduction');
-
-
-    let u_name = screenplay.captain_name;
-
-    let submit = ()=>{
-      screenplay.captain_name = ( !u_name || u_name === '') ? false : u_name;
-      this.react_app.render();
-      this.ActivateOrbitControls( screenplay );
-      //alert( `Thank you Captain${(!screenplay.captain_name)?'':' '+screenplay.captain_name}.`)
+    } finally{
+      //
+      this.react_app.render( <><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /><ViewScreenDisplay screenplay={screenplay} onDisplay={false} selfCamStream={selfCamStream} videoStreams={videoStreams} /></> );
       director.emit( `${dictum_name}_progress`, dictum_name, ndx );
     }
-
-    class SubmitButton extends React.Component {
-
-      constructor( props ) {
-        super( props );
-      }
-
-      handleSubmitClick( e ) {
-        submit();
-      }
-
-      handleDefaultClick( e ){
-        u_name = false;
-        submit();
-      }
-
-      render() {
-        const captainName = this.props.captainName;
-
-        return (
-          <div
-              className="user_side"
-              style={{ gridRow: 5, display: 'flex' }}>
-            <button
-              name="submit"
-              className="pip_button"
-              style={{ marginLeft: '1rem' }}
-              type="button"
-              onClick={this.handleSubmitClick}>Submit</button>
-            <button
-              name="default"
-              className="pip_button"
-              style={{ marginLeft: '1rem' }}
-              type="button"
-              onClick={this.handleDefaultClick}>Captain will&nbsp;do.</button>
-          </div>
-        );
-      }
-    }
-
-    class CaptainNameField extends React.Component {
-      constructor(props) {
-        super(props);
-        this.handleCaptainNameChange = this.handleCaptainNameChange.bind( this );
-      }
-
-      handleCaptainNameChange( e ) {
-        this.props.onCaptainNameChange( e.target.value );
-      }
-
-      handleCaptainNameFocus( e ) {
-        e.target.placeholder = '';
-      }
-
-      handleCaptainNameBlur( e ) {
-        e.target.placeholder = "Your name Captain?";
-      }
-
-      render() {
-        return (
-          <input
-            id="captain_name_field"
-            className="pip_reply user_side"
-            style={{ gridRow: 4 }}
-            type="text"
-            placeholder="..."
-            value={this.props.captainName}
-            onChange={this.handleCaptainNameChange}
-            onFocus={this.handleCaptainNameFocus}
-            onBlur={this.handleCaptainNameBlur}
-          />
-        );
-      }
-    }
-
-    class IntroductionForm extends React.Component {
-      constructor( props ) {
-        super( props );
-        this.state = {
-          captainName: ""
-        };
-
-        this.handleCaptainNameChange = this.handleCaptainNameChange.bind( this );
-      }
-
-      handleCaptainNameChange( captainName ) {
-        this.setState({
-          captainName: captainName
-        });
-        u_name = captainName;
-      }
-
-      componentDidMount(){
-        document.getElementById( 'root' ).classList.add( 'pip_gui' );
-      }
-
-      componentWillUnmount(){
-        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-      }
-
-      render() {
-        return (
-          <div id="introduction" className="pip_gui pip_chat">
-            <span className="ui_side pip_text" style={{ gridRow: 2 }}>
-              Greetings Captain.
-            </span>
-            <span className="ui_side pip_text" style={{ gridRow: 3 }}>How do you prefer to be addressed?</span>
-            <CaptainNameField
-              filterText={this.state.captainName}
-              onCaptainNameChange={this.handleCaptainNameChange}
-            />
-            <SubmitButton
-              captainName={this.state.captainName}
-              />
-          </div>
-        );
-      }
-    }
-
-    this.react_app.render( <ErrorBoundary><IntroductionForm /></ErrorBoundary> );
-
-    document.title = 'Workflow.introduction | The Pale Blue Dot | Phox.Solutions';
   };
-  tour_or_skip = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.tour_or_skip');
 
-    let engage = ()=>{
-      this.react_app.render();
-      this.ActivateOrbitControls( screenplay );
+  //Orphans
+  new_room = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.new_room');
+    document.title = 'Workflow.new_room | MySpace';
 
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    class EngageButton extends React.Component {
-
-      constructor( props ) {
-        super( props );
-      }
-
-      handleEngageClick( e ) {
-        engage();
-      }
-
-      componentDidMount(){
-        document.getElementById( 'root' ).classList.add( 'pip_gui' );
-      }
-
-      componentWillUnmount(){
-        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-      }
-
-      render() {
-        const captainName = this.props.captainName;
-
-        return (
-          <>
-            <button
-              name="engage"
-              className="pip_button user_side"
-              type="button"
-              onClick={this.handleEngageClick}>
-              ENGAGE
-            </button>
-          </>
-        );
-      }
-    }
-
-    class CaptainsOrders extends React.Component {
-
-      constructor( props ) {
-        super( props );
-        this.state = {
-          captainName: props.captainName
-        };
-        this.handleShowTourChange = this.handleShowTourChange.bind( this );
-      }
-
-      handleShowTourChange( e ) {
-        this.props.onShowTourChange( e.target.checked );
-      }
-
-      render() {
-        const captainName = this.props.captainName;
-        const showTour = this.props.showTour;
-
-        return (
-          < div
-              className="user_side"
-              style={{ gridRow: 4, display: 'flex' }}>
-            <label
-              className="pip_text user_side"
-              htmlFor="show_tour"
-              style={{ marginLeft: '1rem' }}
-              >Take the Tour?</label>
-            <input
-              id="show_tour_checkbox"
-              className="pip_toggle user_side"
-              style={{ marginLeft: '1rem' }}
-              type="checkbox"
-              checked={this.props.showTour}
-              onChange={this.handleShowTourChange}
-            />
-            <EngageButton />
-          </div>
-        );
-      }
-    }
-
-    class TourOrSkipForm extends React.Component {
-      constructor( props ) {
-        super( props );
-        this.state = {
-          showTour: false,
-          captainName: screenplay.captain_name
-        };
-        this.handleShowTourChange = this.handleShowTourChange.bind( this );
-      }
-
-      handleShowTourChange( showTour ) {
-        this.setState({
-          showTour: showTour
-        });
-        screenplay.take_the_tour = showTour;
-      }
-
-      componentDidMount(){
-        document.getElementById( 'root' ).classList.add( 'pip_gui' );
-      }
-
-      componentWillUnmount(){
-        document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-      }
-
-      render( ) {
-        return (
-          <div id="tour_or_skip" className="pip_gui pip_chat">
-            <span className="ui_side pip_text" style={{ gridRow: 2 }}>
-              Captain{(!this.state.captainName)?'':' '+this.state.captainName}.
-            </span>
-            <span className="ui_side pip_text" style={{ gridRow: 3 }}>A tour of the local system is available.<br />Shall I begin, or would you rather continue on to meet the Architect?</span>
-            <CaptainsOrders
-              showTour={this.state.showTour}
-              onShowTourChange={this.handleShowTourChange}
-            />
-          </div>
-        );
-      }
-    }
-
-    this.react_app.render( <ErrorBoundary><TourOrSkipForm /></ErrorBoundary> );
-
-    document.title = 'Workflow.tour_or_skip | The Pale Blue Dot | Phox.Solutions';
-
+    this.react_app.render( <ErrorBoundary><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /><PipGUI pipGUI={false} /><ViewScreenDisplay screenplay={screenplay} /></ErrorBoundary> );
+    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
-  visit_sun = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_sun');
+  event_model = async ( screenplay, dictum_name, director, ndx ) => {
+    console.log('Workflow.event_model');
+    document.title = 'Workflow.event_model | MySpace';
+
+    // Instantiate a exporter
+    let sys_ve_scene = screenplay.sys_ve_scene;
+    let sys_ui_scene = screenplay.sys_ui_scene;
+    let page_ve_scene = screenplay.page_ve_scene;
+    let page_ui_scene = screenplay.page_ui_scene;
+
+    page_ve_scene.add( screenplay.lights.ambient_light );
+    await screenplay.props.Model;
+    let model = screenplay.props.Model.scene;
+    let fullsize = new THREE.Vector3( 1, 1, 1 );
+    model.scale.multiplyScalar( 0 );
+    sys_ve_scene.add( model );
+    let event_model_entrance = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = event_model_entrance.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = cache.frame / cache.duration;
+          model.scale.lerp( fullsize, progress );
 
-    let onArrival = ()=>{
-
-      class VisitSunModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-          // TODO: Place this component as if on the viewscreen.
-          /*
-          const visit_sun_modal = document.getElementById( "visit_sun_modal" );
-          const cssObject = new CSS3DAsset( visit_sun_modal );
-
-          let _pos = new THREE.Vector3();
-          screenplay.actors.Ship.NavDots.sight_target.getWorldPosition( _pos );
-          cssObject.up = screenplay.actors.Ship.up;
-          cssObject.position.copy( _pos );
-          cssObject.scale.copy( new THREE.Vector3( 0.1, 0.1, 0.1 ) );
-          cssObject.directions.set( 'lookAt', ()=>{
-            cssObject.lookAt( screenplay.actors.Ship.position );
-          });
-          screenplay.actives.push( cssObject );
-          screenplay.ui_scene.add( cssObject );
-
-          let tour_info_settings_folder = gui.addFolder( 'Tour Info Settings' );
-          tour_info_settings_folder.add( cssObject.position, 'x' ).name( 'Pos X');
-          tour_info_settings_folder.add( cssObject.position, 'y' ).name( 'Pos Y');
-          tour_info_settings_folder.add( cssObject.position, 'z' ).name( 'Pos Z');
-          tour_info_settings_folder.add( cssObject.scale, 'x' ).name( 'Scale X');
-          tour_info_settings_folder.add( cssObject.scale, 'y' ).name( 'Scale Y');
-          tour_info_settings_folder.add( cssObject.scale, 'z' ).name( 'Scale Z');
-
-          tour_info_settings_folder.open( true );
-          */
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_sun_modal = document.getElementById( "visit_sun_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_sun_modal" className="pip_gui pip_import">
-                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
-                <iframe src="https://en.wikipedia.org/wiki/Sun#Structure_and_fusion" title="Sun - Wikipedia" ></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitSunModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_sun | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Sun, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  visit_mercury = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_mercury');
-
-    let onArrival = ()=>{
-
-      class VisitMercuryModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_mercury_modal = document.getElementById( "visit_mercury_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_mercury_modal" className="pip_gui pip_import">
-                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
-                <iframe src="https://en.wikipedia.org/wiki/Mercury_(planet)#Orbit.2C_rotation.2C_and_longitude" title="Mercury - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitMercuryModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_mercury | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Mercury, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  visit_venus = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_venus');
-
-    let onArrival = ()=>{
-
-      class VisitVenusModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_venus_modal = document.getElementById( "visit_venus_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_venus_modal" className="pip_gui pip_import">
-                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
-                <iframe src="https://en.wikipedia.org/wiki/Venus" title="Venus - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitVenusModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_venus | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Venus, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  visit_earth = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_earth');
-
-    let onArrival = ()=>{
-
-      class VisitEarthModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_earth_modal = document.getElementById( "visit_earth_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_earth_modal" className="pip_gui pip_import">
-                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
-                <iframe src="https://en.wikipedia.org/wiki/Earth" title="Earth - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitEarthModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_earth | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Earth, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  visit_moon = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_moon');
-
-    let onArrival = ()=>{
-
-      class VisitMoonModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_moon_modal = document.getElementById( "visit_moon_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_moon_modal" className="pip_gui pip_import">
-                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
-                <iframe src="https://en.wikipedia.org/wiki/Moon#Physical_characteristics" title="Moon - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitMoonModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_moon | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Moon, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  visit_mars = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_mars');
-
-    let onArrival = ()=>{
-
-      class VisitMarsModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_mars_modal = document.getElementById( "visit_mars_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_mars_modal" className="pip_gui pip_import">
-                <iframe src="https://en.wikipedia.org/wiki/Mars" title="Mars - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitMarsModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_mars | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Mars, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  visit_jupiter = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_jupiter');
-
-    let onArrival = ()=>{
-
-      class VisitJupiterModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_jupiter_modal = document.getElementById( "visit_jupiter_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_jupiter_modal" className="pip_gui pip_import">
-                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
-                <iframe src="https://en.wikipedia.org/wiki/Jupiter" title="Jupiter - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitJupiterModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_jupiter | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Jupiter, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  visit_saturn = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_saturn');
-
-    let onArrival = ()=>{
-
-      class VisitSaturnModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_saturn_modal = document.getElementById( "visit_saturn_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_saturn_modal" className="pip_gui pip_import">
-                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
-                <iframe src="https://en.wikipedia.org/wiki/Saturn" title="Saturn - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitSaturnModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_saturn | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Saturn, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  visit_uranus = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_uranus');
-
-    let onArrival = ()=>{
-
-      class VisitUranusModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_uranus_modal = document.getElementById( "visit_uranus_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_uranus_modal" className="pip_gui pip_import">
-                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
-                <iframe src="https://en.wikipedia.org/wiki/Uranus" title="Uranus - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitUranusModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_uranus | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Uranus, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  visit_neptune = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.visit_neptune');
-
-    let onArrival = ()=>{
-
-      class VisitNeptuneModal extends React.Component {
-        constructor( props ){
-          super( props );
-        }
-
-        componentDidMount(){
-
-          // 4NOW: Display as a fullscreen pip_gui.
-          const visit_neptune_modal = document.getElementById( "visit_neptune_modal" );
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-        }
-
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-
-        handleAckClick( e ){
-          onAcknowledge();
-        }
-
-        render(){
-          return (
-            <>
-              <div id="visit_neptune_modal" className="pip_gui pip_import">
-                <h2 className='iframe_title'>Data found @ Wikipedia.org</h2>
-                <iframe src="https://en.wikipedia.org/wiki/Neptune" title="Neptune - Wikipedia" width={window.innerWidth} height={window.innerHeight}></iframe>
-              </div>
-              <button name="ack_user_instruction" className="pip_ack" type="button" onClick={this.handleAckClick}>OK</button>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VisitNeptuneModal /></ErrorBoundary>);
-
-      document.title = 'Workflow.visit_neptune | The Pale Blue Dot | Phox.Solutions';
-    }
-
-    let onAcknowledge = ()=>{
-      this.react_app.render();
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-    }
-
-    screenplay.actions.warp_to( screenplay.actors.Neptune, false, onArrival );
-
-    document.title = 'Warping... | The Pale Blue Dot | Phox.Solutions';
-
-  };
-  introduce_phox = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.introduce_phox');
-    screenplay.actions.change_cam( 'Center' );
-    this.ActivateOrbitControls( screenplay );
-
-    window.alert(' The Architect Connection is under contruction.  For now you may explore the Solar System with the Architect Interface.  Enjoy!');
-    const gui = screenplay.lil_gui;
-    gui.open( true );
-    // TODO: Convert to React Component, load from resume.html for content
-/*
-    let resume_objects = screenplay.resume.objects;
-    let targets = screenplay.resume.targets;
-    let minor_dim = Math.min( window.innerWidth, window.innerHeight );
-    let major_dim = Math.max( window.innerWidth, window.innerHeight );
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    let x_offset = -window.innerWidth / 2;
-    let y_offset = -window.innerHeight / 2;
-
-    // Resume 3DObjectification
-    const resume_station = document.querySelectorAll("#resume > .station");
-    let resume_group = new THREE.Group();
-    resume_station.forEach( function( station ) {
-
-      station.addEventListener( 'click', ( e )=>{
-        e.preventDefault();
-        if( cssObject.showcase ) cssObject.showcase = false; else cssObject.showcase = true; // Toggle to track whether on display or not.
-        if (cssObject.showcase ) {
-          let distance = cssObject.element.clientWidth;
-          cssObject.position.addVectors( screenplay.active_cam.position, new THREE.Vector3( 0, 0, -distance ) );
-          cssObject.directions.set( 'lookAt', ()=>{
-            cssObject.lookAt( screenplay.active_cam.position );
-          });
         } else {
-          switch ( cssObject.arrangement ) {
-            case 'timeline':
-              cssObject.position.copy( targets.timeline[ cssObject.ndx ].position );
-              break;
-
-            case 'table':
-              cssObject.position.copy( targets.table[ cssObject.ndx ].position );
-              break;
-
-            case 'sphere':
-              cssObject.position.copy( targets.sphere[ cssObject.ndx ].position );
-              break;
-
-            case 'helix':
-              cssObject.position.copy( targets.helix[ cssObject.ndx ].position );
-              break;
-
-            case 'grid':
-              cssObject.position.copy( targets.grid[ cssObject.ndx ].position );
-              break;
-          }
+          event_model_entrance.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
         }
-      }, { capture: true } );
-
-      const cssObject = new CSS3DAsset( station );
-      cssObject.directions.set( 'lookAt', ()=>{
-        cssObject.lookAt( screenplay.active_cam.position );
-      });
-      cssObject.ndx = resume_objects.length;
-      screenplay.actives.push( cssObject );
-      resume_group.add( cssObject );
-      resume_objects.push( cssObject );
+      },
+      cache: {
+        duration: 30, /* do something in 60 frames */
+        frame: 0,
+      },
+      reset: ()=>{
+        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.frame = 0;
+        screenplay.updatables.set( 'event_model_entrance', event_model_entrance );
+      },
+      post: ( )=>{
+        screenplay.updatables.delete( 'event_model_entrance' );
+        model.scale.copy( fullsize );
+      }
     });
-    screenplay.ui_scene.add( resume_group );
+    screenplay.updatables.set( 'event_model_entrance', event_model_entrance );
 
-    const vector = new THREE.Vector3();
-    let _offset = new THREE.Vector3( (-width / 2),  -(height / 4), (-width) );
-    let time_start = new THREE.Vector3().addVectors( screenplay.active_cam.position, _offset );
-    let time_bend = new THREE.Vector3().addVectors( time_start, new THREE.Vector3( 0, 0, -3 * major_dim ) );
-    let time_end = new THREE.Vector3( (width * 4),  height * 4, -3 * major_dim );
-    const timeline = new THREE.QuadraticBezierCurve3( time_start, time_bend, time_end );
-
-    // Set the Targets for each display orientation
-    let timelength = 2208 - 606;
-    let last_start = 0;
-    for ( let ndx = 0, len = resume_objects.length; ndx < len; ndx++ ){
-      last_start = ( ndx > 0 ) ? Number.parseInt( resume_objects[ndx - 1].element.dataset.start ) : 0;
-      let start = Number.parseInt( resume_objects[ndx].element.dataset.start );
-      let end = Number.parseInt( resume_objects[ndx].element.dataset.end );
-
-      let prog = (ndx + 1)/len;
-      let element_height = resume_objects[ ndx ].element.clientHeight;
-      let element_width = resume_objects[ ndx ].element.clientWidth;
-
-      // Time-Line Display
-      const timeline_object = new THREE.Object3D();
-      let _at = ( start-606 ) / timelength;
-      let _last_at = ( last_start-606 ) / timelength;
-      let pos_at = new THREE.Vector3();
-      if( true ) {
-        timeline.getPointAt( _at, pos_at );
-        timeline_object.position.copy( pos_at );
-      } else {
-        // TODO: Implement this offset, but this needs an overhaul from above.
-        timeline.getPointAt( _last_at, pos_at );
-        let stack_offset = new THREE.Vector3( 0, element_height, 0 );
-        timeline_object.position.addVectors( pos_at, stack_offset );
-      }
-      targets.timeline.push( timeline_object );
-
-      // Table Display
-      const table_object = new THREE.Object3D();
-      let _col = ( ndx % 3 );
-      let _row = ( Math.floor( ndx / 3 ) );
-      let _col_width = ( window.innerWidth / 2 );     // TODO: Add Perspective scalar to fit view frustum.
-      let _row_height = ( window.innerHeight / 2 );   // TODO: Add Perspective scalar to fit view frustum.
-      table_object.position.x = ( _col * _col_width ) + x_offset;  // TODO: Add Perspective scalar to fit view frustum.
-      table_object.position.y = ( _row * _row_height ) + y_offset;  // TODO: Add Perspective scalar to fit view frustum.
-      targets.table.push( table_object );
-
-      // Sphere Display
-      const phi = Math.acos( - 1 + ( 2 * ndx ) / len );
-      const sphere_theta = Math.sqrt( len * Math.PI ) * phi;
-      const sphere_object = new THREE.Object3D();
-      sphere_object.position.setFromSphericalCoords( minor_dim, phi, sphere_theta );
-      targets.sphere.push( sphere_object );
-
-      // Helix Display
-      const helix_theta = (ndx / ( len - 1)) * 2 * Math.PI;
-
-      const y = -( 2 * minor_dim * prog ) + minor_dim;
-      const helix_object = new THREE.Object3D();
-      helix_object.position.setFromCylindricalCoords( major_dim / 2, helix_theta, y );
-
-      targets.helix.push( helix_object );
-
-
-      // Grid Display
-      let ratio = major_dim / minor_dim;
-      const grid_object = new THREE.Object3D();
-      switch( ndx ){
-        case 4:
-          grid_object.position.x = ( 0 * _col_width ) + x_offset;
-          grid_object.position.y = ( 0 * _row_height ) + y_offset;
-          break;
-        case 8:
-          grid_object.position.x = ( 1 * _col_width ) + x_offset;
-          grid_object.position.y = ( 0 * _row_height ) + y_offset;
-          break;
-        case 2:
-          grid_object.position.x = ( 2 * _col_width ) + x_offset;
-          grid_object.position.y = ( 0 * _row_height ) + y_offset;
-          break;
-        case 3:
-          grid_object.position.x = ( 0 * _col_width ) + x_offset;
-          grid_object.position.y = ( 1 * _row_height ) + y_offset;
-          break;
-        case 0:
-          grid_object.position.x = ( 1 * _col_width ) + x_offset;
-          grid_object.position.y = ( 1 * _row_height ) + y_offset;
-          break;
-        case 6:
-          grid_object.position.x = ( 2 * _col_width ) + x_offset;
-          grid_object.position.y = ( 1 * _row_height ) + y_offset;
-          break;
-        case 7:
-          grid_object.position.x = ( 0 * _col_width ) + x_offset;
-          grid_object.position.y = ( 2 * _row_height ) + y_offset;
-          break;
-        case 5:
-          grid_object.position.x = ( 1 * _col_width ) + x_offset;
-          grid_object.position.y = ( 2 * _row_height ) + y_offset;
-          break;
-        case 1:
-          grid_object.position.x = ( 2 * _col_width ) + x_offset;
-          grid_object.position.y = ( 2 * _row_height ) + y_offset;
-          break;
-      }
-      grid_object.position.z = 0;
-
-      targets.grid.push( grid_object );
-
-    }
 
     const gui = screenplay.lil_gui;
-    let document_controls_folder = gui.addFolder( 'Document Controls' );
-    const document_controls = {
-      'Timeline_Display': ( ) => {
 
-        resume_objects.forEach( (obj)=>{
-          obj.arrangement = 'timeline';
-        });
-        screenplay.actions.transform( resume_objects, targets.timeline, 100 );
-        resume_group.directions = new Map();
-        resume_group.up = new THREE.Vector3( 0,1,0 );
-        resume_group.rotation.y = 0;
-        resume_group.rotation.x = 0;
+    let scene_sharing_folder = gui.addFolder( 'Scene Controls');
+
+    let wrap = {
+      scene: ()=>{
+        // Parse the input and generate the glTF output
+        let to_remove = [];
+        let to_save = sys_ve_scene.clone( true );
+        to_save.traverse( function ( object ) {
+          if (!object.isLight) return;
+          if (!object.isDirectionalLight && !object.isPointLight && !object.isSpotLight) {
+            to_remove.push(object);
+          }
+        } );
+        to_remove.forEach( obj => { obj.removeFromParent() });
+        const exporter = new GLTFExporter();
+        exporter.parse( [to_save],
+         // called when the gltf has been generated
+         function ( gltf ) {
+           //console.log( gltf );
+           //  Diverting to Glyphon Research    wrap.downloadObjectAsGLTF( gltf, 'Scene' );
+           wrap.generateGlyphon( gltf );
+         },
+         // called when there is an error in the generation
+         function ( error ) {
+           console.log( 'An error happened' );
+
+         });
+      },
+      encodeGlyph: ()=>{
+        wrap.generateGlyph();
+      },
+      downloadObjectAsGLTF: function downloadObjectAsGLTF( exportObj, exportName ){
+        let raw_string = encodeURIComponent( JSON.stringify( exportObj ) );
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent( JSON.stringify( exportObj ) );
+        var downloadAnchorNode = document.createElement( 'a' );
+        downloadAnchorNode.setAttribute( "href",     dataStr );
+        downloadAnchorNode.setAttribute( "download", exportName + ".gltf" );
+        document.body.appendChild( downloadAnchorNode ); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      },
+      generateGlyph: function generateGlyph( dataStr = 'https://wethe.network/AnObscureCodeWhichAintNeccessaryToReadAsThisVeryCodeIsPartOfTheSolution' ){
+        QRCode.toDataURL(dataStr)
+          .then(url => {
+            console.log(url);
+            let glyph = document.createElement( 'div' );
+            glyph.id = "glyph";
+            var glyphImage = document.createElement( 'img' );
+            glyphImage.setAttribute( "src", url );
+            glyph.appendChild( glyphImage );
+            document.body.appendChild( glyph ); // required for firefox
+          })
+          .catch(err => {
+            console.error(err)
+          })
 
       },
-      'Table_Display': ( ) => {
+      generateGlyphon: function generateGlyphon( exportObj ){
+        let raw_string = encodeURIComponent( JSON.stringify( exportObj ) );
+        let glyphon = [];
+        let page = "data:img/glyphon;page:0;" + encodeURIComponent( JSON.stringify( exportObj ) );
 
-        resume_objects.forEach( (obj)=>{
-          obj.arrangement = 'table';
+        console.log( 'here' );
+        //let raw_string = encodeURIComponent( JSON.stringify( exportObj ) );
+        wrap.generateGlyphon( raw_string );
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent( JSON.stringify( exportObj ) );
+
+        // As before, I'm regularly grabbing blobs of video data
+        // The implementation of "nextChunk" could be various things:
+        //   - reading from a MediaRecorder
+        //   - reading from an XMLHttpRequest
+        //   - reading from a local webcam
+        //   - generating the files on the fly in JavaScript
+        //   - etc
+        var arrayOfBlobs = [];
+        setInterval(function() {
+            arrayOfBlobs.append(nextChunk());
+            // NEW: Try to flush our queue of video data to the video element
+            appendToSourceBuffer();
+        }, 1000);
+
+        // 1. Create a `MediaSource`
+        var mediaSource = new MediaSource();
+
+        // 2. Create an object URL from the `MediaSource`
+        var url = URL.createObjectURL(mediaSource);
+
+        // 3. Set the video's `src` to the object URL
+        var video = document.getElementById("video");
+        video.src = url;
+
+        // 4. On the `sourceopen` event, create a `SourceBuffer`
+        var sourceBuffer = null;
+        mediaSource.addEventListener("sourceopen", function(){
+            // NOTE: Browsers are VERY picky about the codec being EXACTLY
+            // right here. Make sure you know which codecs you're using!
+            sourceBuffer = mediaSource.addSourceBuffer("video/webm; codecs=\"opus,vp8\"");
+
+            // If we requested any video data prior to setting up the SourceBuffer,
+            // we want to make sure we only append one blob at a time
+            sourceBuffer.addEventListener("updateend", appendToSourceBuffer);
         });
-        screenplay.actions.transform( resume_objects, targets.table, 100 );
-        resume_group.directions = new Map();
-        resume_group.up = new THREE.Vector3( 0,1,0 );
-        resume_group.rotation.y = 0;
-        resume_group.rotation.x = 0;
 
-      },
-      'Sphere_Display': ( ) => {
+        // 5. Use `SourceBuffer.appendBuffer()` to add all of your chunks to the video
+        function appendToSourceBuffer(){
+            if ( mediaSource.readyState === "open" && sourceBuffer && sourceBuffer.updating === false ){
+                sourceBuffer.appendBuffer( arrayOfBlobs.shift() );
+            }
 
-        resume_objects.forEach( (obj)=>{
-          obj.arrangement = 'sphere';
-        });
-        screenplay.actions.transform( resume_objects, targets.sphere, 100 );
-        resume_group.directions = new Map();
-        resume_group.directions.set( 'sphere', ()=>{
-          resume_group.rotation.y += .00420;
-        });
-        screenplay.actives.push( resume_group );
+            // Limit the total buffer size to 20 minutes
+            // This way we don't run out of RAM
+            if ( video.buffered.length && video.buffered.end(0) - video.buffered.start(0) > 1200 ){
+                sourceBuffer.remove(0, video.buffered.end(0) - 1200)
+            }
+        }
 
-      },
-      'Helix_Display': ( ) => {
-
-        resume_objects.forEach( (obj)=>{
-          obj.arrangement = 'helix';
-        });
-        screenplay.actions.transform( resume_objects, targets.helix, 100 );
-        resume_group.directions = new Map();
-        resume_group.directions.set( 'helix', ()=>{
-          resume_group.rotation.y -= .00420;
-        });
-        screenplay.actives.push( resume_group );
-
-      },
-      'Grid_Display': ( ) => {
-
-        resume_objects.forEach( (obj)=>{
-          obj.arrangement = 'grid';
-        });
-        screenplay.actions.transform( resume_objects, targets.grid, 100 );
-        resume_group.directions = new Map();
-        resume_group.up = new THREE.Vector3( 0,1,0 );
-        resume_group.rotation.y = 0;
-        resume_group.rotation.x = 0;
-
-
+        return glyphon;
       }
     }
-    document_controls_folder.add( document_controls, 'Timeline_Display' ).name( 'Timeline Display' );
-    document_controls_folder.add( document_controls, 'Table_Display' ).name( 'Table Display' );
-    document_controls_folder.add( document_controls, 'Sphere_Display' ).name( 'Sphere Display' );
-    document_controls_folder.add( document_controls, 'Helix_Display' ).name( 'Helix Display' );
-    document_controls_folder.add( document_controls, 'Grid_Display' ).name( 'Grid Display' );
 
-    gui.open( true );
-    gui.folders.forEach( (folder)=>{
-      folder.open( false );
+    scene_sharing_folder.add( wrap, 'scene' ).name( "save scene");
+    scene_sharing_folder.add( wrap, 'encodeGlyph' ).name( "Show Glyph");
+
+
+    gui.open( open );
+    let page_ve_folder = gui.addFolder( 'Page VE' );
+    page_ve_folder.add ( screenplay.props.Model.scene.position, 'x' ).listen().onChange((value)=>{
+      screenplay.props.Model.scene.position.setX( value );
+    }).name( 'Stage: pos.X' );
+    page_ve_folder.add ( screenplay.props.Model.scene.position, 'y' ).listen().onChange((value)=>{
+      screenplay.props.Model.scene.position.setY( value );
+    }).name( 'Stage: pos.Y' );
+    page_ve_folder.add ( screenplay.props.Model.scene.position, 'z' ).listen().onChange((value)=>{
+      screenplay.props.Model.scene.position.setZ( value );
+    }).name( 'Stage: pos.Z' );
+    page_ve_folder.add ( screenplay.props.Model.scene.rotation, 'x' ).listen().onChange((value)=>{
+      screenplay.props.Model.scene.rotateX( value );
+    }).name( 'Stage: rot.X' );
+    page_ve_folder.add ( screenplay.props.Model.scene.rotation, 'y' ).listen().onChange((value)=>{
+      screenplay.props.Model.scene.rotateY( value );
+    }).name( 'Stage: rot.Y' );
+    page_ve_folder.add ( screenplay.props.Model.scene.rotation, 'z' ).listen().onChange((value)=>{
+      screenplay.props.Model.scene.rotateZ( value );
+    }).name( 'Stage: rot.Z' );
+
+    this.react_app.render( <ErrorBoundary><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /><PipGUI pipGUI={false} /><ViewScreenDisplay screenplay={screenplay} /></ErrorBoundary> );
+
+  };
+  demo = async ( screenplay, dictum_name, director, ndx ) =>{
+    console.log('Workflow.demo');
+    document.title = 'Workflow.demo | MySpace';
+
+    let page_ve_scene = screenplay.page_ve_scene;
+
+    this.react_app.render( <ErrorBoundary><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /><PipGUI pipGUI={false} /><ViewScreenDisplay screenplay={screenplay} /></ErrorBoundary>  );
+
+
+    let demo_2 = await new SceneTransformation({
+      update: function(){
+        let cache = this.cache;
+
+        if( cache.initialized ){
+
+  				cache.idleWeight = cache.idleAction.getEffectiveWeight();
+  				cache.walkWeight = cache.walkAction.getEffectiveWeight();
+  				cache.runWeight = cache.runAction.getEffectiveWeight();
+
+  				// Update the panel values if weights are modified from "outside" (by crossfadings)
+  				updateWeightSliders();
+
+  				// Enable/disable crossfade controls according to current weight values
+  				updateCrossFadeControls();
+
+  				// Get the time elapsed since the last frame, used for mixer update (if not in single step mode)
+  				let mixerUpdateDelta = cache.clock.getDelta();
+
+  				// If in single step mode, make one step and then do nothing (until the user clicks again)
+  				if ( cache.singleStepMode ) {
+  					cache.mixerUpdateDelta = cache.sizeOfNextStep;
+  					cache.sizeOfNextStep = 0;
+  				}
+
+  				// Update the animation mixer and render this frame
+  				cache.mixer.update( mixerUpdateDelta );
+        }
+      },
+      cache: {
+        scene: null, renderer: null, camera: null, model: null, skeleton: null, mixer: null, clock: null,
+        crossFadeControls: [],
+
+        idleAction: null, walkAction: null, runAction: null,
+        idleWeight: null, walkWeight: null, runWeight: null,
+        actions: null, settings: null,
+
+        singleStepMode: false,
+        sizeOfNextStep: 0,
+        dirLight: null
+
+      },
+      post: function(){
+
+      },
+      init: async function(){
+        let cache = this.cache;
+
+				cache.clock = screenplay.clock;
+        cache.renderer = screenplay.page_ve_renderer;
+
+				let scene = page_ve_scene;
+				scene.background = new THREE.Color( 0xa0a0a0 );
+				scene.fog = new THREE.Fog( 0xa0a0a0, 10, 50 );
+
+				let hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
+				hemiLight.position.set( 0, 20, 0 );
+				scene.add( hemiLight );
+
+				let dirLight = cache.dirLight = new THREE.DirectionalLight( 0xffffff );
+				dirLight.position.set( - 3, 10, - 10 );
+				dirLight.castShadow = true;
+				dirLight.shadow.camera.top = 2;
+				dirLight.shadow.camera.bottom = - 2;
+				dirLight.shadow.camera.left = - 2;
+				dirLight.shadow.camera.right = 2;
+				dirLight.shadow.camera.near = 0.1;
+				dirLight.shadow.camera.far = 40;
+				scene.add( dirLight );
+
+				// scene.add( new THREE.CameraHelper( dirLight.shadow.camera ) );
+
+				// ground
+
+				const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
+				mesh.rotation.x = - Math.PI / 2;
+				mesh.receiveShadow = true;
+				scene.add( mesh );
+
+				const loader = new GLTFLoader();
+        let model = cache.model;
+        let skeleton = cache.skeleton;
+				loader.load( 'models/Soldier.glb', ( gltf ) => {
+
+					model = cache.model = gltf.scene;
+					model.traverse( function ( object ) {
+
+						if ( object.isMesh ) object.castShadow = true;
+
+					} );
+          scene.add( model );
+
+					//
+
+					skeleton = cache.skeleton = new THREE.SkeletonHelper( model );
+					skeleton.visible = false;
+					scene.add( skeleton );
+
+					//
+
+
+
+
+					//
+
+					const animations = gltf.animations;
+
+					let mixer = cache.mixer = new THREE.AnimationMixer( model );
+
+					cache.idleAction = mixer.clipAction( animations[ 0 ] );
+					cache.walkAction = mixer.clipAction( animations[ 3 ] );
+					cache.runAction = mixer.clipAction( animations[ 1 ] );
+
+					cache.actions = [ cache.idleAction, cache.walkAction, cache.runAction ];
+          activateAllActions();
+
+          cache.initialized = true;
+				} );
+
+
+			}
     });
-    document_controls_folder.open( true );
 
-    document_controls.Grid_Display();*/
-    this.ActivateOrbitControls( screenplay );
+    let showModel = function( visibility ) {
 
-    document.title = 'Workflow.introduce_phox | The Pale Blue Dot | Phox.Solutions';
+      demo_2.cache.model.visible = visibility;
 
-    //director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-  };
-  confirm_privileges = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.confirm_privileges');
+    };
 
-    document.title = 'Workflow.confirm_privileges | The Pale Blue Dot | Phox.Solutions';
+    let showSkeleton = function( visibility ) {
+
+      demo_2.cache.skeleton.visible = visibility;
+
+    };
+
+    let modifyTimeScale = function( speed ) {
+
+      demo_2.cache.mixer.timeScale = speed;
+
+    };
+
+    let deactivateAllActions = function() {
+
+      demo_2.cache.actions.forEach( function ( action ) {
+
+        action.stop();
+
+      } );
+
+    };
+
+    let activateAllActions = function() {
+
+      setWeight( demo_2.cache.idleAction, demo_2.cache.settings[ 'modify idle weight' ] );
+      setWeight( demo_2.cache.walkAction, demo_2.cache.settings[ 'modify walk weight' ] );
+      setWeight( demo_2.cache.runAction, demo_2.cache.settings[ 'modify run weight' ] );
+
+      demo_2.cache.actions.forEach( function ( action ) {
+
+        action.play();
+
+      } );
+
+    };
+
+    let pauseContinue = function() {
+
+      if ( demo_2.cache.singleStepMode ) {
+
+        demo_2.cache.singleStepMode = false;
+        unPauseAllActions();
+
+      } else {
+
+        if ( demo_2.cache.idleAction.paused ) {
+
+          unPauseAllActions();
+
+        } else {
+
+          pauseAllActions();
+
+        }
+
+      }
+
+    };
+
+    let pauseAllActions = function() {
+
+      demo_2.cache.actions.forEach( function ( action ) {
+
+        action.paused = true;
+
+      } );
+
+    };
+
+    let unPauseAllActions = function() {
+
+      demo_2.cache.actions.forEach( function ( action ) {
+
+        action.paused = false;
+
+      } );
+
+    };
+
+    let toSingleStepMode = function() {
+
+      unPauseAllActions();
+
+      demo_2.cache.singleStepMode = true;
+      demo_2.cache.sizeOfNextStep = demo_2.cache.settings[ 'modify step size' ];
+
+    };
+
+    let prepareCrossFade = function( startAction, endAction, defaultDuration ) {
+
+      // Switch default / custom crossfade duration (according to the user's choice)
+
+      const duration = setCrossFadeDuration( defaultDuration );
+
+      // Make sure that we don't go on in singleStepMode, and that all actions are unpaused
+
+      demo_2.cache.singleStepMode = false;
+      unPauseAllActions();
+
+      // If the current action is 'idle' (duration 4 sec), execute the crossfade immediately;
+      // else wait until the current action has finished its current loop
+
+      if ( startAction === cache.idleAction ) {
+
+        executeCrossFade( startAction, endAction, duration );
+
+      } else {
+
+        synchronizeCrossFade( startAction, endAction, duration );
+
+      }
+
+    };
+
+    let setCrossFadeDuration = function( defaultDuration ) {
+
+      // Switch default crossfade duration <-> custom crossfade duration
+
+      if ( demo_2.cache.settings[ 'use default duration' ] ) {
+
+        return defaultDuration;
+
+      } else {
+
+        return demo_2.cache.settings[ 'set custom duration' ];
+
+      }
+
+    };
+    let synchronizeCrossFade = function( startAction, endAction, duration ) {
+
+      let mixer = demo_2.cache.mixer;
+      mixer.addEventListener( 'loop', onLoopFinished );
+
+      function onLoopFinished( event ) {
+
+        if ( event.action === startAction ) {
+
+          mixer.removeEventListener( 'loop', onLoopFinished );
+
+          executeCrossFade( startAction, endAction, duration );
+
+        }
+
+      }
+
+    };
+
+    let executeCrossFade = function( startAction, endAction, duration ) {
+
+      // Not only the start action, but also the end action must get a weight of 1 before fading
+      // (concerning the start action demo_2 is already guaranteed in demo_2 place)
+
+      setWeight( endAction, 1 );
+      endAction.time = 0;
+
+      // Crossfade with warping - you can also try without warping by setting the third parameter to false
+
+      startAction.crossFadeTo( endAction, duration, true );
+
+    };
+
+    // demo_2 function is needed, since animationAction.crossFadeTo() disables its start action and sets
+    // the start action's timeScale to ((start animation's duration) / (end animation's duration))
+    let setWeight = function( action, weight ) {
+
+      action.enabled = true;
+      action.setEffectiveTimeScale( 1 );
+      action.setEffectiveWeight( weight );
+
+    };
+
+    // Called by the render loop
+    let updateWeightSliders = function() {
+
+      demo_2.cache.settings[ 'modify idle weight' ] = demo_2.cache.idleWeight;
+      demo_2.cache.settings[ 'modify walk weight' ] = demo_2.cache.walkWeight;
+      demo_2.cache.settings[ 'modify run weight' ] = demo_2.cache.runWeight;
+
+    };
+
+    // Called by the render loop
+    let updateCrossFadeControls = function() {
+
+      if ( demo_2.cache.idleWeight === 1 && demo_2.cache.walkWeight === 0 && demo_2.cache.runWeight === 0 ) {
+
+        demo_2.cache.crossFadeControls[ 0 ].disable();
+        demo_2.cache.crossFadeControls[ 1 ].enable();
+        demo_2.cache.crossFadeControls[ 2 ].disable();
+        demo_2.cache.crossFadeControls[ 3 ].disable();
+
+      }
+
+      if ( demo_2.cache.idleWeight === 0 && demo_2.cache.walkWeight === 1 && demo_2.cache.runWeight === 0 ) {
+
+        demo_2.cache.crossFadeControls[ 0 ].enable();
+        demo_2.cache.crossFadeControls[ 1 ].disable();
+        demo_2.cache.crossFadeControls[ 2 ].enable();
+        demo_2.cache.crossFadeControls[ 3 ].disable();
+
+      }
+
+      if ( demo_2.cache.idleWeight === 0 && demo_2.cache.walkWeight === 0 && demo_2.cache.runWeight === 1 ) {
+
+        demo_2.cache.crossFadeControls[ 0 ].disable();
+        demo_2.cache.crossFadeControls[ 1 ].disable();
+        demo_2.cache.crossFadeControls[ 2 ].disable();
+        demo_2.cache.crossFadeControls[ 3 ].enable();
+
+      }
+
+    };
+
+    await demo_2.init();
+
+    let cache = demo_2.cache;
+
+    const gui = screenplay.lil_gui;
+    const panel = gui.addFolder( 'Orphan: Demo' );
+
+    const folder1 = panel.addFolder( 'Visibility' );
+    const folder2 = panel.addFolder( 'Activation/Deactivation' );
+    const folder3 = panel.addFolder( 'Pausing/Stepping' );
+    const folder4 = panel.addFolder( 'Crossfading' );
+    const folder5 = panel.addFolder( 'Blend Weights' );
+    const folder6 = panel.addFolder( 'General Speed' );
+    const folder7 = panel.addFolder( ' Phox.Stuff' );
 
 
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-  };
-  connect = async ( screenplay, dictum_name, director, ndx ) => {
-    console.log('Workflow.connect');
+    let settings = demo_2.cache.settings = {
+      'show model': true,
+      'show skeleton': false,
+      'deactivate all': deactivateAllActions,
+      'activate all': activateAllActions,
+      'pause/continue': pauseContinue,
+      'make single step': toSingleStepMode,
+      'modify step size': 0.05,
+      'from walk to idle': ()=>{
 
-    document.title = 'Workflow.connect | The Pale Blue Dot | Phox.Solutions';
+        prepareCrossFade( cache.walkAction, cache.idleAction, 1.0 );
 
-    director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-  };
+      },
+      'from idle to walk': ()=>{
 
-  constructor( react_app ){
+        prepareCrossFade( cache.idleAction, cache.walkAction, 0.5 );
+
+      },
+      'from walk to run': ()=>{
+
+        prepareCrossFade( cache.walkAction, cache.runAction, 2.5 );
+
+      },
+      'from run to walk': ()=>{
+
+        prepareCrossFade( cache.runAction, cache.walkAction, 5.0 );
+
+      },
+      'use default duration': true,
+      'set custom duration': 3.5,
+      'modify idle weight': 0.0,
+      'modify walk weight': 1.0,
+      'modify run weight': 0.0,
+      'modify time scale': 1.0
+    };
+
+    folder1.add( settings, 'show model' ).onChange( showModel );
+    folder1.add( settings, 'show skeleton' ).onChange( showSkeleton );
+    folder2.add( settings, 'deactivate all' );
+    folder2.add( settings, 'activate all' );
+    folder3.add( settings, 'pause/continue' );
+    folder3.add( settings, 'make single step' );
+    folder3.add( settings, 'modify step size', 0.01, 0.1, 0.001 );
+
+    cache.crossFadeControls.push( folder4.add( settings, 'from walk to idle' ) );
+    cache.crossFadeControls.push( folder4.add( settings, 'from idle to walk' ) );
+    cache.crossFadeControls.push( folder4.add( settings, 'from walk to run' ) );
+    cache.crossFadeControls.push( folder4.add( settings, 'from run to walk' ) );
+
+    folder4.add( settings, 'use default duration' );
+    folder4.add( settings, 'set custom duration', 0, 10, 0.01 );
+    folder5.add( settings, 'modify idle weight', 0.0, 1.0, 0.01 ).listen().onChange( function ( weight ) {
+
+      setWeight( cache.idleAction, weight );
+
+    } );
+    folder5.add( settings, 'modify walk weight', 0.0, 1.0, 0.01 ).listen().onChange( function ( weight ) {
+
+      setWeight( cache.walkAction, weight );
+
+    } );
+    folder5.add( settings, 'modify run weight', 0.0, 1.0, 0.01 ).listen().onChange( function ( weight ) {
+
+      setWeight( cache.runAction, weight );
+
+    } );
+    folder6.add( settings, 'modify time scale', 0.0, 1.5, 0.01 ).onChange( modifyTimeScale );
+    let dirLight = cache.dirLight;
+    folder7.add ( dirLight.position, 'x' ).listen().onChange((value)=>{
+      dirLight.position.setX( value );
+
+    }).name( 'dirLight: pos.x' );
+    folder7.add ( dirLight.position, 'y' ).listen().onChange((value)=>{
+      dirLight.position.setY( value );
+
+    }).name( 'dirLight: pos.y' );
+    folder7.add ( dirLight.position, 'z' ).listen().onChange((value)=>{
+      dirLight.position.setZ( value );
+
+    }).name( 'dirLight: pos.z' );
+    folder7.add ( dirLight.rotation, 'x' ).listen().onChange((value)=>{
+      dirLight.rotateX( value );
+
+    }).name( 'dirLight: rot.x' );
+    folder7.add ( dirLight.rotation, 'y' ).listen().onChange((value)=>{
+      dirLight.rotateY( value );
+
+    }).name( 'dirLight: rot.y' );
+    folder7.add ( dirLight.rotation, 'z' ).listen().onChange((value)=>{
+      dirLight.rotateZ( value );
+
+    }).name( 'dirLight: rot.z' );
+
+    folder1.open();
+    folder2.open();
+    folder3.open();
+    folder4.open();
+    folder5.open();
+    folder6.open();
+
+
+    screenplay.updatables.set( 'demo', demo_2 );
+/*
+    let demo = {
+      scene: false, renderer: false, camera: false, model: false, skeleton: false, mixer: false, clock: false,
+			crossFadeControls: [],
+
+			idleAction: false, walkAction: false, runAction: false,
+			idleWeight: false, walkWeight: false, runWeight: false,
+			actions: false, settings: false,
+
+			singleStepMode: false,
+			sizeOfNextStep: 0,
+      dirLight: false,
+
+
+			init: function() {
+
+				demo.clock = screenplay.clock;
+        demo.renderer = screenplay.page_ve_renderer;
+
+				let scene = demo.scene = page_ve_scene;
+				scene.background = new THREE.Color( 0xa0a0a0 );
+				scene.fog = new THREE.Fog( 0xa0a0a0, 10, 50 );
+
+				let hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
+				hemiLight.position.set( 0, 20, 0 );
+				scene.add( hemiLight );
+
+				let dirLight = demo.dirLight = new THREE.DirectionalLight( 0xffffff );
+				dirLight.position.set( - 3, 10, - 10 );
+				dirLight.castShadow = true;
+				dirLight.shadow.camera.top = 2;
+				dirLight.shadow.camera.bottom = - 2;
+				dirLight.shadow.camera.left = - 2;
+				dirLight.shadow.camera.right = 2;
+				dirLight.shadow.camera.near = 0.1;
+				dirLight.shadow.camera.far = 40;
+				scene.add( dirLight );
+
+				// scene.add( new THREE.CameraHelper( dirLight.shadow.camera ) );
+
+				// ground
+
+				const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
+				mesh.rotation.x = - Math.PI / 2;
+				mesh.receiveShadow = true;
+				scene.add( mesh );
+
+				const loader = new GLTFLoader();
+        let model = demo.model;
+        let skeleton = demo.skeleton;
+				loader.load( 'models/Soldier.glb', ( gltf ) => {
+
+					model = gltf.scene;
+					model.traverse( function ( object ) {
+
+						if ( object.isMesh ) object.castShadow = true;
+
+					} );
+          scene.add( model );
+
+					//
+
+					skeleton = new THREE.SkeletonHelper( model );
+					skeleton.visible = false;
+					scene.add( skeleton );
+
+					//
+
+					demo.createPanel();
+
+
+					//
+
+					const animations = gltf.animations;
+
+					let mixer = demo.mixer = new THREE.AnimationMixer( model );
+
+					demo.idleAction = mixer.clipAction( animations[ 0 ] );
+					demo.walkAction = mixer.clipAction( animations[ 3 ] );
+					demo.runAction = mixer.clipAction( animations[ 1 ] );
+
+					demo.actions = [ demo.idleAction, demo.walkAction, demo.runAction ];
+
+					demo.activateAllActions();
+
+				} );
+
+
+			},
+
+			createPanel: function() {
+
+        const gui = screenplay.lil_gui;
+				const panel = gui.addFolder( 'Orphan: Demo' );
+
+				const folder1 = panel.addFolder( 'Visibility' );
+				const folder2 = panel.addFolder( 'Activation/Deactivation' );
+				const folder3 = panel.addFolder( 'Pausing/Stepping' );
+				const folder4 = panel.addFolder( 'Crossfading' );
+				const folder5 = panel.addFolder( 'Blend Weights' );
+				const folder6 = panel.addFolder( 'General Speed' );
+        const folder7 = panel.addFolder( ' Phox.Stuff' );
+
+				let settings = demo.settings = {
+					'show model': true,
+					'show skeleton': false,
+					'deactivate all': demo.deactivateAllActions,
+					'activate all': demo.activateAllActions,
+					'pause/continue': demo.pauseContinue,
+					'make single step': demo.toSingleStepMode,
+					'modify step size': 0.05,
+					'from walk to idle': ()=>{
+
+						demo.prepareCrossFade( demo.walkAction, demo.idleAction, 1.0 );
+
+					},
+					'from idle to walk': ()=>{
+
+						demo.prepareCrossFade( demo.idleAction, demo.walkAction, 0.5 );
+
+					},
+					'from walk to run': ()=>{
+
+						demo.prepareCrossFade( demo.walkAction, demo.runAction, 2.5 );
+
+					},
+					'from run to walk': ()=>{
+
+						demo.prepareCrossFade( demo.runAction, demo.walkAction, 5.0 );
+
+					},
+					'use default duration': true,
+					'set custom duration': 3.5,
+					'modify idle weight': 0.0,
+					'modify walk weight': 1.0,
+					'modify run weight': 0.0,
+					'modify time scale': 1.0
+				};
+
+				folder1.add( settings, 'show model' ).onChange( demo.showModel );
+				folder1.add( settings, 'show skeleton' ).onChange( demo.showSkeleton );
+				folder2.add( settings, 'deactivate all' );
+				folder2.add( settings, 'activate all' );
+				folder3.add( settings, 'pause/continue' );
+				folder3.add( settings, 'make single step' );
+				folder3.add( settings, 'modify step size', 0.01, 0.1, 0.001 );
+				demo.crossFadeControls.push( folder4.add( settings, 'from walk to idle' ) );
+				demo.crossFadeControls.push( folder4.add( settings, 'from idle to walk' ) );
+				demo.crossFadeControls.push( folder4.add( settings, 'from walk to run' ) );
+				demo.crossFadeControls.push( folder4.add( settings, 'from run to walk' ) );
+				folder4.add( settings, 'use default duration' );
+				folder4.add( settings, 'set custom duration', 0, 10, 0.01 );
+				folder5.add( settings, 'modify idle weight', 0.0, 1.0, 0.01 ).listen().onChange( function ( weight ) {
+
+					demo.setWeight( idleAction, weight );
+
+				} );
+				folder5.add( settings, 'modify walk weight', 0.0, 1.0, 0.01 ).listen().onChange( function ( weight ) {
+
+					demo.setWeight( walkAction, weight );
+
+				} );
+				folder5.add( settings, 'modify run weight', 0.0, 1.0, 0.01 ).listen().onChange( function ( weight ) {
+
+					demo.setWeight( runAction, weight );
+
+				} );
+				folder6.add( settings, 'modify time scale', 0.0, 1.5, 0.01 ).onChange( demo.modifyTimeScale );
+        let dirLight = demo.dirLight;
+        folder7.add ( dirLight.position, 'x' ).listen().onChange((value)=>{
+          dirLight.position.setX( value );
+
+        }).name( 'dirLight: pos.x' );
+        folder7.add ( dirLight.position, 'y' ).listen().onChange((value)=>{
+          dirLight.position.setY( value );
+
+        }).name( 'dirLight: pos.y' );
+        folder7.add ( dirLight.position, 'z' ).listen().onChange((value)=>{
+          dirLight.position.setZ( value );
+
+        }).name( 'dirLight: pos.z' );
+        folder7.add ( dirLight.rotation, 'x' ).listen().onChange((value)=>{
+          dirLight.rotateX( value );
+
+        }).name( 'dirLight: rot.x' );
+        folder7.add ( dirLight.rotation, 'y' ).listen().onChange((value)=>{
+          dirLight.rotateY( value );
+
+        }).name( 'dirLight: rot.y' );
+        folder7.add ( dirLight.rotation, 'z' ).listen().onChange((value)=>{
+          dirLight.rotateZ( value );
+
+        }).name( 'dirLight: rot.z' );
+
+				folder1.open();
+				folder2.open();
+				folder3.open();
+				folder4.open();
+				folder5.open();
+				folder6.open();
+
+			},
+			showModel: function( visibility ) {
+
+				demo.model.visible = visibility;
+
+			},
+			showSkeleton: function( visibility ) {
+
+				demo.skeleton.visible = visibility;
+
+			},
+			modifyTimeScale: function( speed ) {
+
+				demo.mixer.timeScale = speed;
+
+			},
+			deactivateAllActions: function() {
+
+				demo.actions.forEach( function ( action ) {
+
+					action.stop();
+
+				} );
+
+			},
+			activateAllActions: function() {
+
+				demo.setWeight( demo.idleAction, demo.settings[ 'modify idle weight' ] );
+				demo.setWeight( demo.walkAction, demo.settings[ 'modify walk weight' ] );
+				demo.setWeight( demo.runAction, demo.settings[ 'modify run weight' ] );
+
+				demo.actions.forEach( function ( action ) {
+
+					action.play();
+
+				} );
+
+			},
+			pauseContinue: function() {
+
+				if ( demo.singleStepMode ) {
+
+					demo.singleStepMode = false;
+					demo.unPauseAllActions();
+
+				} else {
+
+					if ( demo.idleAction.paused ) {
+
+						demo.unPauseAllActions();
+
+					} else {
+
+						demo.pauseAllActions();
+
+					}
+
+				}
+
+			},
+			pauseAllActions: function() {
+
+				demo.actions.forEach( function ( action ) {
+
+					action.paused = true;
+
+				} );
+
+			},
+			unPauseAllActions: function() {
+
+				demo.actions.forEach( function ( action ) {
+
+					action.paused = false;
+
+				} );
+
+			},
+			toSingleStepMode: function() {
+
+				demo.unPauseAllActions();
+
+				demo.singleStepMode = true;
+				demo.sizeOfNextStep = demo.settings[ 'modify step size' ];
+
+			},
+			prepareCrossFade: function( startAction, endAction, defaultDuration ) {
+
+				// Switch default / custom crossfade duration (according to the user's choice)
+
+				const duration = demo.setCrossFadeDuration( defaultDuration );
+
+				// Make sure that we don't go on in singleStepMode, and that all actions are unpaused
+
+				demo.singleStepMode = false;
+				demo.unPauseAllActions();
+
+				// If the current action is 'idle' (duration 4 sec), execute the crossfade immediately;
+				// else wait until the current action has finished its current loop
+
+				if ( startAction === demo.idleAction ) {
+
+					demo.executeCrossFade( startAction, endAction, duration );
+
+				} else {
+
+					demo.synchronizeCrossFade( startAction, endAction, duration );
+
+				}
+
+			},
+			setCrossFadeDuration: function( defaultDuration ) {
+
+				// Switch default crossfade duration <-> custom crossfade duration
+
+				if ( demo.settings[ 'use default duration' ] ) {
+
+					return defaultDuration;
+
+				} else {
+
+					return demo.settings[ 'set custom duration' ];
+
+				}
+
+			},
+			synchronizeCrossFade: function( startAction, endAction, duration ) {
+
+				let mixer = demo.mixer;
+        mixer.addEventListener( 'loop', onLoopFinished );
+
+				function onLoopFinished( event ) {
+
+					if ( event.action === startAction ) {
+
+						mixer.removeEventListener( 'loop', onLoopFinished );
+
+						executeCrossFade( startAction, endAction, duration );
+
+					}
+
+				}
+
+			},
+			executeCrossFade: function( startAction, endAction, duration ) {
+
+				// Not only the start action, but also the end action must get a weight of 1 before fading
+				// (concerning the start action this is already guaranteed in this place)
+
+				demo.setWeight( endAction, 1 );
+				endAction.time = 0;
+
+				// Crossfade with warping - you can also try without warping by setting the third parameter to false
+
+				startAction.crossFadeTo( endAction, duration, true );
+
+			},
+
+			// This function is needed, since animationAction.crossFadeTo() disables its start action and sets
+			// the start action's timeScale to ((start animation's duration) / (end animation's duration))
+			setWeight: function( action, weight ) {
+
+				action.enabled = true;
+				action.setEffectiveTimeScale( 1 );
+				action.setEffectiveWeight( weight );
+
+			},
+
+      // Called by the render loop
+			updateWeightSliders: function() {
+
+				demo.settings[ 'modify idle weight' ] = demo.idleWeight;
+				demo.settings[ 'modify walk weight' ] = demo.walkWeight;
+				demo.settings[ 'modify run weight' ] = demo.runWeight;
+
+			},
+
+			// Called by the render loop
+			updateCrossFadeControls: function() {
+
+				if ( demo.idleWeight === 1 && demo.walkWeight === 0 && demo.runWeight === 0 ) {
+
+					demo.crossFadeControls[ 0 ].disable();
+					demo.crossFadeControls[ 1 ].enable();
+					demo.crossFadeControls[ 2 ].disable();
+					demo.crossFadeControls[ 3 ].disable();
+
+				}
+
+				if ( demo.idleWeight === 0 && demo.walkWeight === 1 && demo.runWeight === 0 ) {
+
+					demo.crossFadeControls[ 0 ].enable();
+					demo.crossFadeControls[ 1 ].disable();
+					demo.crossFadeControls[ 2 ].enable();
+					demo.crossFadeControls[ 3 ].disable();
+
+				}
+
+				if ( demo.idleWeight === 0 && demo.walkWeight === 0 && demo.runWeight === 1 ) {
+
+					demo.crossFadeControls[ 0 ].disable();
+					demo.crossFadeControls[ 1 ].disable();
+					demo.crossFadeControls[ 2 ].disable();
+					demo.crossFadeControls[ 3 ].enable();
+
+				}
+
+			},
+			update: function() {
+
+				// Render loop
+
+				this.idleWeight = this.idleAction.getEffectiveWeight();
+				this.walkWeight = this.walkAction.getEffectiveWeight();
+				this.runWeight = this.runAction.getEffectiveWeight();
+
+				// Update the panel values if weights are modified from "outside" (by crossfadings)
+
+				this.updateWeightSliders();
+
+				// Enable/disable crossfade controls according to current weight values
+
+				this.updateCrossFadeControls();
+
+				// Get the time elapsed since the last frame, used for mixer update (if not in single step mode)
+
+				let mixerUpdateDelta = this.clock.getDelta();
+
+				// If in single step mode, make one step and then do nothing (until the user clicks again)
+
+				if ( this.singleStepMode ) {
+
+					this.mixerUpdateDelta = this.sizeOfNextStep;
+					this.sizeOfNextStep = 0;
+
+				}
+
+				// Update the animation mixer and render this frame
+
+				this.mixer.update( mixerUpdateDelta );
+
+			}
+    }
+*/
+  }
+
+  constructor( react_app, screenplay, shard ){
     super();
     this.react_app = react_app;
+    this.shard = shard;
+    this.menu = [];
+
   }
 }
 

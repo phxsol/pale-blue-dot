@@ -1,8 +1,12 @@
 // ScreenDirector Reference
-import { Screenplay as _Screenplay, SceneAsset3D } from '../bin/ScreenDirector.js';
+import { Screenplay as _Screenplay, SceneAsset3D, SceneTransformation } from '../bin/ScreenDirector.js';
 // Support Library Reference
 import * as THREE from 'three';
 import { GLTFLoader } from '../lib/GLTFLoader.js';
+import { DRACOLoader } from '../lib/DRACOLoader.js';
+import { ImprovedNoise } from '../lib/ImprovedNoise.js';
+import { RectAreaLightHelper } from '../lib/RectAreaLightHelper.js';
+import { RectAreaLightUniformsLib } from '../lib/RectAreaLightUniformsLib.js';
 
 // Constant Definitions
 const LIGHT = {
@@ -17,10 +21,12 @@ const LIGHT = {
   blue: 0x0000ff
 };
 const VIEW = {
-  fov: 45,
+  fov: 110,
   aspect: window.innerWidth / window.innerHeight,
   near: 0.1,
-  far: 100000000000000
+  far: 100000000000000,
+  major_dim: Math.max( window.innerWidth, window.innerHeight ),
+  minor_dim: Math.min( window.innerWidth, window.innerHeight )
 };
 
 // Screenplay Implementation
@@ -31,8 +37,8 @@ class Screenplay extends _Screenplay{
     get Neptune(){
       let _map = new THREE.TextureLoader().load('resources/neptunemap.jpg');
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 24622000, 64, 32 ),
-        new THREE.MeshStandardMaterial( { map: _map, metalness: 1 } )
+        new THREE.SphereGeometry( 24622000, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, shininess: 100 } )
       );
       _mesh.castShadow = true;
 			_mesh.receiveShadow = true;
@@ -55,8 +61,8 @@ class Screenplay extends _Screenplay{
     get Uranus(){
       let _map = new THREE.TextureLoader().load('resources/uranusmap.jpg');
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 25362000, 64, 32 ),
-        new THREE.MeshStandardMaterial( { map: _map, metalness: 1 } )
+        new THREE.SphereGeometry( 25362000, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, shininess: 100 } )
       );
       _mesh.castShadow = true;
 			_mesh.receiveShadow = true;
@@ -85,12 +91,11 @@ class Screenplay extends _Screenplay{
         v3.fromBufferAttribute( pos, i );
         _ring_geometry.attributes.uv.setXY( i, v3.length() < 101732000 ? 0 : 1, 1 );
       }
-      const _ring_material = new THREE.MeshStandardMaterial({
+      const _ring_material = new THREE.MeshPhongMaterial({
         map: _ring_texture,
         color: 0x777777,
         side: THREE.DoubleSide,
-        roughness: 1,
-        metalness: 0
+        shininess: 0
       });
       const _rings_mesh = new THREE.Mesh( _ring_geometry, _ring_material );
       _rings_mesh.castShadow = true;
@@ -99,8 +104,8 @@ class Screenplay extends _Screenplay{
 
       let _map = new THREE.TextureLoader().load( 'resources/saturnmap.jpg' );
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 58232000, 64, 32 ),
-        new THREE.MeshStandardMaterial( { map: _map, metalness: 1 } )
+        new THREE.SphereGeometry( 58232000, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, shininess: 100 } )
       );
       _mesh.castShadow = true;
 			_mesh.receiveShadow = true;
@@ -123,8 +128,8 @@ class Screenplay extends _Screenplay{
     get Jupiter(){
       let _map = new THREE.TextureLoader().load('resources/jupitermap.jpg');
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 69911000, 64, 32 ),
-        new THREE.MeshStandardMaterial( { map: _map, metalness: 1 } )
+        new THREE.SphereGeometry( 69911000, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, shininess: 100 } )
       );
       _mesh.castShadow = true;
 			_mesh.receiveShadow = true;
@@ -147,8 +152,8 @@ class Screenplay extends _Screenplay{
       let _map = new THREE.TextureLoader().load('resources/mars_1k_color.jpg');
       let _topo = new THREE.TextureLoader().load('resources/mars_1k_topo.jpg');
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 3389000, 64, 32 ),
-        new THREE.MeshStandardMaterial( { map: _map, displacementMap: _topo, metalness: 1 } )
+        new THREE.SphereGeometry( 3389000, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, displacementMap: _topo, shininess: 100 } )
       );
       _mesh.castShadow = true;
 			_mesh.receiveShadow = true;
@@ -167,7 +172,7 @@ class Screenplay extends _Screenplay{
     },
 
     // Earth
-    get Earth(){
+    get OldEarth(){
       let _map = new THREE.TextureLoader().load('resources/earthmap1k.jpg');
       let _spec = new THREE.TextureLoader().load('resources/earthspec1k.jpg');
       let _bump = new THREE.TextureLoader().load('resources/earthbump1k.jpg');
@@ -177,31 +182,82 @@ class Screenplay extends _Screenplay{
       let _emissive = new THREE.TextureLoader().load('resources/earthlights1k_dark.jpg');
       let _lights_negative = new THREE.TextureLoader().load('resources/earthlights1k_negative.jpg');
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 6371000, 64, 32 ),
-        new THREE.MeshStandardMaterial( { map: _map, emissive: 0xffffff, emissiveMap: _emissive, metalness: 1 } )
+        new THREE.SphereGeometry( 6371000, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, emissive: 0xffffff, emissiveMap: _emissive, shininess: 100 } )
       );
       _mesh.castShadow = true;
 			_mesh.receiveShadow = true;
-      _mesh.position.set( 149598023000, 0, 149598023000 );
-      //_mesh.position.set( 149598023000, 0, 0 );
+      _mesh.position.set( 149598023000, 0, 0 );
       let earth = new SceneAsset3D( _mesh );
-      earth.name = 'Earth';
+      earth.name = 'OldEarth';
       earth.directions.set( 'revolve', function(){
         earth.rotation.y += .0002424;
       });
       earth.surface_distance = 6371000;
       earth.orbital_distance = 3 * 9009000;
-      earth.orbital_vector = new THREE.Vector3( 9009000, 9009000, 9009000 );
+      earth.orbital_vector = new THREE.Vector3( 9009000, 3000000, 9009000 );
+
       delete this.Earth;
       return this.Earth = earth;
     },
 
+    get Earth(){
+
+      let loading = new Promise( ( resolve, reject )=>{
+        const loader = new GLTFLoader();
+        // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath( 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/' );
+        loader.setDRACOLoader( dracoLoader );
+        loader.load( 'models/Earth.glb',
+          async ( gltf )=>{
+
+            let _earth = gltf.scene;
+            let earth = new SceneAsset3D( _earth );
+            earth.scale.set( 12756, 12756, 12712 );
+            earth.position.set( 149598023000, 0, 0 );
+            earth.name = 'Earth';
+            earth.directions.set( 'revolve', function(){
+              earth.rotation.y += .0002424;
+            });
+            earth.surface_distance = 6371000;
+            earth.orbital_distance = 1 * 9009000;
+            earth.orbital_vector = new THREE.Vector3( 9009000, 3000000, 9009000 );
+
+            resolve( earth );
+          },
+          async function ( xhr ) {
+            // TODO: Add Repair progress functionality... if needed.
+            //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+          },
+          async ( err )=>{
+            console.error( err );
+            reject( err );
+          }
+        );
+      });
+
+      return (async () => {
+        try {
+          return await loading.then(( earth )=>{
+
+            delete this.Earth;
+            return this.Earth = earth;
+
+          })
+        } catch(e) {
+          return 0; // fallback value;
+        }
+      })();
+    },
+
+    // Moon
     get Moon(){
       let _map = new THREE.TextureLoader().load('resources/moonmap1k.jpg');
       let _bump = new THREE.TextureLoader().load('resources/moonbump1k.jpg');
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 1735500, 64, 32 ),
-        new THREE.MeshStandardMaterial( { map: _map, bumpMap: _bump, metalness: 1 })
+        new THREE.SphereGeometry( 1735500, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, bumpMap: _bump, shininess: 100 })
       );
       _mesh.castShadow = true;
 			_mesh.receiveShadow = true;
@@ -219,13 +275,13 @@ class Screenplay extends _Screenplay{
       return this.Moon = moon;
     },
 
-    // Earth
+    // Venus
     get Venus(){
       let _map = new THREE.TextureLoader().load('resources/venusmap.jpg');
       let _bump = new THREE.TextureLoader().load('resources/venusbump.jpg');
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 6052000, 64, 32 ),
-        new THREE.MeshStandardMaterial( { map: _map, bumpMap: _bump, metalness: 1 } )
+        new THREE.SphereGeometry( 6052000, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, bumpMap: _bump, shininess: 100 } )
       );
       _mesh.castShadow = true;
 			_mesh.receiveShadow = true;
@@ -243,13 +299,13 @@ class Screenplay extends _Screenplay{
       return this.Venus = venus;
     },
 
-    // Earth
+    // Mercury
     get Mercury(){
       let _map = new THREE.TextureLoader().load('resources/mercurymap.jpg');
       let _bump = new THREE.TextureLoader().load('resources/mercurybump.jpg');
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 2439500, 64, 32 ),
-        new THREE.MeshStandardMaterial( { map: _map, bumpMap: _bump, metalness: 1 } )
+        new THREE.SphereGeometry( 2439500, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, bumpMap: _bump, shininess: 100 } )
       );
       _mesh.castShadow = true;
 			_mesh.receiveShadow = true;
@@ -272,8 +328,8 @@ class Screenplay extends _Screenplay{
       let _map = new THREE.TextureLoader().load('resources/solarmap.jpg');
       let _spec = new THREE.TextureLoader().load('resources/sunmap.jpg');
       let _mesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 695508000, 64, 32 ),
-        new THREE.MeshBasicMaterial( { map: _map, side: THREE.DoubleSide, wireframe: true } )
+        new THREE.SphereGeometry( 695508000, 128, 128 ),
+        new THREE.MeshPhongMaterial( { map: _map, side: THREE.DoubleSide, wireframe: true } )
       );
       _mesh.castShadow = false;
 			_mesh.receiveShadow = false;
@@ -284,8 +340,12 @@ class Screenplay extends _Screenplay{
         sun.rotation.y += .00008978;
       });
       sun.surface_distance = 695508000;
-      sun.orbital_distance = 3 * 983596000;
+      sun.orbital_distance = 20000000000;
       sun.orbital_vector = new THREE.Vector3( 983596000, 983596000, 983596000);
+      sun.material.depthTest = false;
+      sun.light = new THREE.DirectionalLight( 0xffffff, 1 );
+      sun.add( sun.light );
+      sun.visible = false;
       delete this.Sun;
       return this.Sun = sun;
     },
@@ -295,16 +355,21 @@ class Screenplay extends _Screenplay{
 
       let loading = new Promise( ( resolve, reject )=>{
         const loader = new GLTFLoader();
+        // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath( 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/' );
+        loader.setDRACOLoader( dracoLoader );
         loader.load( 'models/bridge.glb',
           async ( gltf )=>{
 
             let ship = new THREE.Group();
             ship = gltf.scene;
-            let _bulkhead_mat = new THREE.MeshStandardMaterial( { color: 0x777777, roughness: 1, metalness: 1, side: THREE.DoubleSide } );
+            let _bulkhead_mat = new THREE.MeshPhongMaterial();
             let _bulkhead = ship.getObjectByName( 'Bulkhead' );
             _bulkhead.castShadow = true;
             _bulkhead.receiveShadow = true;
             _bulkhead.material = _bulkhead_mat;
+            _bulkhead.material.wireframe = true;
             ship.bulkhead = _bulkhead;
             ship.bulkhead.visible = false;
 
@@ -312,6 +377,7 @@ class Screenplay extends _Screenplay{
             _bulkhead_open.castShadow = true;
             _bulkhead_open.receiveShadow = true;
             _bulkhead_open.material = _bulkhead_mat;
+            _bulkhead_open.material.wireframe = true;
             ship.bulkhead_open = _bulkhead_open;
             ship.bulkhead_open.visible = true;
 
@@ -328,11 +394,23 @@ class Screenplay extends _Screenplay{
             //_light.position.add( new THREE.Vector3( 0, -2, 0) );
             ship.light = _light;
 
-            let _station_mats = new THREE.MeshStandardMaterial( { color: 0x222222, roughness: 1, metalness: 0.5 } );
+            RectAreaLightUniformsLib.init();
+            const rectLight1 = new THREE.RectAreaLight( 0xffff00, 1.5, 4, 4 );
+            rectLight1.rotateX( Math.PI / 2 );
+            rectLight1.position.set( 0, 0, 0 );
+            const rectLight2 = new THREE.RectAreaLight( 0x0000ff, 1.5, 4, 4 );
+            rectLight2.rotateX( - Math.PI / 2 );
+            rectLight2.position.set( 0, 1, 0 );
+
+            let _station_mats = new THREE.MeshPhongMaterial( { color: 0x222222, shininess: 50 } );
             let _ops_station = ship.getObjectByName( 'OpsStation' );
             _ops_station.castShadow = true;
             _ops_station.receiveShadow = true;
             _ops_station.material = _station_mats;
+            _ops_station.add( rectLight1 );
+            ship.ops_light = rectLight1;
+            _ops_station.add( rectLight2 );
+            ship.ops_light_above = rectLight2;
             ship.ops_station = _ops_station;
             //let _conn_station = ship.getObjectByName( 'ConnStation' );
             //_conn_station.castShadow = true;
@@ -373,9 +451,9 @@ class Screenplay extends _Screenplay{
               let secondary_shell = new SceneAsset3D( _warp_tunnel[ cone_ndx ].clone( false ) );
               let tertiary_shell = new SceneAsset3D( _warp_tunnel[ cone_ndx ].clone( false ) );
 
-              primary_shell.material = new THREE.MeshStandardMaterial( { color: 0x000000, emissive: 0x040bff, wireframe: true, roughness: 0, side: THREE.DoubleSide, alphaMap: cloud_boiling_texture, alphaTest: 0.5, transparent: true, opacity: 0.9 } );
-              secondary_shell.material = new THREE.MeshStandardMaterial( { color: 0x000000, emissive: 0x0000ff,   roughness: 0, side: THREE.DoubleSide, alphaMap: clouds_clouds_clouds_texture, alphaTest: 0.7, transparent: true, opacity: 0.8});
-              tertiary_shell.material = new THREE.MeshStandardMaterial( { color: 0x000000, emissive: 0xffffff, wireframe: true, roughness: 0, side: THREE.DoubleSide, alphaMap: cloud_ribbons_texture, alphaTest: 0.7, transparent: true, opacity: 0.9 });
+              primary_shell.material = new THREE.MeshPhongMaterial( { color: 0x000000, emissive: 0x040bff, wireframe: true, side: THREE.DoubleSide, alphaMap: cloud_boiling_texture, alphaTest: 0.5, transparent: true, opacity: 0.9 } );
+              secondary_shell.material = new THREE.MeshPhongMaterial( { color: 0x000000, emissive: 0x0000ff,  side: THREE.DoubleSide, alphaMap: clouds_clouds_clouds_texture, alphaTest: 0.7, transparent: true, opacity: 0.8});
+              tertiary_shell.material = new THREE.MeshPhongMaterial( { color: 0x000000, emissive: 0xffffff, wireframe: true, side: THREE.DoubleSide, alphaMap: cloud_ribbons_texture, alphaTest: 0.7, transparent: true, opacity: 0.9 });
 
               primary_shell.directions.set( 'revolve', function( delta, warp_speed ){
                 if( warp_speed > 0 ) primary_shell.rotation.y += 1.5 * warp_speed;
@@ -397,15 +475,15 @@ class Screenplay extends _Screenplay{
             // Define Key Navigation Data
             let _fwd = ship.getObjectByName( 'NavdotForward' );
             let navdot_forward = new THREE.Mesh(
-              new THREE.SphereGeometry( 0.01, 64, 32 ),
-              new THREE.MeshBasicMaterial( { color: 0x0000ff } )
+              new THREE.SphereGeometry( 0.01, 3, 2 ),
+              new THREE.MeshPhongMaterial( { color: 0x0000ff } )
             );
             navdot_forward.position.copy( _fwd.position );
 
             let _awd = ship.getObjectByName( 'NavdotAftward' );
             let navdot_aftward = new THREE.Mesh(
-              new THREE.SphereGeometry( 0.01, 64, 32 ),
-              new THREE.MeshBasicMaterial( { color: 0xff0000 } )
+              new THREE.SphereGeometry( 0.01, 3, 2 ),
+              new THREE.MeshPhongMaterial( { color: 0xff0000 } )
             );
             navdot_aftward.position.copy( _awd.position );
 
@@ -429,7 +507,7 @@ class Screenplay extends _Screenplay{
             _sl.getPointAt( 0.55, _st_v);
             let sight_target = new THREE.Mesh(
               new THREE.TorusKnotGeometry( 1, 1, 3, 3, 3, 3 ),
-              new THREE.MeshBasicMaterial( { color: 0xffffff } )
+              new THREE.MeshPhongMaterial( { color: 0xffffff } )
             );
             sight_target.position.copy( _st_v );
 
@@ -449,14 +527,23 @@ class Screenplay extends _Screenplay{
 
             ship.cameras = new Map();
             gltf.cameras.forEach( (camera)=>{
+              //camera.position.copy( camera.parent.position );
               ship.cameras.set( camera.parent.name, camera );
             });
-            let _cap_cam = ship.cameras.get( 'CaptainCam');
+            let third_person_cam = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
+            third_person_cam.position.addVectors( ship.position, new THREE.Vector3( 0, 5, -25 ) );
+            third_person_cam.up.copy( ship.up );
+            third_person_cam.name = '3rdPerson';
+            third_person_cam.lookAt( ship.position );
+            third_person_cam.updateProjectionMatrix();
+            ship.add( third_person_cam );
+            ship.cameras.set( third_person_cam.name, third_person_cam );
+
 
             ship.viewscreen = ship.getObjectByName( 'Viewscreen' );
             ship.viewscreen.material.transparent = true;
             ship.viewscreen.material.opacity = 0.17;
-            ship.viewscreen.visible = true;
+            ship.viewscreen.visible = false;
 
             ship.name = "Ship";
             let ship_asset = new SceneAsset3D( ship );
@@ -486,82 +573,239 @@ class Screenplay extends _Screenplay{
           return 0; // fallback value;
         }
       })();
+    },
+
+    // Starship
+    get Starship(){
+
+      let loading = new Promise( ( resolve, reject )=>{
+        const loader = new GLTFLoader();
+        // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath( 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/' );
+        loader.setDRACOLoader( dracoLoader );
+        loader.load( 'models/Starship.glb',
+          async ( gltf )=>{
+
+            let starship = gltf.scene;
+            starship.traverse( function( obj3D ) {
+              if( obj3D.isMesh ) obj3D.castShadow = true;
+            });
+
+            starship.name = 'Starship You';
+
+            starship.mixer = new THREE.AnimationMixer( starship );
+            starship.animations = {
+              warp_tunnel: await new SceneTransformation({
+                init: async function(){
+                  this.cache.mixer = starship.mixer;
+                  this.cache.clip = this.cache.mixer.clipAction( gltf.animations[ 0 ] );
+                  this.cache.clip.enabled = true;
+                  this.cache.clip.play();
+                },
+                cache: {
+                  mixer: null, animations: null
+                },
+                update: function( delta ){
+                  this.cache.mixer.update( delta );
+                },
+                post: function(){
+                  this.cache.clip.enabled = false;
+                  this.cache.clip.stop();
+                }
+              })
+            }
+
+            starship.cameras = new Map();
+            gltf.cameras.forEach( (camera)=>{
+              camera.fov=90;
+              starship.cameras.set( camera.name, camera );
+            });
+
+            let starship_texture = new THREE.TextureLoader().load('textures/StarShipTexture.jpg' );
+            starship_texture.wrapS = THREE.MirroredRepeatWrapping;
+            starship_texture.wrapT = THREE.MirroredRepeatWrapping;
+            starship_texture.repeat.set( 24, 24 );
+            let starship_material = new THREE.MeshPhongMaterial({map: starship_texture, color: 0x000111, emissive: 0x000000, specular: 0x111111, shininess: 100, combine: THREE.MultiplyOperation, side:THREE.DoubleSide, combine: THREE.MixOperation, flatShading: true});
+            starship.Hull = starship.getObjectByName( 'Hull' );
+            let _hull = starship.Hull.getObjectByName( 'Hull001' );
+            _hull.traverse( function( obj3D ) {
+              if( obj3D.isMesh ) obj3D.material = starship_material;
+            });
+            starship.Warp_Tunnel = starship.getObjectByName( 'Warp_Tunnel' );
+            starship.Warp_Tunnel.visible = false;
+            starship.Light = starship.getObjectByName( 'Light' );
+            starship.Light.intensity = 10;
+
+            starship.Conference__Table = starship.getObjectByName( 'Conference__Table' );
+            starship.Aft_Wall = starship.getObjectByName( 'Aft_Wall' );
+            starship.SecurityStation = starship.getObjectByName( 'SecurityStation' );
+            starship.Viewscreen = starship.getObjectByName( 'Viewscreen' );
+            starship.Viewscreen.visible = false;
+            starship.Bulkhead = starship.getObjectByName( 'Bulkhead' );
+            starship.Bulkhead.material = starship_material;
+            starship.Bulkhead.receiveShadow = true;
+            starship.OpsStation = gltf.scene.getObjectByName( 'OpsStation' );
+
+            // Define Key Navigation Data
+            let _fwd = starship.getObjectByName( 'NavdotForward' );
+            let navdot_forward = new THREE.Mesh(
+              new THREE.SphereGeometry( 0.01, 3, 2 ),
+              new THREE.MeshPhongMaterial( { color: 0x0000ff } )
+            );
+            navdot_forward.position.copy( _fwd.position );
+
+            let _awd = starship.getObjectByName( 'NavdotAftward' );
+            let navdot_aftward = new THREE.Mesh(
+              new THREE.SphereGeometry( 0.01, 3, 2 ),
+              new THREE.MeshPhongMaterial( { color: 0xff0000 } )
+            );
+            navdot_aftward.position.copy( _awd.position );
+
+            let _al = new THREE.Line3( _awd.position, _fwd.position );
+            let _al_geometry = new THREE.BufferGeometry().setFromPoints( [ _al.start, _al.end ] );
+            let _al_material = new THREE.LineBasicMaterial( { color: 0xff00ff } );
+            let a_line = new THREE.Line( _al_geometry, _al_material );
+            a_line.visible = false;
+
+            let _sl_ctrl = new THREE.Vector3();
+            _al.at( 1, _sl_ctrl );
+            _sl_ctrl.add( new THREE.Vector3( 0, 0, 0 ));
+            let _sl = new THREE.QuadraticBezierCurve3( new THREE.Vector3( 0,-1,0 ), _fwd.position, new THREE.Vector3( 0,3,0 ) );
+            let  _sl_points = _sl.getPoints( 50 );
+            let  _sl_geometry = new THREE.BufferGeometry().setFromPoints( _sl_points );
+            let  _sl_material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+            let  sight_line = new THREE.Line( _sl_geometry, _sl_material );
+            sight_line.visible = false;
+
+            let _st_v = new THREE.Vector3();
+            _sl.getPointAt( 0.55, _st_v);
+            let sight_target = new THREE.Mesh(
+              new THREE.TorusKnotGeometry( 1, 1, 3, 3, 3, 3 ),
+              new THREE.MeshPhongMaterial( { color: 0xffffff } )
+            );
+            sight_target.position.copy( _st_v );
+
+            let nav_dots = {
+              forward: navdot_forward,
+              aftward: navdot_aftward,
+              sight_target: sight_target
+            }
+            let nav_lines = {
+              a_line: a_line,
+              sight_line: sight_line
+            };
+            starship.NavDots = nav_dots;
+            starship.NavLines = nav_lines;
+            starship.add( sight_target ); // As a child, the position will update.
+            starship.add( sight_line );
+
+            let starship_asset = new SceneAsset3D( starship );
+            resolve( starship_asset );
+          },
+          async function ( xhr ) {
+            // TODO: Add Repair progress functionality... if needed.
+            //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+          },
+          async ( err )=>{
+            console.error( err );
+            reject( err );
+          }
+        );
+      });
+
+      return (async () => {
+        try {
+          return await loading.then(( starship )=>{
+
+            delete this.Starship;
+            return this.Starship = starship;
+
+          })
+        } catch(e) {
+          return 0; // fallback value;
+        }
+      })();
     }
 
   };
   lights = {
     get point_light(){
-      delete this.point_light;
-      this.point_light = new THREE.PointLight( 0xffffff, 2.5, 0, 2 );
-      this.point_light.castShadow = true;
-      this.point_light.shadow.bias = - 0.005; // reduces self-shadowing on double-sided objects
-      this.point_light.shadow.camera.near = VIEW.near;
-      this.point_light.shadow.camera.far = VIEW.far;
-
-      return this.point_light;
+      let point_light = new THREE.PointLight( 0xffffff, 2.5, 0, 2 );
+      return point_light;
     },
     get ambient_light(){
-      delete this.ambient_light;
-      return this.ambient_light = new THREE.AmbientLight( LIGHT.evening ) ;
+      return new THREE.AmbientLight( LIGHT.day ) ;
     }
   };
   cameras;
   actions = {
+    impulse_to: async ( arrival_coords, arrival_emitter = false ) =>{
+      // TODO: Replace this (warp_to copy) with impulse_to plotted course
+      let plotted_course = {
+        update: ( )=>{},
+        cache: {
+          iniQ: iniQ,
+          endQ: endQ,
+          path: travel_path,
+          up_now: this.actors.Starship.up.clone(),
+          turn_duration: 2 * Math.max( 100, Math.ceil( _quat_diff * ( 250 / Math.PI ) ) ),
+          travel_duration: 2 * Math.ceil( 100 + ( travel_distance / 15000000000 ) ),
+          warp_duration: 2 * 15,
+          duration: this.turn_duration + this.travel_duration,  // TODO: Vary this by the travel_distance to target
+          frame: 0,
+          locking_on: false,
+          locked_on: false,
+          warping: false,
+          warp_speed: 0,
+          warp_tunnel_buildup: 2 * 250,
+          warped: false,
+          at_destination: false,
+          completed: true,
+          cleanup_phase: false,
+          arrival_emitter: arrival_emitter
+        }
+      }
+      this.updatables.set('impulse_to', plotted_course );
+    },
+    land_at: async ( landing_coords, arrival_emitter = false ) =>{
+      // TODO: Replace this (warp_to copy) with land_at plotted course
+      let plotted_course = {
+        update: ( )=>{
+
+        },
+        cache: {
+          completed: true,
+          arrival_emitter: arrival_emitter
+        }
+      }
+      this.updatables.set('land_at', plotted_course );
+    },
     warp_to: async ( planetary_body, equidistant_orbit = false, arrival_emitter = false ) =>{
       // Find yourself.
-      let pov_posi = new THREE.Vector3().copy( this.actors.Ship.position );
+      let pov_posi = new THREE.Vector3().copy( this.actors.Starship.position );
       // Set the arrival coordinates.
       let orbit_distance = planetary_body.orbital_distance;
       let surface_distance = planetary_body.surface_distance;
       let target_posi = planetary_body.position.clone();
       // Determine the travel path to the destination.
-      if(pov_posi.distanceTo( target_posi ) == 0) target_posi = this.actors.Ship.NavDots.forward.position;
+      if(pov_posi.distanceTo( target_posi ) == 0) target_posi = this.actors.Starship.NavDots.forward.position;
       let travel_path = new THREE.Line3( pov_posi, target_posi );
       let travel_distance = Math.floor( travel_path.distance() );
-      if( travel_distance > orbit_distance ) {
-        let _target_distance = ( equidistant_orbit ) ? travel_distance - surface_distance - 1000000 : travel_distance - orbit_distance;
-        let _path_diff_ratio = _target_distance / travel_distance;
-        travel_path.at( _path_diff_ratio, target_posi );
-        travel_path = new THREE.Line3( pov_posi, target_posi );
-        travel_distance = Math.floor( travel_path.distance() );
-
-      } else {
-        let _target_distance = ( equidistant_orbit ) ? travel_distance - surface_distance - 1000000 : travel_distance - orbit_distance;
-        let _path_diff_ratio = _target_distance / travel_distance;
-        travel_path.at( _path_diff_ratio, target_posi );
-        travel_path = new THREE.Line3( pov_posi, target_posi );
-        travel_distance = Math.floor( travel_path.distance() );
-      }
-      var iniQ = new THREE.Quaternion().copy( this.actors.Ship.quaternion ).normalize();
-      this.actors.Ship.lookAt( ...target_posi );
-      this.actors.Ship.updateMatrixWorld( true );
-      //var rotationMatrix = new THREE.Matrix4().extractRotation( this.actors.Ship.matrixWorld );
-      var endQ = new THREE.Quaternion().copy( this.actors.Ship.quaternion ).normalize();
-      this.actors.Ship.quaternion.copy( iniQ );
-      this.actors.Ship.updateMatrixWorld( true );
+      let _target_distance = ( equidistant_orbit ) ? travel_distance - surface_distance - 300000 : travel_distance - orbit_distance;
+      let _path_diff_ratio = _target_distance / travel_distance;
+      travel_path.at( _path_diff_ratio, target_posi );
+      travel_path = new THREE.Line3( pov_posi, target_posi );
+      travel_distance = Math.floor( travel_path.distance() );
+      var iniQ = new THREE.Quaternion().copy( this.actors.Starship.quaternion ).normalize();
+      this.actors.Starship.lookAt( ...target_posi );
+      this.actors.Starship.updateMatrixWorld( true );
+      //var rotationMatrix = new THREE.Matrix4().extractRotation( this.actors.Starship.matrixWorld );
+      var endQ = new THREE.Quaternion().copy( this.actors.Starship.quaternion ).normalize();
+      this.actors.Starship.quaternion.copy( iniQ );
+      this.actors.Starship.updateMatrixWorld( true );
       let _quat_diff = iniQ.angleTo( endQ );
-
-      let plotted_course_cache = {
-        iniQ: iniQ,
-        endQ: endQ,
-        path: travel_path,
-        up_now: this.actors.Ship.up.clone(),
-        turn_duration: 2 * Math.max( 100, Math.ceil( _quat_diff * ( 250 / Math.PI ) ) ),
-        travel_duration: 2 * Math.ceil( 100 + ( travel_distance / 15000000000 ) ),
-        warp_duration: 2 * 15,
-        duration: this.turn_duration + this.travel_duration,  // TODO: Vary this by the travel_distance to target
-        frame: 0,
-        locking_on: false,
-        locked_on: false,
-        warping: false,
-        warp_speed: 0,
-        warp_tunnel_buildup: 2 * 250,
-        warped: false,
-        at_destination: false,
-        completed: false,
-        cleanup_phase: false,
-        arrival_emitter: arrival_emitter
-      }
+      debugger;
       let plotted_course = {
         update: ( )=>{
 
@@ -579,8 +823,9 @@ class Screenplay extends _Screenplay{
             } else if( a && a.dictum_name && a.ndx ) {
               a.director.emit( `${a.dictum_name}_progress`, a.dictum_name, a.ndx );
             }
+
           } else {
-            // Turn toward the destination.
+            // 1 Turn toward the destination.
             if( !cache.locked_on && cache.frame <= cache.turn_duration ){
 
               // Turn the ship toward the target.
@@ -588,15 +833,15 @@ class Screenplay extends _Screenplay{
               let turn_progress = _tprog ** (10-(10.05*_tprog));
 
               let curQ = new THREE.Quaternion().slerpQuaternions( iniQ, endQ, turn_progress ).normalize();
-              this.actors.Ship.quaternion.copy( curQ );
+              this.actors.Starship.quaternion.copy( curQ );
 
-              this.actors.Ship.updateMatrixWorld( true );
-              var rotationMatrix = new THREE.Matrix4().extractRotation( this.actors.Ship.matrixWorld );
+              this.actors.Starship.updateMatrixWorld( true );
+              var rotationMatrix = new THREE.Matrix4().extractRotation( this.actors.Starship.matrixWorld );
               var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
 
-              this.actors.Ship.up.lerpVectors( cache.up_now, up_now, _tprog );
+              this.actors.Starship.up.lerpVectors( cache.up_now, up_now, _tprog );
 
-              this.actors.Ship.warp_tunnel.quaternion.copy( curQ );
+              //this.actors.Starship.warp_tunnel.quaternion.copy( curQ );
 
               let sight_target = new THREE.Vector3();
 
@@ -607,12 +852,12 @@ class Screenplay extends _Screenplay{
 
                   break;
                 case '3rdPerson':
-                    this.actors.Ship.getWorldPosition( sight_target );
+                    this.actors.Starship.getWorldPosition( sight_target );
                     this.active_cam.lookAt( sight_target );
                   break;
 
                 case 'CaptainCam':
-                    this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
+                    this.actors.Starship.NavDots.sight_target.getWorldPosition( sight_target );
                     this.active_cam.up.lerpVectors( cache.up_now, up_now, turn_progress );
                     this.active_cam.lookAt( sight_target );
                   break;
@@ -625,7 +870,7 @@ class Screenplay extends _Screenplay{
                 let cam_pos = new THREE.Vector3();
                 switch( cam_name ){
                   case 'Center':
-                    //this.actors.Ship.conn_station.getWorldPosition( sight_target );
+                    //this.actors.Starship.conn_station.getWorldPosition( sight_target );
                     break;
                   case '3rdPerson':
 
@@ -636,7 +881,7 @@ class Screenplay extends _Screenplay{
                     this.active_cam.lookAt( sight_target );
                     break;
                   case 'CaptainCam':
-                    this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
+                    this.actors.Starship.NavDots.sight_target.getWorldPosition( sight_target );
                     this.cameras.get( cam_name ).getWorldPosition( cam_pos );
                     this.active_cam.position.copy( cam_pos );
                     this.active_cam.up.lerpVectors( this.scene.updates.cache.up_now, up_now, turn_progress );
@@ -647,7 +892,7 @@ class Screenplay extends _Screenplay{
   */
             }
 
-            // Target Locked Captain
+            // 2 Target Locked Captain
             else if( !cache.locked_on && ! cache.locking_on ) {
 
               cache.locking_on = true;
@@ -659,16 +904,17 @@ class Screenplay extends _Screenplay{
 
             }
 
-            // Engage!
+            // 3 Engage!
             else if( cache.locked_on ) {
 
-              // Distort First-Person Space-Time
+              // 4 Distort First-Person Space-Time
               if( cache.warping && cache.frame <= cache.warp_duration ){
 
                 let _wprog = cache.frame / cache.warp_duration;
                 let warp_progress = _wprog ** (10-(10.05*_wprog));
                 let warp_zoom = THREE.MathUtils.lerp( 0.1, 1, warp_progress );
                 cam_name = this.active_cam.name;
+
                 switch( cam_name ){
                   case 'Center':
 
@@ -690,7 +936,7 @@ class Screenplay extends _Screenplay{
 
               }
 
-              // Stop the ship!
+              //  9 Stop the ship!
               else if( cache.warped && cache.frame <= cache.warp_duration ){
 
                 let _wprog = cache.frame / cache.warp_duration;
@@ -719,46 +965,48 @@ class Screenplay extends _Screenplay{
 
               }
 
-              // Begin travelling within a warp tunnel
+              // 5 Begin travelling within a warp tunnel
               else {
 
+                // 6  The warp tunnel appears gradually along the process of travelling.
                 if( !cache.at_destination && cache.frame <= cache.travel_duration ){
 
-                  // The warp tunnel appears gradually along the process of travelling.
                   let tunnel_progress = ( cache.frame<= cache.warp_tunnel_buildup ) ? cache.frame / cache.warp_tunnel_buildup :  1;
-                  if( !this.actors.Ship.warp_tunnel.children[0].visible && tunnel_progress > 0.01 ) this.actors.Ship.warp_tunnel.children[0].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[1].visible && tunnel_progress > 0.02 ) this.actors.Ship.warp_tunnel.children[1].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[2].visible && tunnel_progress > 0.03 ) this.actors.Ship.warp_tunnel.children[2].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[3].visible && tunnel_progress > 0.04 ) this.actors.Ship.warp_tunnel.children[3].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[4].visible && tunnel_progress > 0.05 ) this.actors.Ship.warp_tunnel.children[4].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[5].visible && tunnel_progress > 0.06 ) this.actors.Ship.warp_tunnel.children[5].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[6].visible && tunnel_progress > 0.07 ) this.actors.Ship.warp_tunnel.children[6].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[7].visible && tunnel_progress > 0.08 ) this.actors.Ship.warp_tunnel.children[7].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[8].visible && tunnel_progress > 0.09 ) this.actors.Ship.warp_tunnel.children[8].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[9].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[9].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[10].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[10].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[11].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[11].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[12].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[12].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[13].visible && tunnel_progress > 0.10 ) this.actors.Ship.warp_tunnel.children[13].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[14].visible && tunnel_progress > 0.20 ) this.actors.Ship.warp_tunnel.children[14].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[15].visible && tunnel_progress > 0.20 ) this.actors.Ship.warp_tunnel.children[15].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[16].visible && tunnel_progress > 0.30 ) this.actors.Ship.warp_tunnel.children[16].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[17].visible && tunnel_progress > 0.30 ) this.actors.Ship.warp_tunnel.children[17].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[18].visible && tunnel_progress > 0.40 ) this.actors.Ship.warp_tunnel.children[18].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[19].visible && tunnel_progress > 0.40 ) this.actors.Ship.warp_tunnel.children[19].visible = true;
-                  if( !this.actors.Ship.warp_tunnel.children[20].visible && tunnel_progress > 0.50 ) this.actors.Ship.warp_tunnel.children[20].visible = true;
+                  /*
+                  if( !this.actors.Starship.warp_tunnel.children[0].visible && tunnel_progress > 0.01 ) this.actors.Starship.warp_tunnel.children[0].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[1].visible && tunnel_progress > 0.02 ) this.actors.Starship.warp_tunnel.children[1].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[2].visible && tunnel_progress > 0.03 ) this.actors.Starship.warp_tunnel.children[2].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[3].visible && tunnel_progress > 0.04 ) this.actors.Starship.warp_tunnel.children[3].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[4].visible && tunnel_progress > 0.05 ) this.actors.Starship.warp_tunnel.children[4].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[5].visible && tunnel_progress > 0.06 ) this.actors.Starship.warp_tunnel.children[5].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[6].visible && tunnel_progress > 0.07 ) this.actors.Starship.warp_tunnel.children[6].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[7].visible && tunnel_progress > 0.08 ) this.actors.Starship.warp_tunnel.children[7].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[8].visible && tunnel_progress > 0.09 ) this.actors.Starship.warp_tunnel.children[8].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[9].visible && tunnel_progress > 0.10 ) this.actors.Starship.warp_tunnel.children[9].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[10].visible && tunnel_progress > 0.10 ) this.actors.Starship.warp_tunnel.children[10].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[11].visible && tunnel_progress > 0.10 ) this.actors.Starship.warp_tunnel.children[11].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[12].visible && tunnel_progress > 0.10 ) this.actors.Starship.warp_tunnel.children[12].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[13].visible && tunnel_progress > 0.10 ) this.actors.Starship.warp_tunnel.children[13].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[14].visible && tunnel_progress > 0.20 ) this.actors.Starship.warp_tunnel.children[14].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[15].visible && tunnel_progress > 0.20 ) this.actors.Starship.warp_tunnel.children[15].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[16].visible && tunnel_progress > 0.30 ) this.actors.Starship.warp_tunnel.children[16].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[17].visible && tunnel_progress > 0.30 ) this.actors.Starship.warp_tunnel.children[17].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[18].visible && tunnel_progress > 0.40 ) this.actors.Starship.warp_tunnel.children[18].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[19].visible && tunnel_progress > 0.40 ) this.actors.Starship.warp_tunnel.children[19].visible = true;
+                  if( !this.actors.Starship.warp_tunnel.children[20].visible && tunnel_progress > 0.50 ) this.actors.Starship.warp_tunnel.children[20].visible = true;
 
                   // Increase the opacity of the tunnel as a whole during the ramp-up cycle (<=100 Frames) of the travel process.
                   if( tunnel_progress <= 1){
-                    this.actors.Ship.warp_tunnel.children.forEach( ( cone )=>{
+                    this.actors.Starship.warp_tunnel.children.forEach( ( cone )=>{
                       cone.material.opaciy = tunnel_progress / 2;
                     });
                   }
                   // TODO: Implement a color cycling algorithm for the warp tunnel.
-                  for( let wc_ndx = 1; wc_ndx<this.actors.Ship.warp_tunnel.children.length; wc_ndx+=3){
+                  for( let wc_ndx = 1; wc_ndx<this.actors.Starship.warp_tunnel.children.length; wc_ndx+=3){
                     //let color = (16777215 / 500 * this.scene.updates.cache.frame).toString(16);
-                    //this.actors.Ship.warp_tunnel.children[wc_ndx].material.color = color;
+                    //this.actors.Starship.warp_tunnel.children[wc_ndx].material.color = color;
                   }
+                  */
                   // Define progress linearly, and organically.
                   let _dprog = cache.frame / cache.travel_duration;
                   let travel_progress = _dprog ** ( 1.5-_dprog );
@@ -772,14 +1020,16 @@ class Screenplay extends _Screenplay{
                   // Define what Warp Speed is for this trip... FYI: Not analalogous to contemporary warp travel mathematics.
                   this.cache.warp_speed = cache.warp_speed = _distance /  1500000000;
 
-                  let camship_pos_diff = new THREE.Vector3().subVectors( this.actors.Ship.position, this.active_cam.position );
+                  let camship_pos_diff = new THREE.Vector3().subVectors( this.actors.Starship.position, this.active_cam.position );
 
                   let sight_target = new THREE.Vector3();
-                  this.actors.Ship.position.copy( next_pos );
-                  this.actors.Ship.updateMatrixWorld( true );
-                  this.actors.Ship.warp_tunnel.position.copy( next_pos );
+                  this.actors.Starship.position.copy( next_pos );
+                  this.actors.Starship.updateMatrixWorld( true );
+                  //this.actors.Starship.warp_tunnel.position.copy( next_pos );
                   // TODO: REPLACE WITH CAMERA-INDEPENDANT TRAVEL
+                  /*
                   cam_name = this.active_cam.name;
+
                   switch( cam_name ){
                     case 'Center':
 
@@ -787,53 +1037,63 @@ class Screenplay extends _Screenplay{
                     case '3rdPerson':
                       this.active_cam.position.subVectors( next_pos, camship_pos_diff );
 
-                      this.actors.Ship.getWorldPosition( sight_target );
+                      this.actors.Starship.getWorldPosition( sight_target );
                       this.active_cam.lookAt( sight_target );
                       break;
 
                     case 'CaptainCam':
                       this.active_cam.position.subVectors( next_pos, camship_pos_diff );
 
-                      this.actors.Ship.NavDots.sight_target.getWorldPosition( sight_target );
+                      this.actors.Starship.NavDots.sight_target.getWorldPosition( sight_target );
                       this.active_cam.lookAt( sight_target );
                       break;
                   }
 
                   if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( sight_target );
                   this.active_cam.updateProjectionMatrix();
+                  */
   /*
 
                   if( !user_control ){
                     this.active_cam.position.subVectors( next_pos, camship_pos_diff );
                   } else {
                     this.active_cam.position.subVectors( next_pos, camship_pos_diff );
-                    this.actors.Ship.NavDots.sight_target.getWorldPosition( this.controls.orbit_controls.target );
+                    this.actors.Starship.NavDots.sight_target.getWorldPosition( this.controls.orbit_controls.target );
                     //this.active_cam.updateProjectionMatrix();
                   }
-  */
-                } else if( !cache.at_destination ) {
+  */}
 
+                // 7  Arrival and tunnel dissipation
+                else if( !cache.at_destination ) {
+
+                  // Arrival at destination
                   cache.at_destination = true;
                   cache.frame = 0;
                   cache.warped = true;
 
+                  // ... warp tunnel dissipates.
+                  /*
                   let _wd = 35;
-                  this.actors.Ship.warp_tunnel.children.forEach( ( cone )=>{
+                  this.actors.Starship.warp_tunnel.children.forEach( ( cone )=>{
                     setTimeout( ()=>{
                       cone.visible = false;
                     }, _wd+=35);
                   })
-                  //alert( ' We have arrived Captain. @ Frame: ' + this.scene.updates.cache.frame.toString() );
+                  */
+                  //alert( ' We have arrived Captain. ' );
 
-                } else if ( cache.at_destination ) {
+                }
+                // 8 Set final angle for this destination.
+                else if ( cache.at_destination ) {
 
-                  let ship = this.actors.Ship;
+                  let ship = this.actors.Starship;
                   ship.updateMatrixWorld( true );
                   var rotationMatrix = new THREE.Matrix4().extractRotation( ship.matrixWorld );
                   var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
                   let camship_pos_diff = new THREE.Vector3().subVectors( ship.position, this.active_cam.position  );
                   let sight_target = new THREE.Vector3();
                   cam_name = this.active_cam.name;
+                  /*
                   switch( cam_name ){
                     case 'Center':
 
@@ -853,9 +1113,9 @@ class Screenplay extends _Screenplay{
 
                       break;
                   }
-
+*/
                   cache.completed = true;
-                  //alert( `Arrived at corrdinates: [ X:${this.actors.Ship.position.x}, Y:${this.actors.Ship.position.y}, Z:${this.actors.Ship.position.z} ]` );
+                  //alert( `Arrived at corrdinates: [ X:${this.actors.Starship.position.x}, Y:${this.actors.Starship.position.y}, Z:${this.actors.Starship.position.z} ]` );
 
                 }
               }
@@ -863,28 +1123,46 @@ class Screenplay extends _Screenplay{
             cache.frame++;
           }
         },
-        cache: plotted_course_cache
+        cache: {
+          iniQ: iniQ,
+          endQ: endQ,
+          path: travel_path,
+          up_now: this.actors.Starship.up.clone(),
+          turn_duration: 2 * Math.max( 100, Math.ceil( _quat_diff * ( 250 / Math.PI ) ) ),
+          travel_duration: 2 * Math.ceil( 100 + ( travel_distance / 15000000000 ) ),
+          warp_duration: 2 * 15,
+          duration: this.turn_duration + this.travel_duration,  // TODO: Vary this by the travel_distance to target
+          frame: 0,
+          locking_on: false,
+          locked_on: false,
+          warping: false,
+          warp_speed: 0,
+          warp_tunnel_buildup: 2 * 250,
+          at_destination: false,
+          warped: false,
+          completed: false,
+          cleanup_phase: false,
+          arrival_emitter: arrival_emitter
+        }
       }
       this.updatables.set('warp_to', plotted_course );
     },
-    change_cam: async ( cam_name ) =>{
-      let ship = this.actors.Ship;
+    change_cam_old: async ( cam_name ) =>{
+      let ship = this.actors.Starship;
       let new_position = new THREE.Vector3();
       let new_target_position = new THREE.Vector3();
-      let major_dim = Math.max( window.innerHeight, window.innerWidth );
-      let minor_dim = Math.min( window.innerHeight, window.innerWidth );
 
       switch( cam_name ){
         case 'Center':
-          new_position.setY( major_dim );
-          new_position.setZ( major_dim );
+          new_position.setY( this.major_dim );
+          new_position.setZ( this.major_dim );
           new_target_position = new THREE.Vector3();
           this.active_cam.up = new THREE.Vector3( 0, 1, 0 );
 
           break;
         case '3rdPerson':
           ship.getWorldPosition( new_position );
-          new_position.add( new THREE.Vector3( 100, 200, 100 ) );
+          new_position.add( new THREE.Vector3( 100, 200, -100 ) );
           ship.getWorldPosition( new_target_position );
           break;
         case 'CaptainCam':
@@ -892,18 +1170,171 @@ class Screenplay extends _Screenplay{
           ship.NavDots.sight_target.getWorldPosition( new_target_position );
           break;
       }
-      this.active_cam.position.copy( new_position );
-      this.active_cam.lookAt( new_target_position );
+      this.position.copy( new_position );
+      this.target.copy( new_target_position );
+      this.active_cam.position.copy( this.position );
+      this.active_cam.lookAt( this.target );
       if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( new_target_position );
       this.active_cam.updateProjectionMatrix();
       this.active_cam.name = cam_name;
 
     },
+    change_cam: async ( cam_name ) =>{
+      // REPLACE WITH MOVING TRANSITION... NO MORE JUMP CUTS!!!
+      let travel_duration = 30; // calculate paths for any distance.
+      let a = new THREE.Vector3();
+      this.active_cam.getWorldPosition( a );
+      let b = new THREE.Vector3();
+      let cam = this.cameras.get( cam_name );
+      cam.getWorldPosition( b );
+      let distance = a.distanceTo( b );
+      let travel_type = ( distance > 5000 ) ? ( distance > 10000000 ) ? "FAST" : "TRANSPORT" : "LOCAL";
+      console.log( `Distance: ${distance} | Type: ${travel_type}` );
+      let camera_change = new SceneTransformation({
+        update: ()=>{
+          let cache = camera_change.cache;
+
+          // Queue up the frame / sequence or => post()
+          if(++cache.frame > cache.durations[cache.seq]){
+            cache.frame = 1;
+            if( ++cache.seq >= cache.durations.length ) camera_change.post();
+            else{
+              let progress = cache.frame / cache.durations[cache.seq];
+              switch( cache.type ){
+                case "FAST":
+                    switch(cache.seq){
+                      case 0:
+                        // This is for turning toward the destination
+
+                        break;
+                      case 1:
+                        // If fast-travelling, zoom the camera to augment the warp tunnel visuals
+
+                        break;
+                      case 2:
+                        // if fast-travelling, this is for gracefully landing at the destination.
+
+                        break;
+                      default:
+                        // Should not actually get here. :)
+                        break;
+                    }
+                  break;
+                case "TRANSPORT":
+                    switch(cache.seq){
+                      case 0:
+                        // if transporting, this is for the beaming sequence
+
+                        break;
+                      case 1:
+                        /* If transporting:
+                            zoom out to encompass both locations,
+                            overlay labels and icons as a virtual map display,
+                            show the travel path for the journey as an arcing arrow from start to finish
+                            zoom in to the destination, bringing the label become the title when rematerializing.
+                        */
+
+                        break;
+                      case 2:
+                        // if transporting, this is for the beaming sequence
+
+                        break;
+                      default:
+                        // Should not actually get here. :)
+                        break;
+                    }
+                  break;
+
+                case "LOCAL":
+                    switch(cache.seq){
+                      case 0:
+
+                        break;
+                      case 1:
+
+                        break;
+                      case 2:
+
+                        break;
+                      default:
+                        // Should not actually get here. :)
+                        break;
+                    }
+                  break;
+                default:
+                  // Should not actually get here. :)
+                  break;
+              }
+
+            }
+          }
+        },
+        cache: {
+          frame: 0,
+          seq: 0,
+          durations: [15,travel_duration,15],
+          a: a,
+          b: b,
+          distance: distance,
+          type: travel_type
+        },
+        post: ()=>{
+          /*
+          let cam_pos = new THREE.Vector3();
+          this.cameras.get( cam_name ).getWorldPosition( cam_pos );
+          let cam_quat = new THREE.Quaternion();
+          this.cameras.get( cam_name ).getWorldQuaternion( cam_quat );
+          this.active_cam.position.copy( cam_pos );
+          this.active_cam.quaternion.copy( cam_quat );
+          this.active_cam.name = cam_name;
+          this.active_cam.updateProjectionMatrix();
+          */
+
+          let ship = this.actors.Starship;
+          let new_position = new THREE.Vector3();
+          let new_target_position = new THREE.Vector3();
+          let major_dim = Math.max( window.innerHeight, window.innerWidth );
+          let minor_dim = Math.min( window.innerHeight, window.innerWidth );
+
+          this.active_cam = this.cameras.get( cam_name );
+/*
+          switch( cam_name ){
+            case 'Center':
+              //new_position.setY( major_dim );
+              //new_position.setZ( major_dim );
+              new_target_position = new THREE.Vector3();
+              this.active_cam.up = new THREE.Vector3( 0, 1, 0 );
+
+              break;
+            case '3rdPerson':
+              //this.cameras.get( cam_name )
+              //ship.getWorldPosition( new_position );
+              //new_position.add( new THREE.Vector3( 0, 10, -50 ) );
+              //ship.getWorldPosition( new_target_position );
+              ship.position.copy( new_target_position );
+              break;
+            case 'CaptainCam':
+              //ship.getWorldPosition( new_position );
+              ship.NavDots.sight_target.getWorldPosition( new_target_position );
+              break;
+          }
+
+          //this.active_cam.position.copy( new_position );
+          this.active_cam.lookAt( new_target_position );
+          if( this.controls.orbit_controls ) this.controls.orbit_controls.target.copy( new_target_position );
+          */
+          this.active_cam.updateProjectionMatrix();
+          this.active_cam.name = cam_name;
+
+        }
+      });
+      this.updatables.set( 'change_cam', camera_change );
+    },
     transform: async ( objects, targets, duration, arrival_emitter = false )=>{
       // Remove actively competing animations by resetting this engine.
       this.updatables.delete('ui_transform');
-      delete this.ui_scene.updates;
-      this.ui_scene.updates = {
+      delete this.sys_ui_scene.updates;
+      this.sys_ui_scene.updates = {
         update: ()=>{},
         cache: {}
       };
@@ -942,16 +1373,16 @@ class Screenplay extends _Screenplay{
             }
           } else {
 
-            let objects = this.ui_scene.updates.cache.objects;
-            let targets = this.ui_scene.updates.cache.targets;
-            let paths = this.ui_scene.updates.cache.paths;
-            let _tprog = this.ui_scene.updates.cache.frame / this.ui_scene.updates.cache.duration;
+            let objects = this.sys_ui_scene.updates.cache.objects;
+            let targets = this.sys_ui_scene.updates.cache.targets;
+            let paths = this.sys_ui_scene.updates.cache.paths;
+            let _tprog = this.sys_ui_scene.updates.cache.frame / this.sys_ui_scene.updates.cache.duration;
             let transform_progress = _tprog ** (10-(10.05*_tprog));
 
             for ( let ndx = 0; ndx < objects.length; ndx++ ) {
 
               let new_pos = new THREE.Vector3();
-              if ( this.ui_scene.updates.cache.frame === this.ui_scene.updates.cache.duration ) {
+              if ( this.sys_ui_scene.updates.cache.frame === this.sys_ui_scene.updates.cache.duration ) {
                 new_pos = targets[ ndx ].position;
               } else {
                 paths[ ndx ].at( transform_progress, new_pos );
@@ -962,20 +1393,34 @@ class Screenplay extends _Screenplay{
             }
 
           }
-          if( ++this.ui_scene.updates.cache.frame >= this.ui_scene.updates.cache.duration ) this.ui_scene.updates.cache.completed = true;
+          if( ++this.sys_ui_scene.updates.cache.frame >= this.sys_ui_scene.updates.cache.duration ) this.sys_ui_scene.updates.cache.completed = true;
         },
         cache: ui_transform_cache
       }
       this.updateables.set( 'ui_transform', ui_transform );
-    }
+    },
+    addLabel: async ( name, location )=>{
 
+			const textGeo = new TextGeometry( name, {
+				font: font,
+				size: 20,
+				height: 1,
+				curveSegments: 1
+			} );
+
+			const textMaterial = new THREE.MeshBasicMaterial();
+			const textMesh = new THREE.Mesh( textGeo, textMaterial );
+			textMesh.position.copy( location );
+			this.sys_ve_scene.add( textMesh );
+
+		}
   };
   SetSceneBackground = async ( )=>{
 
     const loader = new THREE.CubeTextureLoader();
 				loader.setPath( 'textures/environment/' );
 				let textureCube = await loader.load( [ 'corona_lf.png', 'corona_rt.png', 'corona_up_2.png', 'corona_dn_2.png', 'corona_ft.png', 'corona_bk.png'   ] );
-				this.scene.background = textureCube;
+				this.sys_ve_scene.background = textureCube;
   };
   props = {
     get SplashScreen(){
@@ -986,34 +1431,170 @@ class Screenplay extends _Screenplay{
       delete this.SplashScreen;
       return this.SplashScreen = splash_screen;
     },
-    get HomeDome(){
-      let major_dim = Math.max( window.innerWidth, window.innerHeight );
-      let minor_dim = Math.min( window.innerWidth, window.innerHeight );
-      // TODO: Tesselate a floor at your earliest convenience... currently only makes a single tile.
-      let StageBuilder = ( size )=>{
-        let stage = new THREE.Group();
-        const stage_geometry = new THREE.CircleGeometry( 3 * major_dim, 6 );
-        const stage_material = new THREE.MeshStandardMaterial( { color: 0x070f54, side: THREE.FrontSide, metalness: 1, roughness: 0 } );
-        stage.add( new THREE.Mesh( stage_geometry, stage_material ) );
-        stage.rotateX( - Math.PI / 2 );
-        return stage;
-      };
-      let home_stage = StageBuilder( 42 ); // Currently disregards the parameter.
-      home_stage.position.setY( -100 );
-      let bowl = new THREE.Mesh(
-        new THREE.SphereGeometry( major_dim * Math.PI, 64, 32, 0, 2*Math.PI, Math.PI/2, Math.PI ),
-        new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.DoubleSide } )
-      )
-      bowl.position.setY( major_dim - 100 );
-      let home_dome = new THREE.Group();
-      home_dome.stage = home_stage;
-      home_dome.bowl = bowl;
-      home_dome.add( home_stage );
-      home_dome.add( bowl );
+    get Model(){
 
-      delete this.HomeDome;
-      return this.HomeDome = home_dome;
-    }
+      let loading = new Promise( ( resolve, reject )=>{
+        const loader = new GLTFLoader();
+        // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath( 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/' );
+        loader.setDRACOLoader( dracoLoader );
+        loader.load( 'models/scene.glb',
+          async ( gltf )=>{
+            resolve( gltf );
+          },
+          async function ( xhr ) {
+            // TODO: Add Repair progress functionality... if needed.
+            //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+          },
+          async ( err )=>{
+            console.error( err );
+            reject( err );
+          }
+        );
+      });
+
+
+      return (async () => {
+        try {
+          return await loading.then(( model )=>{
+            delete this.Model;
+            return this.Model = model;
+
+          })
+        } catch(e) {
+          return 0; // fallback value;
+        }
+      })();
+    },
+    get Avatar(){
+
+      let loading = new Promise( ( resolve, reject )=>{
+        const loader = new GLTFLoader();
+        // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath( 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/' );
+        loader.setDRACOLoader( dracoLoader );
+        loader.load( 'models/base_female.glb',
+          async ( gltf )=>{
+            resolve( gltf );
+          },
+          async function ( xhr ) {
+            // TODO: Add Repair progress functionality... if needed.
+            //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+          },
+          async ( err )=>{
+            console.error( err );
+            reject( err );
+          }
+        );
+      });
+
+
+      return (async () => {
+        try {
+          return await loading.then(( avatar )=>{
+            delete this.Avatar;
+            return this.Avatar = avatar.scene.children[0];
+
+          })
+        } catch(e) {
+          return 0; // fallback value;
+        }
+      })();
+    },
+    get SpaceStation(){
+
+      let loading = new Promise( ( resolve, reject )=>{
+        const loader = new GLTFLoader();
+        // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath( 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/' );
+        loader.setDRACOLoader( dracoLoader );
+        loader.load( 'models/Earth.glb',
+          async ( gltf )=>{
+
+            let _earth = gltf.scene;
+            let earth = new SceneAsset3D( _earth );
+            earth.scale.set( 13000, 13000, 13000 );
+            earth.position.set( 149598023000, 0, 0 );
+            earth.name = 'Earth';
+            earth.directions.set( 'revolve', function(){
+              earth.rotation.y += .0002424;
+            });
+            earth.surface_distance = 6371000;
+            earth.orbital_distance = 1 * 9009000;
+            earth.orbital_vector = new THREE.Vector3( 9009000, 3000000, 9009000 );
+
+            resolve( earth );
+          },
+          async function ( xhr ) {
+            // TODO: Add Repair progress functionality... if needed.
+            //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+          },
+          async ( err )=>{
+            console.error( err );
+            reject( err );
+          }
+        );
+      });
+
+      return (async () => {
+        try {
+          return await loading.then(( earth )=>{
+
+            delete this.Earth;
+            return this.Earth = earth;
+
+          })
+        } catch(e) {
+          return 0; // fallback value;
+        }
+      })();
+    },
+    get HomeDome(){
+
+      let loading = new Promise( ( resolve, reject )=>{
+        const loader = new GLTFLoader();
+        // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath( 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/' );
+        loader.setDRACOLoader( dracoLoader );
+        loader.load( 'models/space_station.glb',
+          async ( gltf )=>{
+
+            let _model = gltf.scene;
+            let home_dome = new SceneAsset3D( _model );
+            home_dome.scale.set( 1, 1, 1 );
+            home_dome.position.set( 149600000105, 5000040, 4999769 );
+            home_dome.name = 'HomeDome';
+
+            resolve( home_dome );
+          },
+          async function ( xhr ) {
+            // TODO: Add Repair progress functionality... if needed.
+            //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+          },
+          async ( err )=>{
+            console.error( err );
+            reject( err );
+          }
+        );
+      });
+
+      return (async () => {
+        try {
+          return await loading.then(( home_dome )=>{
+
+            delete this.HomeDome;
+            return this.HomeDome = home_dome;
+
+          })
+        } catch(e) {
+          return 0; // fallback value;
+        }
+      })();
+    },
   }
   direct = ( delta )=>{
     let warp_speed = this.cache.warp_speed;
@@ -1026,38 +1607,27 @@ class Screenplay extends _Screenplay{
   }
 
   /* Rendering Loop parameter values */
+  //VIEW;
   cache = {};
-  u_name = "";
-  ups_test = {
-    ticks: 0,
-    duration: 0,
-    stamps: [],
-    max: -1,
-    min: -1,
-    score: 0
-  };
-  resume = {
-    objects: [],
-    targets: {
-      timeline: [],
-      table: [],
-      sphere: [],
-      helix: [],
-      grid: []
-    }
-  };
-  lil_gui: {}
 
   constructor( ){
     super( );
 
-    let major_dim = Math.max( window.innerHeight, window.innerWidth );
-    let minor_dim = Math.min( window.innerHeight, window.innerWidth );
+    this.VIEW = VIEW;
 
     // Camera & Controls Setup
-    let active_cam = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
-    this.active_cam = active_cam;
-    this.actions.change_cam( 'Center' );
+    let center_cam = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
+    center_cam.position.set( 0, 0, 0 );
+    center_cam.lookAt( new THREE.Vector3() );
+    center_cam.updateProjectionMatrix();
+    this.cameras.set('Center',  center_cam);
+    this.active_cam = this.cameras.get( 'Center' );
+
+    this.ui_cam = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
+    //this.ui_cam.position.set( 0, 0, VIEW.major_dim );
+    this.ui_cam.position.set( 0, 0, 9 );
+    this.ui_cam.setRotationFromEuler( new THREE.Euler( center_cam.rotation.x,center_cam.rotation.y,center_cam.rotation.z, 'XYZ' ) );
+
 
   }
 }

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+
 import { EventEmitter } from 'events';
 import { CSS3DRenderer, CSS3DObject } from '../lib/CSS3DRenderer.js';
 
@@ -19,22 +20,58 @@ class ScreenDirector{
 
   }
 
-  // GUI Interactions
-  raycaster; mouse;
-  onPointerDown = ( event )=> {
-    this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  Add_Dictum = function( dictum_name, dictum ){
 
-    this.raycaster.setFromCamera( this.mouse, this.screenplay.active_cam );
-    const intersects = (this.screenplay.interactives && this.screenplay.interactives.length > 0) ? this.raycaster.intersectObjects( this.screenplay.interactives, false ) : [];
-    if ( intersects.length > 0 ) {
+    // EventHandler <dictum_name>: When fired, executes the designated functions in order, reporting the progress to the <dictum_name>_progress eventhandler.
+    this.director.on( `${dictum_name}`, async ()=>{
+      this.manifesto[ dictum_name ].directions.on_enter( this.screenplay, dictum_name, `${dictum_name}_entered`, this.director );
+    });
+    this.director.on( `${dictum_name}_entered`, async ()=>{
+      this.manifesto[ dictum_name ].directions.on_idle( this.screenplay, dictum_name, `${dictum_name}_idling`, this.director );
+    });
 
-      // Capture the first clicked target
-      const object = intersects[ 0 ].object;
-      let pos = object.position;
-      object.click(); // Fire the object's internal click handler if any.
+    // Run the dictum logic
+    let logic_count = 0;
+    if(!dictum.logic) throw new Error('Dictums must be logical.  Declare a void function at least.');   // Feedback for the Dictum writers.
+    logic_count = dictum.logic.length;
+    this.director.on( `${dictum_name}_idling`, async ()=>{
+      dictum.logic[ 0 ]( this.screenplay, dictum_name, this.director, 0 );
+    });
 
-    }
+    this.director.on( `${dictum_name}_progress`, async ( dictum_name, ndx )=>{
+
+      let dictum = this.manifesto[ dictum_name ];
+      dictum.directions.on_progress( this.screenplay, dictum_name, ndx );
+      dictum.progress.completed++;
+      dictum.progress.passed++;
+      if( dictum.progress.completed >= dictum.logic.length ) {
+        this.director.emit( `${dictum_name}_end`, dictum_name );
+      } else {
+        this.director.emit( `next_logic`, dictum_name, ++ndx );
+      }
+
+    } );
+
+    this.director.on( `${dictum_name}_failure`, async ( dictum_name, ndx )=>{
+
+      let dictum = this.manifesto[dictum_name];
+      dictum.directions.on_failure( this.screenplay, dictum_name, ndx );
+      dictum.progress.completed++;
+      dictum.progress.failed++;
+      if( dictum.progress.completed === dictum.logic.length ) {
+        this.director.emit( `${dictum_name}_end`, dictum_name );
+      } else {
+        this.director.emit( `next_logic`, dictum_name, ++ndx );
+      }
+
+    } );
+
+    this.director.on( `${dictum_name}_end`, async ( dictum_name )=>{
+
+      let dictum = this.manifesto[dictum_name];
+      let next_emit = (dictum.progress.failed > 0) ? 'fail_dictum' : `confirm_dictum`;
+      this.manifesto[ dictum_name ].directions.on_end( this.screenplay, dictum_name, next_emit, this.director ) ;
+    } );
   }
 
   // screenplay: This object contains the lights, cameras, ations... actors, directions, etc... to run the scene.
@@ -43,68 +80,16 @@ class ScreenDirector{
   constructor( screenplay, manifesto, start_now ){
     this.director = new EventEmitter();
 
-    this.raycaster = new THREE.Raycaster();
-    this.mouse = new THREE.Vector2();
-
     this.screenplay = screenplay;
     this.manifesto = manifesto;
 
-    // Iterate through the provided dictums, generating event-handing pathways to progress through the manifesto.
+    // Iterate through the provided dictums, generating event-handling pathways to progress through the manifesto.
     for (const dictum_name in this.manifesto) {
 
       this.dictum_index.push(dictum_name);
       let dictum = this.manifesto[dictum_name];
 
-      // EventHandler <dictum_name>: When fired, executes the designated functions in order, reporting the progress to the <dictum_name>_progress eventhandler.
-      this.director.on( `${dictum_name}`, async ()=>{
-        this.manifesto[ dictum_name ].directions.on_enter( this.screenplay, dictum_name, `${dictum_name}_entered`, this.director );
-      });
-      this.director.on( `${dictum_name}_entered`, async ()=>{
-        this.manifesto[ dictum_name ].directions.on_idle( this.screenplay, dictum_name, `${dictum_name}_idling`, this.director );
-      });
-
-      // Run the dictum logic
-      let logic_count = 0;
-      if(!dictum.logic) throw new Error('Dictums must be logical.  Declare a void function at least.');   // Feedback for the Dictum writers.
-      logic_count = dictum.logic.length;
-      this.director.on( `${dictum_name}_idling`, async ()=>{
-        dictum.logic[ 0 ]( this.screenplay, dictum_name, this.director, 0 );
-      });
-
-      this.director.on( `${dictum_name}_progress`, async ( dictum_name, ndx )=>{
-
-        let dictum = this.manifesto[ dictum_name ];
-        dictum.directions.on_progress( this.screenplay );
-        dictum.progress.completed++;
-        dictum.progress.passed++;
-        if( dictum.progress.completed === dictum.logic.length ) {
-          this.director.emit( `${dictum_name}_end`, dictum_name );
-        } else {
-          this.director.emit( `next_logic`, dictum_name, ++ndx );
-        }
-
-      } );
-
-      this.director.on( `${dictum_name}_failure`, async ( dictum_name, ndx )=>{
-
-        let dictum = this.manifesto[dictum_name];
-        dictum.directions.on_failure( this.screenplay );
-        dictum.progress.completed++;
-        dictum.progress.failed++;
-        if( dictum.progress.completed === dictum.logic.length ) {
-          this.director.emit( `${dictum_name}_end`, dictum_name );
-        } else {
-          this.director.emit( `next_logic`, dictum_name, ++ndx );
-        }
-
-      } );
-
-      this.director.on( `${dictum_name}_end`, async ( dictum_name )=>{
-
-        let dictum = this.manifesto[dictum_name];
-        let next_emit = (dictum.progress.failed > 0) ? 'fail_dictum' : `confirm_dictum`;
-        this.manifesto[ dictum_name ].directions.on_end( this.screenplay, dictum_name, next_emit, this.director ) ;
-      } );
+      this.Add_Dictum( dictum_name, dictum );
 
     }
 
@@ -152,9 +137,8 @@ class ScreenDirector{
     });
 
     // EventHandler 'next_dictum': When fired, increments the ScreenDirector to the next dictum, or past; emitting either that <dictum_name> event, or the 'manifesto_compete' event respectively.
-    this.director.on('goto_dictum', async ( dictum_name, from_dictum_name )=>{
+    this.director.on('goto_dictum', async ( dictum_name )=>{
 
-      this.manifesto[ from_dictum_name ].result.complete = true;
       this.active_dictum = this.dictum_index.indexOf( dictum_name );
       dictum_name = this.dictum_index[ this.active_dictum ];
       this.director.emit( `${dictum_name}`, dictum_name );
@@ -202,10 +186,17 @@ class ScreenDirector{
 */
 class Screenplay{
   ENTIRE_SCENE = 0;
-  active_cam;
-  scene; ui_scene; renderer; ui_renderer;
+  CAN_SAVE; SHOULD_SAVE;
+  activePipGUID = 0;
+  active_cam; ui_cam; user_cam;
+  sys_ve_scene; sys_ui_scene;
+  page_ve_scene; page_ui_scene;
+  sys_ve_renderer; sys_ui_renderer; page_ve_renderer; page_ui_renderer;
+  sys_ve_post; sys_ui_post; page_ve_post; page_ui_post;
+  sys_ve_composer = false; sys_ui_composer = false; page_ve_composer = false; page_ui_composer = false;
   clock; delta; fps; interval; raycaster; mouse;
   stop_me;
+  VIEW; aspect; major_dim; minor_dim;height;width;
   animate = ()=>{
     requestAnimationFrame( this.animate );
     this.delta += this.clock.getDelta();
@@ -213,8 +204,11 @@ class Screenplay{
       let next_delta = this.delta % this.interval;
       this.update( this.delta );
       this.direct( this.delta );
-      this.render();
-      this.ui_render();
+
+      this.render_sys_ve();
+      this.render_sys_ui();
+      this.render_page_ve();
+      this.render_page_ui();
       this.delta = next_delta;
     }
   }
@@ -222,7 +216,11 @@ class Screenplay{
 
   // Grouping Arrays... Add models here to isolate unrelated items during processing (ie. Click / Tap events)
   updatables_cache;  // Place the parameters for the like-named update routine into this Map for access during each run.
-  updatables;  // Place objects which must have their '.update()' function run during the render phase.
+  updatables;   // Place objects which must be updated continuously... must have update()
+  heartbeats; // Place objects which must be updated at a heartbeat pace... must have update()
+  polling;  // Place objects here which must be updated at longer polling intervals... must have update(), must use integral interval value.
+
+  resizables;   // Place objects here which must readjust when the screen is resized... must have resize()
   actives = [];
   interactives = [];  // Populate this with the rendered objects which the user may interact with... improving the efficiency of the Raycaster.
 
@@ -244,8 +242,58 @@ class Screenplay{
     });
   }
 
+  heartbeat = ( delta )=>{
+    this.heartbeats.forEach(( heartbeat, name )=>{
+      if ( heartbeat.update ) heartbeat.update( delta );
+    });
+  }
+
+  poller = {
+    quarter_minute: ( delta )=>{
+      this.polls.quarter_minute.forEach(( poll, name )=>{
+        debugger;
+        try { poll( delta ) } catch(e) { console.error( e ) };
+      });
+    },
+    minute: ( delta )=>{
+      this.polls.minute.forEach(( poll, name )=>{
+        try { poll.update( delta ) } catch(e) { console.error( e ) };
+      });
+    },
+    quarter_hour: ( delta )=>{
+      this.polls.quarter_hour.forEach(( poll, name )=>{
+        try { poll.update( delta ) } catch(e) { console.error( e ) };
+      });
+    },
+    half_hour: ( delta )=>{
+      this.polls.half_hour.forEach(( poll, name )=>{
+        try { poll.update( delta ) } catch(e) { console.error( e ) };
+      });
+    },
+    hour: ( delta )=>{
+      this.polls.hour.forEach(( poll, name )=>{
+        try { poll.update( delta ) } catch(e) { console.error( e ) };
+      });
+    },
+    quarter_day: ( delta )=>{
+      this.polls.quarter_day.forEach(( poll, name )=>{
+        try { poll.update( delta ) } catch(e) { console.error( e ) };
+      });
+    },
+    half_day: ( delta )=>{
+      this.polls.half_day.forEach(( poll, name )=>{
+        try { poll.update( delta ) } catch(e) { console.error( e ) };
+      });
+    },
+    day: ( delta )=>{
+      this.polls.day.forEach(( poll, name )=>{
+        try { poll.update( delta ) } catch(e) { console.error( e ) };
+      });
+    }
+
+  }
+
   direct = ( delta )=>{
-    debugger;
     this.actives.forEach( ( active, name )=>{
       active.directions.forEach( ( direction, name )=>{
         direction( delta );
@@ -253,75 +301,212 @@ class Screenplay{
     } );
   }
 
-  render = ()=>{
-    this.renderer.render( this.scene, this.active_cam );
+  render_sys_ve = ()=>{
+    if( this.sys_ve_post && this.sys_ve_composer ){
+      this.sys_ve_composer.render();
+    } else {
+      if( this.user_cam.user_control ){
+        this.sys_ve_renderer.render( this.sys_ve_scene, this.user_cam );
+      } else {
+        this.sys_ve_renderer.render( this.sys_ve_scene, this.active_cam );
+      }
+  	}
   }
 
-  ui_render = ()=>{
-    this.ui_renderer.render( this.ui_scene, this.active_cam );
+  render_sys_ui = ()=>{
+    if(this.sys_ui_post && this.sys_ui_composer){
+      this.sys_ui_composer.render();
+    } else{
+      this.sys_ui_renderer.render( this.sys_ui_scene, this.ui_cam );
+  	}
+  }
+
+  render_page_ve = ()=>{
+  	if( this.page_ve_post && this.page_ve_composer ){
+      this.page_ve_composer.render();
+    } else {
+      if( this.user_cam.user_control ){
+        this.page_ve_renderer.render( this.page_ve_scene, this.user_cam );
+      } else {
+        this.page_ve_renderer.render( this.page_ve_scene, this.active_cam );
+      }
+  	}
+  }
+
+  render_page_ui = ()=>{
+    if( this.page_ui_post && this.page_ui_composer ){
+      this.page_ui_composer.render();
+    } else {
+  		this.page_ui_renderer.render( this.page_ui_scene, this.ui_cam );
+  	}
   }
 
   // Handle Viewscreen Changes
   resize = ()=> {
-    let aspect = window.innerWidth / window.innerHeight;
-    let active_cam = this.active_cam;
-    active_cam.aspect = aspect;
-    active_cam.updateProjectionMatrix();
-    this.renderer.setSize( window.innerWidth, window.innerHeight );
-    this.ui_renderer.setSize( window.innerWidth, window.innderHeight );
+    this.VIEW.aspect = window.innerWidth / window.innerHeight;
+    this.VIEW.major_dim = Math.max( this.height, this.width );
+    this.VIEW.minor_dim = Math.min( this.height, this.width );
+    this.aspect = window.innerWidth / window.innerHeight;
+    this.height = window.innerHeight;
+    this.width = window.innerWidth;
+    this.active_cam.aspect = this.aspect;
+    this.ui_cam.aspect = this.aspect;
+    this.sys_ve_renderer.setSize( this.width, this.height );
+    this.sys_ui_renderer.setSize( this.width, this.height );
+    this.page_ve_renderer.setSize( this.width, this.height );
+    this.page_ui_renderer.setSize( this.width, this.height );
+    this.major_dim = Math.max( this.height, this.width );
+    this.minor_dim = Math.min( this.height, this.width );
+    this.active_cam.updateProjectionMatrix();
+    this.ui_cam.updateProjectionMatrix();
+
+    this.resizables.forEach(( resizable, name )=>{
+      if ( resizable.resize ) resizable.resize( this.width, this.height );
+    });
   }
 
+  // GUI Interactions
+  raycaster; mouse;
+  onPointerDown = ( event )=> {
+
+    this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    // TODO: Redo this for the new camera setup
+    this.raycaster.setFromCamera( this.mouse, this.active_cam );
+    const intersects = (this.interactives && this.interactives.length > 0) ? this.raycaster.intersectObjects( this.interactives, false ) : [];
+    if ( intersects.length > 0 ) {
+
+      // Capture the first clicked target
+      const object = intersects[ 0 ].object;
+      let pos = object.position;
+      if( object.click ) object.click(); // Fire the object's internal click handler if any.
+
+    }
+
+  }
   constructor( ){
+
+    this.CAN_SAVE = (typeof(Storage) !== "undefined") || false;
+    if( this.CAN_SAVE ){
+      let should = localStorage.getItem("should_save") || true; // Defaults to true, false must be explicitly saved to take affect.
+      this.SHOULD_SAVE = should;
+    } else {
+      this.SHOULD_SAVE = false;
+    }
+
+    this.VIEW = {
+      fov: 45,
+      aspect: window.innerWidth / window.innerHeight,
+      near: 0.1,
+      far: 100000000000000,
+      major_dim: Math.max( window.innerWidth, window.innerHeight ),
+      minor_dim: Math.min( window.innerWidth, window.innerHeight )
+    };
+
+
+    // Display Dimensions
+    this.major_dim = Math.max( window.innerHeight, window.innerWidth );
+    this.minor_dim = Math.min( window.innerHeight, window.innerWidth );
+    this.aspect = window.innerWidth / window.innerHeight;
+    this.height = window.innerHeight;
+    this.width = window.innerWidth;
 
     // Internal Clock
     // TODO: Set this to a configuration value
-    const clock = new THREE.Clock();
-    this.clock = clock;
-    let delta = 0;
-    this.delta = delta;
+    this.clock = new THREE.Clock();
+    this.delta = 0;
     let fps = this.fps = 60;
-    let interval = this.interval = 1 / fps;
+    this.interval = 1 / fps;
 
     // Mouse Interaction Capture
-    const raycaster = new THREE.Raycaster();
-    this.raycaster = raycaster;
-    const mouse = new THREE.Vector2();
-    this.mouse = mouse;
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
 
     this.updatables_cache = new Map();
     this.updatables = new Map();
+    this.heartbeats = new Map();
+    this.polls = {
+      quarter_minute: new Map(),
+      minute: new Map(),
+      quarter_hour: new Map(),
+      half_hour: new Map(),
+      hour: new Map(),
+      quarter_day: new Map(),
+      half_day: new Map(),
+      day: new Map()
+    }
+
     this.cameras = new Map();
+    this.resizables = new Map();
     this.active_cam = false;
-    this.scene = new THREE.Scene();
-    this.scene.updates = {
+    this.user_cam = false;
+
+    this.sys_ve_scene = new THREE.Scene();
+    this.sys_ve_scene.updates = {
       update: ()=>{},
       cache: {}
     };
-    this.ui_scene = new THREE.Scene();
-    this.ui_scene.updates = {
+    this.updatables.set('sys_ve_scene', this.sys_ve_scene.updates );
+
+    this.sys_ui_scene = new THREE.Scene();
+    this.sys_ui_scene.updates = {
       update: ()=>{},
       cache: {}
     };
-    this.updatables.set('scene', this.scene.updates );
+    this.updatables.set('sys_ui_scene', this.sys_ui_scene.updates );
 
-    // UI Renderer
-    const ui_renderer = new CSS3DRenderer( );
-    ui_renderer.setSize( window.innerWidth, window.innerHeight );
-    let ui_canvas = ui_renderer.domElement;
-    ui_canvas.id = 'ui';
-    document.body.appendChild( ui_canvas );
-    this.ui_renderer = ui_renderer;
+    this.page_ve_scene = new THREE.Scene();
+    this.page_ve_scene.updates = {
+      update: ()=>{},
+      cache: {}
+    };
+    this.updatables.set('page_ve_scene', this.page_ve_scene.updates );
 
-    // Scene Renderer
-    const renderer = new THREE.WebGLRenderer( { antialias: true, logarithmicDepthBuffer: true, physicallyCorrectLights: true } );
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.setPixelRatio( window.devicePixelRatio ? window.devicePixelRatio : 1 );
-    let canvas = renderer.domElement;
-    canvas.id = 'theatre';
-    document.body.appendChild( canvas );
-    this.renderer = renderer;
+    this.page_ui_scene = new THREE.Scene();
+    this.page_ui_scene.updates = {
+      update: ()=>{},
+      cache: {}
+    };
+    this.updatables.set('page_ui_scene', this.page_ui_scene.updates );
+
+
+    // System Virtual Environment Renderer
+    const svr = this.sys_ve_renderer = new THREE.WebGLRenderer( { antialias: true, logarithmicDepthBuffer: true} );
+    svr.setSize( window.innerWidth, window.innerHeight );
+    svr.setPixelRatio( window.devicePixelRatio ? window.devicePixelRatio : 1 );
+    // Turn on VR support
+    svr.xr.enabled = true;
+    let svc = svr.domElement;
+    svc.id = 'sys_ve_canvas';
+    document.body.appendChild( svc );
+
+    // System User Interface Renderer
+    const sur = this.sys_ui_renderer = new CSS3DRenderer( );
+    sur.setSize( window.innerWidth, window.innerHeight );
+    let suc = sur.domElement;
+    suc.id = 'sys_ui_canvas';
+    document.body.appendChild( suc );
+
+    // Page Virtual Environment Renderer
+    const pvr = this.page_ve_renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true, outputEncoding: THREE.sRGBEncoding } );
+    pvr.setSize( window.innerWidth, window.innerHeight );
+    pvr.setPixelRatio( window.devicePixelRatio ? window.devicePixelRatio : 1 );
+    pvr.toneMapping = THREE.ACESFilmicToneMapping;
+    pvr.toneMappingExposure = 0.5;
+    // Turn on VR support
+    pvr.xr.enabled = true;
+    let pvc = pvr.domElement;
+    pvc.id = 'page_ve_canvas';
+    document.body.appendChild( pvc );
+
+    // Page User Interface Renderer
+    const pur = this.page_ui_renderer = new CSS3DRenderer( );
+    pur.setSize( window.innerWidth, window.innerHeight );
+    let puc = pur.domElement;
+    puc.id = 'page_ui_canvas';
+    document.body.appendChild( puc );
+
 
     // Listen to environmental changes, adjust accordingly.
     window.addEventListener( 'pointerdown', this.onPointerDown );  // This is the canvas raycast handler
@@ -366,11 +551,21 @@ class SceneTransformation{
   reset = ()=>{};
 
   constructor( params ){
-    this.update = params.update;
-    this.setState = params.setState;
-    this.cache = params.cache;
-    this.post = params.post;
-    this.reset = params.reset;
+
+		this.update = params.update;
+		this.cache = params.cache;
+		this.post = params.post;
+		this.reset = params.reset;
+
+		// Migrate the engine functions into the base SceneTransformation object, for access to 'this'.
+		for (const func in params) {
+		  if (Object.hasOwn(params, func)) {
+				if (func=="update" || func=="cache" || func=="post" || func=="reset" ){}
+				else{
+					this[func]=params[func];
+				}
+		  }
+		}
   }
 }
 
@@ -408,6 +603,8 @@ class SceneDirections{
   // NOTE: Without any standardized functionality to declare, and no run-time construction requirements, a commented-out example is necessary to understand the expected syntax.
 */
 class Workflow{
+
+
 
   constructor(){
   }
