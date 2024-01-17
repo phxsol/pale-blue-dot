@@ -19,39 +19,247 @@ import { CSS3DRenderer, CSS3DObject } from '../lib/CSS3DRenderer.js';
 import { GLTFLoader } from '../lib/GLTFLoader.js';
 import { GLTFExporter } from '../lib/GLTFExporter.js';
 
+class VerifyCapabilitiesModal extends Component {
+  test; result_display;
+  screenplay;
 
-// React Component Error Boundary Class
-// Refer to --> # https://reactjs.org/docs/error-boundaries.html #
+  displayTestResults(){
+    let test_results = this.result_display.cache.test_results = this.state.test_results;
+    console.log( test_results );
+    this.screenplay.updatables.set( 'test_results', this.result_display );
+  }
 
+  constructor( props ){
+    super( props );
+    this.director = props.director;
+    this.screenplay = props.screenplay;
+    this.dictum_name = props.dictum_name;
+    this.ndx = props.ndx;
+    this.state = {
+      test_results: false,
+      results_display: {
+        score: 0,
+        speed: 0
+      }
+    };
+    /* -= User Performance Statistics Test =-
+    ** This is where the user's device is tested for a baseline of rendering ability.
+    ** Initial tests may fail due to loading delays... testing again upon failure ensures that
+    ** elibigle users are filtered properly.
+    ** Upon Failure: Display workflow without immersive rendering. */
+    this.test = new SceneTransformation({
+        update: ( delta )=>{
+          if( this.test.cache.duration-- >= 0 ){
+            this.test.cache.stamps.push( delta );
+          } else {
+            this.screenplay.updatables.delete( 'ups_test' );
+            this.test.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+          }
+        },
+        cache: {
+          duration: 60,
+          stamps: [],
+          test_results: []
+        },
+        reset: ()=>{
+          this.test.cache.duration = 60;
+          this.test.cache.stamps = [];
+          this.screenplay.updatables.set( 'ups_test', this.test );
+        },
+        post: ( )=>{
+          // Build the Test Results from the captured test data
+          let test_results = {};
+          test_results.stamps = this.test.cache.stamps;
+          let pop_cnt = test_results.stamps.length;
+          // Calculate the actual test duration based upon stamp values.
+          test_results.time_total = this.test.cache.stamps.reduce( (a,b) => a + b, 0 );
+          // Calculate Population Mean & Standard Deviation
+          let pop_mean = test_results.time_total / pop_cnt;
+          let xi_less_u_2 = this.test.cache.stamps.map( (num)=> { return ( num - pop_mean ) ** 2 } );
+          let sum_xi_less_u_2 = xi_less_u_2.reduce( (a,b) => a + b, 0 );
+          let mean_of_deviation = sum_xi_less_u_2 / pop_cnt;
+          test_results.std_dev = Math.sqrt( mean_of_deviation );
+          let test_frames = test_results.test_frames = this.test.cache.stamps.filter( (num)=> { return Math.abs( num - pop_mean ) < Math.abs( mean_of_deviation - pop_mean ) } );
+          // Determine the largest and smallest tick durations, or stamp values.
+          let test_pop_cnt = test_frames.length;
+          test_results.time = test_frames.reduce( (a,b) => a + b, 0 );
+          test_results.max = Math.max( ...test_frames );
+          test_results.mean = test_results.time /test_pop_cnt;
+          test_results.min = Math.min( ...test_frames );
+          // ...then calculate the highest and lowest FPS from them.
+          test_results.max_fps = 1/test_results.min;
+          test_results.mean_fps = 1/test_results.mean;
+          test_results.min_fps = 1/test_results.max;
+          let qt = test_results.time / test_results.time_total;
+          test_results.score = Math.floor( test_results.mean_fps * qt );
+
+          // ... then post the results to the test_results stack
+          this.test.cache.test_results.push( test_results );
+          // Should another test be run?  The max is 3 runs before failure is determined.
+          let runs_so_far = this.test.cache.test_results.length;
+          if ( test_results.score < 15 && runs_so_far < 3 || test_results.max_fps < 20 && runs_so_far < 3 ) {
+            this.test.reset();  // Rack 'em up and knock 'em down again!
+          } else {
+            // Now that has completed, compile the tests ( up to 3 ), for scoring.
+            // Default values
+            let compiled_test_results = {
+              stamps: [],
+              time: 0,
+              time_total: 0,
+              max: -10000,
+              mean: 0,
+              min: 10000
+            };
+            // Knit the accumulated test results into a unified source.
+            for( let results_ndx = 0; results_ndx < this.test.cache.test_results.length; results_ndx++ ){
+              let test_results = this.test.cache.test_results[results_ndx];
+              compiled_test_results.stamps.push( ...test_results.test_frames );
+              // Calculate the actual test duration based upon stamp values.
+              compiled_test_results.time += test_results.test_frames.reduce( (a,b) => a + b, 0 );
+              compiled_test_results.time_total += test_results.stamps.reduce( (a,b) => a + b, 0 );
+            }
+            // Determine the largest and smallest tick durations, or stamp values.
+            compiled_test_results.max = Math.max( ...test_results.test_frames );
+            compiled_test_results.mean = compiled_test_results.time / test_results.test_frames.length;
+            compiled_test_results.min = Math.min( ...test_results.test_frames );
+
+            // ...then calculate the highest and lowest FPS from them.
+            compiled_test_results.max_fps = 1/compiled_test_results.min;
+            compiled_test_results.mean_fps = 1/compiled_test_results.mean;
+            compiled_test_results.min_fps = 1/compiled_test_results.max;
+            // Grade the User Performance Statistics
+            let cqt = compiled_test_results.time / compiled_test_results.time_total;
+            compiled_test_results.score = Math.floor( test_results.mean_fps * cqt );
+            // ... then post the results to the console and the test_results stack
+            console.log( compiled_test_results );
+            this.setState( { test_results: compiled_test_results, test_complete: true });
+            if ( this.screenplay.CAN_SAVE ) localStorage.setItem( "ups_test", JSON.stringify(compiled_test_results) );
+            this.displayTestResults();
+          }
+        }
+      });
+    this.screenplay.updatables.set( 'ups_test', this.test );
+  }
+  componentDidMount(){
+    document.getElementById( 'root' ).classList.add( 'no_gui' );
+    // Give the results to the next SceneTransformation for display
+    this.result_display = new SceneTransformation({
+      update: ( delta )=>{
+        if( this.state.test_results ){
+          if( this.result_display.cache.duration-- > 0 ){
+            let tick = this.result_display.cache.frames - this.result_display.cache.duration;
+            let prog = tick / this.result_display.cache.frames;
+            let results = this.state.test_results;
+            let score = (prog * results.score);
+            let stamp_ndx = Math.floor( tick * ( results.stamps.length - 1 ) / this.result_display.cache.frames );
+            let speed = Math.ceil( 1 / results.stamps[ stamp_ndx ] );
+            this.setState({
+              results_display: {
+                score: score.toFixed( 2 ),
+                speed: speed.toFixed( 1 )
+              }
+            });
+          } else {
+            this.result_display.update = false;
+            this.screenplay.updatables.delete( 'test_results' );
+            this.result_display.post( this.state.test_results );
+          }
+        }
+      },
+      cache: {
+       duration: 200,
+       frames: 200,
+       test_results: {
+         stamps: [],
+         time: 0,
+         max: Number.MIN_SAFE_INTEGER,
+         min: Number.MAX_SAFE_INTEGER,
+         max_fps: false,
+         min_fps: false,
+         score: false
+       }
+      },
+      post: ( test_results )=>{
+        // Performance Filter //
+        /* The score derived from the above UPS test may be used here to lead poorly
+            performing devices into a workflow without immersive rendering. */
+        if ( test_results.score > 20 || test_results.max_fps > 30 ) {
+          document.querySelector( '#verify_capabilities .success').classList.remove( 'hidden' );
+          setTimeout( ( dictum_name, ndx )=>{
+            this.director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+          }, 3000, this.dictum_name, this.ndx );
+        } else {
+          setTimeout( ( dictum_name, ndx )=>{
+            document.querySelector( '#verify_capabilities .failure').classList.remove( 'hidden' );
+            this.director.emit( `${dictum_name}_failure`, dictum_name, ndx );
+          }, 3000, this.dictum_name, this.ndx );
+        }
+      }
+    });
+  }
+  componentWillUnmount(){
+    document.getElementById( 'root' ).classList.remove( 'no_gui' );
+  }
+  render(){
+    return (
+      <>
+        <style>{`
+          #verify_capabilities{
+            grid-template-rows: auto auto 2fr 1fr;
+          }
+          #verify_capabilities .pip_title{
+            grid-row: 1;
+            grid-column: 1 / -1;
+          }
+          #verify_capabilities .description{
+            text-align: center;
+            grid-row: 2;
+            grid-column: 1 / -1;
+          }
+          #verify_capabilities .fps_display{
+            font-size: 2em;
+            grid-row: 3;
+            color: var(--b2);
+            text-align: center;
+            place-self: center;
+          }
+          #verify_capabilities .success{
+            font-size: 2em;
+            color: var(--g2);
+            grid-row: 4;
+            grid-column: 1 / -1;
+            text-align: center;
+          }
+          #verify_capabilities .failure{
+            font-size: 2em;
+            color: var(--r2);
+            grid-row: 4;
+            grid-column: 1 / -1;
+            text-align: center;
+          }
+          #verify_capabilities .hidden{
+            display: none;
+          }
+          `}</style>
+        <div id="verify_capabilities" className="pip_gui pip_splash">
+          <h1 className="pip_title">Verifying Performance Requirements</h1>
+          <span className="pip_text description">For a more pleasant experience, a brief performance test must be run.</span>
+          <p className="fps_display">
+            Active&nbsp;FPS:&nbsp;<span className="speed">{this.state.results_display.speed}</span>
+            <br />---------------------<br />
+            Standardized&nbsp;FPS:&nbsp;<span className="score">{this.state.results_display.score}</span>
+          </p>
+          <h3 className="success hidden">Test Successful!</h3>
+          <h3 className="failure hidden">Low-FPS Mode Required</h3>
+        </div>
+      </>
+    );
+  }
+}
 
 // Workflow Implementation
 class Workflow extends _Workflow{
-  enigmus; stc; ship_key;
-  elevated_vars = {
-    "u_name": "",
-    "ups_test": {
-      "ticks": 0,
-      "duration": 0,
-      "stamps": [],
-      "max": -1,
-      "min": -1,
-      "score": 0
-    },
-    "resume": {
-      "objects": [],
-      "targets": {
-        "timeline": [],
-        "table": [],
-        "sphere": [],
-        "helix": [],
-        "grid": []
-      }
-    },
-    "lil_gui": {}
-  }
   react_app;
-  shard;
-  menu;
 
   // Hash a sensitive string into a cryptic one
   HashThis = async (toBeHashed, key)=>{
@@ -79,236 +287,8 @@ class Workflow extends _Workflow{
     let performance_results = ( screenplay.CAN_SAVE ) ? localStorage.getItem("ups_test") : false;
     if( typeof(performance_results) === 'undefined' || !performance_results ){
 
-      class VerifyCapabilitiesModal extends Component {
-        test; result_display;
 
-        displayTestResults(){
-          let test_results = this.result_display.cache.test_results = this.state.test_results;
-          console.log( test_results );
-          screenplay.updatables.set( 'test_results', this.result_display );
-        }
-
-        constructor( props ){
-          super( props );
-          this.state = {
-            test_results: false,
-            results_display: {
-              score: 0,
-              speed: 0
-            }
-          };
-          /* -= User Performance Statistics Test =-
-          ** This is where the user's device is tested for a baseline of rendering ability.
-          ** Initial tests may fail due to loading delays... testing again upon failure ensures that
-          ** elibigle users are filtered properly.
-          ** Upon Failure: Display workflow without immersive rendering. */
-          this.test = new SceneTransformation({
-              update: ( delta )=>{
-                if( this.test.cache.duration-- >= 0 ){
-                  this.test.cache.stamps.push( delta );
-                } else {
-                  screenplay.updatables.delete( 'ups_test' );
-                  this.test.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
-                }
-              },
-              cache: {
-                duration: 60,
-                stamps: [],
-                test_results: []
-              },
-              reset: ()=>{
-                this.test.cache.duration = 60;
-                this.test.cache.stamps = [];
-                screenplay.updatables.set( 'ups_test', this.test );
-              },
-              post: ( )=>{
-                // Build the Test Results from the captured test data
-                let test_results = {};
-                test_results.stamps = this.test.cache.stamps;
-                let pop_cnt = test_results.stamps.length;
-                // Calculate the actual test duration based upon stamp values.
-                test_results.time_total = this.test.cache.stamps.reduce( (a,b) => a + b, 0 );
-                // Calculate Population Mean & Standard Deviation
-                let pop_mean = test_results.time_total / pop_cnt;
-                let xi_less_u_2 = this.test.cache.stamps.map( (num)=> { return ( num - pop_mean ) ** 2 } );
-                let sum_xi_less_u_2 = xi_less_u_2.reduce( (a,b) => a + b, 0 );
-                let mean_of_deviation = sum_xi_less_u_2 / pop_cnt;
-                test_results.std_dev = Math.sqrt( mean_of_deviation );
-                let test_frames = test_results.test_frames = this.test.cache.stamps.filter( (num)=> { return Math.abs( num - pop_mean ) < Math.abs( mean_of_deviation - pop_mean ) } );
-                // Determine the largest and smallest tick durations, or stamp values.
-                let test_pop_cnt = test_frames.length;
-                test_results.time = test_frames.reduce( (a,b) => a + b, 0 );
-                test_results.max = Math.max( ...test_frames );
-                test_results.mean = test_results.time /test_pop_cnt;
-                test_results.min = Math.min( ...test_frames );
-                // ...then calculate the highest and lowest FPS from them.
-                test_results.max_fps = 1/test_results.min;
-                test_results.mean_fps = 1/test_results.mean;
-                test_results.min_fps = 1/test_results.max;
-                let qt = test_results.time / test_results.time_total;
-                test_results.score = Math.floor( test_results.mean_fps * qt );
-
-                // ... then post the results to the test_results stack
-                this.test.cache.test_results.push( test_results );
-                // Should another test be run?  The max is 3 runs before failure is determined.
-                let runs_so_far = this.test.cache.test_results.length;
-                if ( test_results.score < 15 && runs_so_far < 3 || test_results.max_fps < 20 && runs_so_far < 3 ) {
-                  this.test.reset();  // Rack 'em up and knock 'em down again!
-                } else {
-                  // Now that has completed, compile the tests ( up to 3 ), for scoring.
-                  // Default values
-                  let compiled_test_results = {
-                    stamps: [],
-                    time: 0,
-                    time_total: 0,
-                    max: -10000,
-                    mean: 0,
-                    min: 10000
-                  };
-                  // Knit the accumulated test results into a unified source.
-                  for( let results_ndx = 0; results_ndx < this.test.cache.test_results.length; results_ndx++ ){
-                    let test_results = this.test.cache.test_results[results_ndx];
-                    compiled_test_results.stamps.push( ...test_results.test_frames );
-                    // Calculate the actual test duration based upon stamp values.
-                    compiled_test_results.time += test_results.test_frames.reduce( (a,b) => a + b, 0 );
-                    compiled_test_results.time_total += test_results.stamps.reduce( (a,b) => a + b, 0 );
-                  }
-                  // Determine the largest and smallest tick durations, or stamp values.
-                  compiled_test_results.max = Math.max( ...test_results.test_frames );
-                  compiled_test_results.mean = compiled_test_results.time / test_results.test_frames.length;
-                  compiled_test_results.min = Math.min( ...test_results.test_frames );
-
-                  // ...then calculate the highest and lowest FPS from them.
-                  compiled_test_results.max_fps = 1/compiled_test_results.min;
-                  compiled_test_results.mean_fps = 1/compiled_test_results.mean;
-                  compiled_test_results.min_fps = 1/compiled_test_results.max;
-                  // Grade the User Performance Statistics
-                  let cqt = compiled_test_results.time / compiled_test_results.time_total;
-                  compiled_test_results.score = Math.floor( test_results.mean_fps * cqt );
-                  // ... then post the results to the console and the test_results stack
-                  console.log( compiled_test_results );
-                  this.setState( { test_results: compiled_test_results, test_complete: true });
-                  if ( screenplay.CAN_SAVE ) localStorage.setItem( "ups_test", JSON.stringify(compiled_test_results) );
-                  this.displayTestResults();
-                }
-              }
-            });
-          screenplay.updatables.set( 'ups_test', this.test );
-        }
-        componentDidMount(){
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
-          // Give the results to the next SceneTransformation for display
-          this.result_display = new SceneTransformation({
-            update: ( delta )=>{
-              if( this.state.test_results ){
-                if( this.result_display.cache.duration-- > 0 ){
-                  let tick = this.result_display.cache.frames - this.result_display.cache.duration;
-                  let prog = tick / this.result_display.cache.frames;
-                  let results = this.state.test_results;
-                  let score = (prog * results.score);
-                  let stamp_ndx = Math.floor( tick * ( results.stamps.length - 1 ) / this.result_display.cache.frames );
-                  let speed = Math.ceil( 1 / results.stamps[ stamp_ndx ] );
-                  this.setState({
-                    results_display: {
-                      score: score.toFixed( 2 ),
-                      speed: speed.toFixed( 1 )
-                    }
-                  });
-                } else {
-                  this.result_display.update = false;
-                  screenplay.updatables.delete( 'test_results' );
-                  this.result_display.post( this.state.test_results );
-                }
-              }
-            },
-            cache: {
-             duration: 200,
-             frames: 200,
-             test_results: {
-               stamps: [],
-               time: 0,
-               max: Number.MIN_SAFE_INTEGER,
-               min: Number.MAX_SAFE_INTEGER,
-               max_fps: false,
-               min_fps: false,
-               score: false
-             }
-            },
-            post: ( test_results )=>{
-              // Performance Filter //
-              /* The score derived from the above UPS test may be used here to lead poorly
-                  performing devices into a workflow without immersive rendering. */
-              if ( test_results.score > 20 || test_results.max_fps > 30 ) {
-                document.querySelector( '#verify_capabilities .success').classList.remove( 'hidden' );
-                setTimeout( ( dictum_name, ndx )=>{
-                  director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-                }, 3000, dictum_name, ndx );
-              } else {
-                setTimeout( ( dictum_name, ndx )=>{
-                  document.querySelector( '#verify_capabilities .failure').classList.remove( 'hidden' );
-                  director.emit( `${dictum_name}_failure`, dictum_name, ndx );
-                }, 3000, dictum_name, ndx );
-              }
-            }
-          });
-        }
-        componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
-        }
-        render(){
-          return (
-            <>
-              <style>{`
-                #verify_capabilities{
-                  grid-template-rows: auto 1fr 1fr 1fr;
-                  text-align: center;
-                }
-                #verify_capabilities .pip_title{
-                  grid-row: 1;
-                  grid-column: 1 / -1;
-                }
-                #verify_capabilities .description{
-                  text-align: center;
-                  grid-row: 2;
-                  grid-column: 1 / -1;
-                }
-                #verify_capabilities .fps_display{
-                  font-size: 2rem;
-                  grid-row: 3;
-                  color: var(--b2);
-                }
-                #verify_capabilities .success{
-                  font-size: 3rem;
-                  color: var(--g2);
-                  grid-row: 4;
-                  grid-column: 1 / -1;
-                }
-                #verify_capabilities .failure{
-                  font-size: 3rem;
-                  color: var(--r2);
-                  grid-row: 4;
-                  grid-column: 1 / -1;
-                }
-                #verify_capabilities .hidden{
-                  display: none;
-                }
-                `}</style>
-              <div id="verify_capabilities" className="pip_gui pip_splash">
-                <h1 className="pip_title">Verifying Performance Requirements</h1>
-                <span className="pip_text description">For a more pleasant experience, a brief performance test must be run.</span>
-                <p className="fps_display">
-                  Active&nbsp;FPS:&nbsp;<span className="speed">{this.state.results_display.speed}</span>
-                  <br />-<br />
-                  Standardized:&nbsp;FPS:&nbsp;<span className="score">{this.state.results_display.score}</span>
-                </p>
-                <h3 className="success hidden">Test Successful!</h3>
-                <h3 className="failure hidden">Low-FPS Mode Required</h3>
-              </div>
-            </>
-          );
-        }
-      }
-      this.react_app.render( <ErrorBoundary><VerifyCapabilitiesModal /></ErrorBoundary> );
+      this.react_app.render( <VerifyCapabilitiesModal director={director} screenplay={screenplay} dictum_name={dictum_name} ndx={ndx}/> );
     } else {
       // TODO: If low performance, switch to lo-fps mode.
       // TODO: Make a 'lo-fps' mode.
@@ -397,11 +377,11 @@ class Workflow extends _Workflow{
         }
 
         componentDidMount(){
-          document.getElementById( 'root' ).classList.add( 'pip_gui' );
+          document.getElementById( 'root' ).classList.add( 'no_gui' );
           screenplay.updatables.set( 'UserInstructionModal_entrance_transition', this.entrance_transition );
         }
         componentWillUnmount(){
-          document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+          document.getElementById( 'root' ).classList.remove( 'no_gui' );
         }
         handleAckClick = ( e )=>{
           if ( screenplay.CAN_SAVE ) localStorage.setItem( "last_shown_tutorial", JSON.stringify( Date.now() ) );
@@ -411,35 +391,15 @@ class Workflow extends _Workflow{
           return (
             this.onDisplay ?
             <>
-            <style>{`
-              #user_instruction{
-                grid-template-rows: auto 1fr 1fr;
-                grid-template-columns: auto auto;
-                text-align: center;
-              }
-              #user_instruction .pip_title{
-                grid-row: 1;
-                grid-column: 1 / -1;
-              }
-              #user_instruction .introduction{
-                text-align: center;
-                grid-row: 2;
-                grid-column: 1 / -1;
-              }
-              #user_instruction .pip_continue{
-                grid-row: 3;
-                grid-column: 2;
-              }
-              `}</style>
-              <div style={{ overflow: 'auto'}} id="user_instruction" ref={ this.panel } className="pip_gui pip_post" >
+              <div style={{ overflow: 'auto'}} id="user_instruction" ref={ this.panel } className="pip_gui pip_chat" >
                 <h1 className="pip_title">Wither-to's and Why-for's</h1>
-                <span className="introduction pip_text">
+                <span className="introduction pip_text ui_side">
                   Thank you for being here!<br/>
                   Watch your head, so to speak, as this is a work in-progress.<br/><br/>
                   You are welcome to investigate 'under the hood', though the code in your browser is compiled and difficult to traverse.<br/>
                   The full codebase upon which this app is running may be <a href="https://github.com/phxsol/pale-blue-dot" target="_blank">found here on GitHub</a>.<br/>
                 </span>
-                <input name="ack_user_instruction" className="pip_continue" type="button" onClick={this.handleAckClick} value="OK" />
+                <input style={{ gridRow: 25}} name="ack_user_instruction" className="pip_continue user_side" type="button" onClick={this.handleAckClick} value="OK" />
 
 
               </div>
@@ -554,12 +514,14 @@ class Workflow extends _Workflow{
           const submitButton = useRef(null);
 
           function cleanup(){
-            document.getElementById( 'root' ).classList.remove( 'pip_gui' );
+            const root = document.getElementById( "root" );
+            root.classList.remove( "no_gui" );
           }
 
           // Initialization --> Singleton
           useEffect(()=>{
-            document.getElementById( 'root' ).classList.add( 'pip_gui' );
+            const root = document.getElementById( "root" );
+            root.classList.add( "no_gui" );
 
             const entrance_transition = new SceneTransformation({
               update: ( delta )=>{
@@ -620,7 +582,6 @@ class Workflow extends _Workflow{
               }
             });
             setExit( exit_transition );
-
             screenplay.updatables.set( 'ResumeUserModal_entrance_transition', entrance_transition );
 
             return cleanup;
@@ -715,6 +676,7 @@ class Workflow extends _Workflow{
             case 0: // Top-Level Options
               return (
                 <div ref={ panel } className="pip_gui pip_chat" >
+                  <h1 className="pip_title">Captain Assignment</h1>
                   <span className="ui_side pip_text" style={{ gridRow: 2 }}>
                   Greetings Captain.
                   </span>
@@ -746,7 +708,10 @@ class Workflow extends _Workflow{
             case 1: // Login Captain
 
               return (
+                <>
+
                 <div ref={ panel } className="pip_gui pip_chat" >
+                  <h1 className="pip_title">Authorization Required</h1>
                   <span className="ui_side pip_text" style={{ gridRow: 2 }}>
                   Greetings Captain.
                   </span>
@@ -769,6 +734,13 @@ class Workflow extends _Workflow{
                         value={pword}
                         onChange={(e) => changeInputs(e, 2)}
                       />
+                    <label htmlFor="back">Go Back:</label>
+                    <input
+                      name="back"
+                      className="pip_cancel"
+                      style={{ marginLeft: '1rem' }}
+                      type="button"
+                      onClick={(e) => setPhase( 0 )} value="Go Back"/>
                     <input type="submit" className="pip_accept" ref={ submitButton } />
                     <label htmlFor="keep_logged">Keep me logged in:</label>
                       <input
@@ -778,17 +750,22 @@ class Workflow extends _Workflow{
                         onChange={(e) => changeInputs(e, 3)}
                       />
                   </form>
-                </div>);
+                </div>
+              </>);
               break;
 
             case 2: // Register New Captain
               return (
+                <>
+
                 <div ref={ panel } className="pip_gui pip_chat" >
+                  <h1 className="pip_title">New Captain</h1>
                   <span className="ui_side pip_text" style={{ gridRow: 2 }}>
                   Greetings Captain.
                   </span>
                   <span className="ui_side pip_text" style={{ gridRow: 3 }}>How do you prefer to be addressed?</span>
                   <form onSubmit={handleSubmitNewUser} className="user_side" style={{ gridRow: 5 }}>
+
                   <label htmlFor="username">User:</label>
                     <input
                       name="username"
@@ -806,7 +783,15 @@ class Workflow extends _Workflow{
                       value={pword}
                       onChange={(e) => changeInputs(e, 2)}
                     />
-                  <input type="submit" className="pip_accept" ref={ submitButton } />
+                  <label htmlFor="back">Go Back:</label>
+                  <input
+                    name="back"
+                    className="pip_cancel"
+                    style={{ marginLeft: '1rem' }}
+                    type="button"
+                    onClick={(e) => setPhase( 0 )} value="Go Back"/>
+                  <label htmlFor="submit">Submit:</label>
+                  <input name="submit" type="submit" className="pip_accept" ref={ submitButton } />
                   <label htmlFor="keep_logged">Keep me logged in:</label>
                     <input
                       name="keep_logged"
@@ -815,31 +800,34 @@ class Workflow extends _Workflow{
                       onChange={(e) => changeInputs(e, 3)}
                     />
                   </form>
-                </div>);
+                </div>
+              </>);
               break;
 
             case 3: // Proceed Anonymously
               return (
-                <div ref={ panel } className="pip_gui pip_chat" >
-                  <span className="ui_side pip_text" style={{ gridRow: 2 }}>
-                  As you wish Captain.
-                  </span>
-                  <span className="ui_side pip_text" style={{ gridRow: 3 }}>I must inform you that persistant changes won't be available to you until you choose to login to a registered Captain's chair.</span>
-                  <div className="user_side" style={{ gridRow: 5, display: 'flex' }}>
-                    <label>Acknowledge:<input
-                      name="ack"
-                      className="pip_accept"
-                      style={{ marginLeft: '1rem' }}
-                      type="button"
-                      onClick={handleAnonymousUser}/></label>
-                    <label>Reconsider:<input
-                      name="back"
-                      className="pip_accept"
-                      style={{ marginLeft: '1rem' }}
-                      type="button"
-                      onClick={(e) => setPhase( 0 )}/></label>
+                <>
+
+                  <div ref={ panel } className="pip_gui pip_chat" >
+                    <h1 className="pip_title">Anonymous Pilot</h1>
+                    <span className="ui_side pip_text" style={{ gridRow: 2 }}>As you wish.  Welcome pilot!</span>
+                    <span className="ui_side pip_text" style={{ gridRow: 3 }}>I must inform you that persistant changes will NOT be available to you until you choose to login to a registered Captain's chair.</span>
+                    <div className="user_side" style={{ gridRow: 5, display: 'flex' }}>
+                      <label>Acknowledge:<input
+                        name="ack"
+                        className="pip_accept"
+                        style={{ marginLeft: '1rem' }}
+                        type="button"
+                        onClick={handleAnonymousUser} value="Acknowledge"/></label>
+                      <label>Reconsider:<input
+                        name="back"
+                        className="pip_cancel"
+                        style={{ marginLeft: '1rem' }}
+                        type="button"
+                        onClick={(e) => setPhase( 0 )} value="Reconsider"/></label>
+                    </div>
                   </div>
-                </div>);
+                </>);
               break;
 
           }
@@ -2063,12 +2051,9 @@ class Workflow extends _Workflow{
 */
   }
 
-  constructor( react_app, screenplay, shard ){
+  constructor( react_app, screenplay ){
     super();
     this.react_app = react_app;
-    this.shard = shard;
-    this.menu = [];
-
   }
 }
 

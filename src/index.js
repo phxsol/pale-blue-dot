@@ -17,7 +17,6 @@ let app = App;
 app.init = async ()=>{
 
 
-
   //const shard = new Shard();
   let shard = false;  // Plug for now till the shard is operational.
 

@@ -27,20 +27,120 @@
   --v1: #CD87AF;
   --v2: #8A2E62;
   --v3: #470028;
+
+}
+@media ( orientation: portrait ){
+  :root{
+    --oF: 1;
+  }
+
+  @media ( min-width: 240px ){
+    :root{
+      --sF: 1;
+    }
+  }
+  @media ( min-width: 480px ){
+    :root{
+      --sF: 1;
+    }
+  }
+  @media ( min-width: 720px ){
+    :root{
+      --sF: 1.5;
+    }
+  }
+  @media ( min-width: 1080px ){
+    :root{
+      --sF: 2.5;
+    }
+  }
+  @media ( min-width: 2160px ){
+    :root{
+      --sF: 5;
+    }
+  }
+}
+@media ( orientation: landscape ){
+  :root{
+    --oF: 1;
+  }
+
+  @media ( min-height: 240px ){
+    :root{
+      --sF: 1;
+    }
+  }
+  @media ( min-height: 480px ){
+    :root{
+      --sF: 1;
+    }
+  }
+  @media ( min-height: 720px ){
+    :root{
+      --sF: 1.5;
+    }
+  }
+  @media ( min-height: 1080px ){
+    :root{
+      --sF: 2.5;
+    }
+  }
+  @media ( min-height: 2160px ){
+    :root{
+      --sF: 5;
+    }
+  }
+}
+@media ( min-resolution: 48dpi ){
+  :root{
+    --pD: 0.5;
+  }
+  html{
+    font-size: calc(var(--oF) * var(--pD) * 2em)
+  }
+}
+@media ( min-resolution: 96dpi ){
+  :root{
+    --pD: 1;
+  }
+  html{
+    font-size: calc(var(--oF) * var(--pD) * 1em);
+  }
+}
+@media ( min-resolution: 192dpi ){
+  :root{
+    --pD: 2;
+  }
+  html{
+    font-size: calc(var(--oF) * var(--pD) * .5em);
+  }
+}
+@media ( min-resolution: 288dpi ){
+  :root{
+    --pD: 3;
+  }
+  html{
+    font-size: calc(var(--oF) * var(--pD) * .33em);
+  }
+}
+@media ( min-resolution: 384dpi ){
+  :root{
+    --pD: 4;
+  }
+  html{
+    font-size: calc(var(--oF) * var(--pD) * .25em);
+  }
 }
 
 @media only screen {
+
   a{
     transition: all 0.2s;
   }
 
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Dosis', sans-serif;
   }
   body > *, body *{
     -webkit-user-select: none; /* Safari */
@@ -55,7 +155,7 @@
 
   iframe::before{
     content: 'All your base are belong to us.';
-    background-color: white;
+    background-color: #fff;
     display: grid;
     height: 100%;
     width: 100%;
@@ -70,14 +170,73 @@
     width: 100vw;
     opacity: 1;
     display: grid;
-    grid-template-columns: 21vh 21vh 1fr 1fr 1fr;
-    grid-template-rows: 9vh 1fr 1fr 21vh 21vh;
     transition: opacity 2s .5s;
   }
+  @media ( orientation: landscape ){
 
-  #glyph {
-    position: absolute;
-    z-index: 1000;
+  }
+  @media ( orientation: portrait ){
+
+  }
+  @media ( orientation: landscape ){
+    #root{
+      grid-template-areas:
+        "head head head head head head head head head"
+        "search search search body body body body body body"
+        "space space space body body body body body body"
+        "space space space body body body body body body"
+        "space space space body body body body body body"
+        "space space space body body body body body body"
+        "menu menu menu body body body body body body"
+        "menu menu menu body body body body body body"
+        "menu menu menu body body body body body body";
+      grid-template-columns: repeat( 9, 1fr );
+      grid-template-rows: repeat( 9, 1fr );
+    }
+    #root.no_gui{
+      grid-template-areas:
+        "lmarg  head  head  head  head  head  head  head  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  foot  foot  foot  foot  foot  foot  foot  rmarg" !important;
+      grid-template-columns: repeat( 9, 1fr ) !important;
+      grid-template-rows: repeat( 9, 1fr ) !important;
+    }
+  }
+  @media ( orientation: portrait ){
+    #root{
+      grid-template-areas:
+        "head   head    head  head head head head head head"
+        "head   head    head  head head head head head head"
+        "search search  body  body body body body body body"
+        "space  space   body  body body body body body body"
+        "space  space   body  body body body body body body"
+        "space  space   body  body body body body body body"
+        "space  space   body  body body body body body body"
+        "menu   menu    body  body body body body body body"
+        "menu   menu    body  body body body body body body";
+      grid-template-columns: repeat( 9, 1fr );
+      grid-template-rows: repeat( 9, 1fr );
+    }
+    #root.no_gui{
+      grid-template-areas:
+        "lmarg  head  head  head  head  head  head  head  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  body  body  body  body  body  body  body  rmarg"
+        "lmarg  foot  foot  foot  foot  foot  foot  foot  rmarg" !important;
+      grid-template-columns: 1rem 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1rem !important;
+      grid-template-rows: repeat( 9, 1fr ) !important;
+    }
   }
 
   #sys_ve_canvas, #sys_ui_canvas, #page_ve_canvas, #page_ui_canvas {
@@ -86,12 +245,13 @@
   }
   #sys_ve_canvas {
     z-index: 1;
+    transition: all 0.5s;
   }
   #sys_ve_canvas.blurry {
-    filter: blur(1.25em);
-    width: calc(100vw + 5em) !important;
-    height: calc(100vh + 5em) !important;
-    margin: -2.5em !important;
+    filter: blur(.25em);
+    width: calc(100vw + 2em) !important;
+    height: calc(100vh + 2em) !important;
+    margin: -1em !important;
   }
   #sys_ui_canvas {
     z-index: 4;
@@ -117,8 +277,9 @@
   .pip_continue, .pip_cancel, .pip_accept{
     border-radius: 50%;
     border: none;
-    width: 3em;
-    height: 3em;
+    width: calc( var(--sF) * 3rem);
+    height: calc( var(--sF) * 3rem);
+    font-size: calc( var(--sF) * 1.25rem);
     pointer-events: all;
     cursor: pointer;
     transition: 0.2s;
@@ -140,38 +301,145 @@
     background-color: var(--b3);
   }
   .pip_cancel{
-    background-color: #81245E;
+    background-color: var(--r2);
+    color: var(--r1);
+  }
+  .pip_cancel:hover{
+    background-color: var(--r1);
+    color: var(--r2);
+  }
+  .pip_cancel:active{
+    background-color: var(--r3);
   }
   .pip_accept{
-    background-color: #799B2B;
+    background-color: var(--g2);
+    color: var(--g1);
+  }
+  .pip_accept:hover{
+    background-color: var(--g1);
+    color: var(--g2);
+  }
+  .pip_accept:active{
+    background-color: var(--g3);
   }
   .pip_title{
-    font-size: 2.5em;
+      color: var(--o2);
+      font-size: calc( var(--sF) * 2.5rem);
   }
   .pip_text{
-    font-size: 1.75em;
+    color: var(--b1);
+    font-size: calc( var(--sF) * 1rem);
   }
   .pip_reply{
-    height: fit-content;
-  }
 
-  #root > .pip_gui{
+  }
+  .pip_gui{
     display: grid;
   }
+  @media ( orientation: landscape ){
+    .pip_gui{
 
+    }
+  }
+  @media ( orientation: portrait ){
+    .pip_gui{
+
+    }
+  }
+
+  /* BEGIN: PIP Chat Styling */
+  /* PIP Chat screens are forms styled as a dialogue between the system and the user.
+     This style allows for decisions to be made and input to be handled. */
+  .pip_gui.pip_chat{
+    --s: 7rem; /* control the size */
+    background:
+      conic-gradient(at 80% 80%,var(--i3) 75%,#0000 0),
+      linear-gradient(135deg,var(--i3) calc(40%/3),
+        #0000 0 calc(200%/3),var(--i3) 0),
+      conic-gradient(from 45deg at calc(160%/3) calc(80%/3),
+        #0008 135deg,#0000 0 225deg,#0004 0)
+      var(--i3); /* cube color */
+    background-size: var(--s) var(--s);
+    border: solid 1px var(--o3);
+    grid-area: body;
+    grid-template-columns: 1rem 1fr 1fr 1fr 1rem;
+    grid-template-rows: repeat( 25, auto );
+    overflow-y: auto;
+    padding: 1rem;
+    border-radius: 0rem 5rem 0rem 5rem;
+    place-items: baseline;
+  }
+
+  .pip_gui.pip_chat .ui_side{
+    grid-column: 2 / 4;
+    border-radius: 0px 4rem 4rem 4rem;
+    margin-left: 0;
+    margin-right: auto;
+  }
+  .pip_gui.pip_chat .user_side{
+    grid-column-end: 5;
+    flex-direction: row-reverse;
+    border-radius: 4rem 4rem 4rem 4rem;
+    margin-right: 0;
+    margin-left: auto;
+  }
+  .pip_gui.pip_chat .pip_title{
+    grid-column: 1 / -1;
+    text-align: center;
+    place-self: center;
+  }
+  .pip_gui.pip_chat .pip_text{
+    border: none;
+    background: linear-gradient( 90deg, var(--b2), #fff1 );
+
+    padding: 1rem;
+  }
+  .pip_gui.pip_chat .pip_reply{
+    border: none;
+    background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
+    min-width: 5rem;
+    padding: 0.5rem;
+  }
+
+  @media ( orientation: landscape ){
+    .pip_gui.pip_chat .pip_text,
+    .pip_gui.pip_chat .pip_reply{
+      min-width: 42vw;
+    }
+  }
+  @media ( orientation: portrait ){
+    .pip_gui.pip_chat .pip_text,
+    .pip_gui.pip_chat .pip_reply{
+      min-width: 58vw;
+    }
+  }
+  .pip_gui.pip_chat .pip_button{
+    width: fit-content;
+    padding: 0.5rem;
+  }
+  .pip_gui.pip_chat .pip_toggle{
+    grid-row: 3;
+    grid-column: 3;
+    width: 2rem;
+    height: 1rem;
+  }
+  .pip_gui.pip_chat .pip_continue{
+  }
+  .pip_gui.pip_chat .pip_cancel{
+  }
+  .pip_gui.pip_chat .pip_accept{
+  }
 
 
   /* BEGIN: PIP Splash Styling */
   /* PIP Splash screens are autonomous heads up displays which appear and disappear on their own.
      This style is useful for displaying the status of running processes, which don't require acknowlegement. */
-  #root > .pip_gui.pip_splash{
-    grid-column: 2 / 5;
-    grid-row: 2 / 5;
+ .pip_gui.pip_splash{
     display: grid;
     transition: all 1s;
-    border-radius: 0 10vh 0 10vh;
-
-    --s: 3em; /* control the size */
+    border: solid 1px var(--o3);
+    grid-area: body;
+    --s: 3rem; /* control the size */
 
     --_s: calc(2*var(--s)) calc(2*var(--s));
     --_g: var(--_s) conic-gradient(at 40% 40%,#0000 75%,var(--b3) 0);
@@ -223,52 +491,47 @@
       calc(-2.3*var(--s)) calc(1.7*var(--s)),0 0
     }
   }
-  #root > .pip_gui.pip_splash .pip_title{
-    color: var(--o2);
+  .pip_gui.pip_splash .pip_title{
+    text-align: center;
   }
-  #root > .pip_gui.pip_splash .pip_text{
+  .pip_gui.pip_splash .pip_text{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     padding: 1rem;
     text-align: center;
-    color: var(--b1);
   }
-  #root > .pip_gui.pip_splash .pip_reply{
+  .pip_gui.pip_splash .pip_reply{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
-    font-size: x-large;
     text-align: center;
     padding: 1rem;
-    background-color: whitesmoke;
   }
-  #root > .pip_gui.pip_splash .pip_button{
+  .pip_gui.pip_splash .pip_button{
     width: fit-content;
-    font-size: x-large;
     padding: 1rem;
   }
-  #root > .pip_gui.pip_splash .pip_toggle{
+  .pip_gui.pip_splash .pip_toggle{
     grid-row: 3;
     grid-column: 3;
     width: 4rem;
     height: 4rem;
   }
-  #root > .pip_gui.pip_splash .pip_continue{
-    background-color: #040633;
+  .pip_gui.pip_splash .pip_continue{
+
   }
-  #root > .pip_gui.pip_splash .pip_cancel{
-    background-color: #81245E;
+  .pip_gui.pip_splash .pip_cancel{
+
   }
-  #root > .pip_gui.pip_splash .pip_accept{
-    background-color: #799B2B;
+  .pip_gui.pip_splash .pip_accept{
+
   }
 
   /* BEGIN: PIP Menu Styling */
   /* PIP Menu screens are form panels which require user interaction to determine where to take the user next.
      This style allows for the system to respond more complexly to the user requests. */
-  #root > .pip_gui.pip_menu{
-    grid-column: 3 / -1;
-    grid-row: 2 / -1;
+  .pip_gui.pip_menu{
+    grid-area: body;
     transition: all 1s;
     border-radius: 0 10vh 0 10vh;
     overflow: hidden;
@@ -288,58 +551,53 @@
       radial-gradient(var(--_c)) 0 calc(var(--s)/2)/var(--s) var(--s)
       var(--c);
 
-    border: solid 0.1em #366;
+    border: solid 1px var(--o3);
   }
-  #root > .pip_gui.pip_menu.loading{
-    --s: 42em;
+  .pip_gui.pip_menu.loading{
+    --s: 42rem;
   }
-  #root > .pip_gui.pip_menu .pip_title{
+  .pip_gui.pip_menu .pip_title{
 
   }
-  #root > .pip_gui.pip_menu .pip_text{
+  .pip_gui.pip_menu .pip_text{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
     padding: 1rem;
-    font-size: x-large;
     text-align: center;
   }
-  #root > .pip_gui.pip_menu .pip_reply{
+  .pip_gui.pip_menu .pip_reply{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
-    font-size: x-large;
     text-align: center;
     padding: 1rem;
-    background-color: whitesmoke;
   }
-  #root > .pip_gui.pip_menu .pip_button{
+  .pip_gui.pip_menu .pip_button{
     width: fit-content;
-    font-size: x-large;
     padding: 1rem;
   }
-  #root > .pip_gui.pip_menu .pip_toggle{
+  .pip_gui.pip_menu .pip_toggle{
     grid-row: 3;
     grid-column: 3;
     width: 4rem;
     height: 4rem;
   }
-  #root > .pip_gui.pip_menu .pip_continue{
-    background-color: #040633;
+  .pip_gui.pip_menu .pip_continue{
+
   }
-  #root > .pip_gui.pip_menu .pip_cancel{
-    background-color: #81245E;
+  .pip_gui.pip_menu .pip_cancel{
+
   }
-  #root > .pip_gui.pip_menu .pip_accept{
-    background-color: #799B2B;
+  .pip_gui.pip_menu .pip_accept{
+
   }
 
   /* BEGIN: PIP Post Styling */
   /* PIP Post screens are notification pages which require acknowlegement before moving on.
      This style allows for the system to post information which the user may wish to examine further before continuing on. */
-  #root > .pip_gui.pip_post{
-    grid-column: 3 / -1;
-    grid-row: 2 / -1;
+  .pip_gui.pip_post{
+    grid-area: body;
     transition: all 1s;
     border-radius: 0 10vh 0 10vh;
 
@@ -353,226 +611,106 @@
       radial-gradient(100% 100% at 0 100%,#0000, #0008 4%,var(--_g),var(--t) 96%)
       var(--t);
     background-size: var(--s) var(--s);
-    border: solid 0.1em #366;
+    border: solid 1px var(--o3);
   }
-  #root > .pip_gui.pip_post .pip_title{
-    color: var(--o2);
+  .pip_gui.pip_post .pip_title{
+
   }
-  #root > .pip_gui.pip_post .pip_text{
+  .pip_gui.pip_post .pip_text{
     border: none;
     background: linear-gradient( 90deg, var(--i2), #0007 );
     min-width: 11rem;
     padding: 1rem;
-    font-size: x-large;
     text-align: center;
-    color: var(--b1);
   }
-  #root > .pip_gui.pip_post .pip_reply{
+  .pip_gui.pip_post .pip_reply{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
-    font-size: x-large;
     text-align: center;
     padding: 1rem;
-    background-color: whitesmoke;
   }
-  #root > .pip_gui.pip_post .pip_button{
-    width: fit-content;
-    font-size: x-large;
-    padding: 1rem;
+  .pip_gui.pip_post .pip_button{
   }
-  #root > .pip_gui.pip_post .pip_toggle{
-    grid-row: 3;
-    grid-column: 3;
-    width: 4rem;
-    height: 4rem;
+  .pip_gui.pip_post .pip_toggle{
   }
-  #root > .pip_gui.pip_post .pip_continue{
-    font-size: 2.5em;
+  .pip_gui.pip_post .pip_continue{
+
   }
-  #root > .pip_gui.pip_post .pip_cancel{
-    background-color: var(--r2);
-    font-size: 2.5em;
+  .pip_gui.pip_post .pip_cancel{
   }
-  #root > .pip_gui.pip_post .pip_accept{
+  .pip_gui.pip_post .pip_accept{
     background-color: var(--g2);
     color: var(--g1);
-    font-size: 2.5em;
 
   }
 
-
-  /* BEGIN: PIP Chat Styling */
-  /* PIP Chat screens are forms styled as a dialogue between the system and the user.
-     This style allows for decisions to be made and input to be handled. */
-  #root > .pip_gui.pip_chat{
-    --s: 7em; /* control the size */
-    --c: #230339; /* back color */
-    background:
-      conic-gradient(at 80% 80%,var(--c) 75%,#0000 0),
-      linear-gradient(135deg,var(--c) calc(40%/3),
-        #0000 0 calc(200%/3),var(--c) 0),
-      conic-gradient(from 45deg at calc(160%/3) calc(80%/3),
-        #0008 135deg,#0000 0 225deg,#0004 0)
-      #241858; /* cube color */
-    background-size: var(--s) var(--s);
-    border: solid 1px #7B85AE;
-    grid-template-columns: auto auto auto auto auto;
-    overflow-y: auto;
-    padding: 1em;
-    grid-column: 2 / 5;
-    grid-row: 2 / 5;
-    border-radius: 0em 5em 0em 5em;
-    color: #ffe6ab;
-  }
-  #root > .pip_gui.pip_chat .ui_side{
-    grid-column: 1 / 4 !important;
-    border-radius: 0px 4rem 4rem 4rem;
-    margin-left: 0;
-    margin-right: auto;
-  }
-  #root > .pip_gui.pip_chat .user_side{
-    grid-column: 3 / -1 !important;
-    flex-direction: row-reverse;
-    border-radius: 4rem 4rem 4rem 4rem;
-    margin-right: 0;
-    margin-left: auto;
-  }
-  #root > .pip_gui.pip_chat .pip_title{
-
-  }
-  #root > .pip_gui.pip_chat .pip_text{
-    border: none;
-    background: linear-gradient( 90deg, var(--i2), #fff1 );
-    min-width: 11rem;
-    padding: 1rem;
-    font-size: x-large;
-    text-align: center;
-    color: var(--b1);
-  }
-  #root > .pip_gui.pip_chat .pip_reply{
-    border: none;
-    background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
-    min-width: 11rem;
-    font-size: x-large;
-    text-align: center;
-    padding: 1rem;
-    background-color: whitesmoke;
-  }
-  #root > .pip_gui.pip_chat .pip_button{
-    width: fit-content;
-    font-size: x-large;
-    padding: 1rem;
-  }
-  #root > .pip_gui.pip_chat .pip_toggle{
-    grid-row: 3;
-    grid-column: 3;
-    width: 4rem;
-    height: 4rem;
-  }
-  #root > .pip_gui.pip_chat .pip_continue{
-    font-size: 2.5em;
-  }
-  #root > .pip_gui.pip_chat .pip_cancel{
-    font-size: 2.5em;
-  }
-  #root > .pip_gui.pip_chat .pip_accept{
-    font-size: 2.5em;
-  }
 
   /* BEGIN: PIP Import Styling */
   /* PIP Import screens are externally-sourced
      This style allows for the system to post information which the user may wish to examine further before continuing on. */
-  #root > .pip_gui.pip_import{
-    grid-row: 2 / -1;
-    grid-column: 2 / -1;
+  .pip_gui.pip_import{
+    grid-area: body;
     margin-right: 2rem;
     display: grid;
     grid-template-rows: auto 5rem auto 5rem;
   }
-  #root > .pip_gui.pip_import > iframe{
+  .pip_gui.pip_import > iframe{
     border-radius: 0 10vh 0 10vh;
     grid-row: 2 / -1;
     height: calc( 100vh - 5rem);
     width: 100%;
   }
 
-  #root > .pip_gui.pip_import .pip_title{
+  .pip_gui.pip_import .pip_title{
 
   }
-  #root > .pip_gui.pip_import .pip_text{
+  .pip_gui.pip_import .pip_text{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
     padding: 1rem;
-    font-size: x-large;
     text-align: center;
   }
-  #root > .pip_gui.pip_import .pip_reply{
+  .pip_gui.pip_import .pip_reply{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
-    font-size: x-large;
     text-align: center;
     padding: 1rem;
-    background-color: whitesmoke;
   }
-  #root > .pip_gui.pip_import .pip_button{
+  .pip_gui.pip_import .pip_button{
     width: fit-content;
-    font-size: x-large;
     padding: 1rem;
   }
-  #root > .pip_gui.pip_import .pip_toggle{
+  .pip_gui.pip_import .pip_toggle{
     grid-row: 3;
     grid-column: 3;
     width: 4rem;
     height: 4rem;
   }
-  #root > .pip_gui.pip_import .pip_continue{
-    background-color: #040633;
+  .pip_gui.pip_import .pip_continue{
+
   }
-  #root > .pip_gui.pip_import .pip_cancel{
-    background-color: #81245E;
+  .pip_gui.pip_import .pip_cancel{
+
   }
-  #root > .pip_gui.pip_import .pip_accept{
-    background-color: #799B2B;
+  .pip_gui.pip_import .pip_accept{
+
   }
 
-  #init_controls{}
 
   .css-gui-odykkp{text-decoration-line:none;background-color:#000000;border-radius:16px;-webkit-transition:all 350ms 0ms cubic-bezier(0, 0, 1, 1);transition:all 350ms 0ms cubic-bezier(0, 0, 1, 1);overflow:hidden;display:block;color:#ffffff;}
   .css-gui-odykkp:hover{-webkit-filter:grayscale(0%);filter:grayscale(0%);}
   .css-gui-cxbi66{max-width:100%;display:block;width:100%;}
   .css-gui-tl6zyz{padding:32px;}
-  .css-gui-12rqme7{font-size:0.75rem;color:currentcolor;}
-  .css-gui-196s729{line-height:1.25;font-family:Inter;text-align:left;font-size:2rem;margin:0px;}
+  .css-gui-12rqme7{font-size:calc( var(--sF) * 0.75rem);;color:currentcolor;}
+  .css-gui-196s729{line-height:1.25;font-family:Inter;text-align:left;font-size:calc( var(--sF) * 2rem);;margin:0px;}
   .css-gui-1bxrphh{max-width:80ch;margin:0;color:#ffffff;}
 
-  .bizCard{
-    display: grid;
-    width: 100vw;
-    height: 100vh;
-  }
-  .bizCard .panel.comms{
-    background-color: goldenrod;
-    z-index: 1;
-  }
-  .bizCard .panel.hero{
-    z-index: 0;
-    display: grid;
-  }
-  .bizCard .panel.hero *{
-    margin: auto;
-    max-height: 85%;
-  }
 
-  .bizCard .panel.menu{
-    z-index: 1;
-    background-color: goldenrod;
-  }
 
-  #confirm_privileges{}
-  #connect{}
+
 
 
 

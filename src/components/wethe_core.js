@@ -1,3 +1,4 @@
+import { SceneTransformation } from '../bin/ScreenDirector.js';
 import { AudioEngineWoker } from '../imp/workers/AudioEngine.ts';
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
@@ -161,7 +162,6 @@ function WeTheMenu( props ){
         }
 
         h1 {
-          font-size: 3rem;
           grid-row: 1;
           grid-column: 1 / -1;
           text-align: right;
@@ -171,7 +171,6 @@ function WeTheMenu( props ){
         .loadingMessage {
           text-align: center;
           padding: 40px;
-          background-color: #eee;
         }
 
         .video{
@@ -372,18 +371,76 @@ function WeTheMenu( props ){
     )
   }
   function SnapPix( props ) {
-    const [onDisplay, setOnDisplay] = useState(false);
+    const [onDisplay, setOnDisplay] = useState( false );
+    const [enter, setEnter] = useState( false );
+    const [exit, setExit] = useState( false );
     const panel = useRef();
 
+    function cleanup(){}
     useEffect( ()=>{
-      if( onDisplay ) document.getElementById('root').appendChild( panel.current );
-    }, [onDisplay]);
+      const entrance_transition = new SceneTransformation({
+        update: ( delta )=>{
+          let cache = entrance_transition.cache;
+          if( ++cache.frame <= cache.duration ){
+            let progress = cache.frame / cache.duration;
+            panel.current.style.scale = progress;
 
-    function handleAckClick( event ){
-      event.stopPropagation();
-      if( onDisplay ) document.getElementById('WeTheMenu').appendChild( panel.current )
-      setOnDisplay(!onDisplay);
-    }
+          } else {
+            entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+          }
+        },
+        cache: {
+          duration: 15, /* do something in 60 frames */
+          frame: 0,
+          manual_control: false,
+          og_transition: false
+        },
+        reset: ()=>{
+          entrance_transition.cache.duration = 15;
+          entrance_transition.cache.frame = 0;
+          screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
+        },
+        post: ( )=>{
+          let cache = entrance_transition.cache;
+          screenplay.updatables.delete( 'SnapPix_entrance_transition' );
+          panel.current.style.transform = `scale(1)`;
+        }
+      });
+      setEnter( entrance_transition );
+      const exit_transition = new SceneTransformation({
+        update: ( delta )=>{
+          let cache = exit_transition.cache;
+          if( ++cache.frame <= cache.duration ){
+            let progress = 1 - cache.frame / cache.duration;
+            panel.current.style.scale = progress;
+
+          } else {
+            exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+          }
+        },
+        cache: {
+          duration: 15, /* do something in this many frames */
+          frame: 0,
+          manual_control: false,
+          og_transition: false
+        },
+        reset: ()=>{
+          exit_transition.cache.duration = 15;
+          exit_transition.cache.frame = 0;
+          screenplay.updatables.set( 'SnapPix_exit_transition', exit_transition );
+        },
+        post: ( )=>{
+          let cache = exit_transition.cache;
+          screenplay.updatables.delete( 'SnapPix_exit_transition' );
+          panel.current.style.transform = `scale(0)`;
+          director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+        }
+      });
+      setExit( exit_transition );
+      screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
+      return cleanup;
+    }, []);
+
     return(
       <>
       <div id="SnapPix" ref={panel} className="pip_gui pip_post">
@@ -815,13 +872,11 @@ function WeTheMenu( props ){
           }
 
           #RemindMe h1 {
-            font-size: 6rem;
             margin: 0;
             background: #d66;
           }
 
           #RemindMe h2 {
-            font-size: 2.4rem;
           }
 
           /* Bottom toolbar styling  */
@@ -838,10 +893,8 @@ function WeTheMenu( props ){
           #RemindMe #enable,
           #RemindMe input[type="submit"] {
             line-height: 1.8;
-            font-size: 1.3rem;
             border-radius: 5px;
             border: 1px solid black;
-            color: black;
             text-shadow: 1px 1px 1px black;
             border: 1px solid rgba(0, 0, 0, 0.1);
             box-shadow: inset 0px 5px 3px rgba(255, 255, 255, 0.2),
@@ -905,7 +958,6 @@ function WeTheMenu( props ){
             width: 10rem;
             float: left;
             padding-right: 1rem;
-            font-size: 1.6rem;
             line-height: 1.6;
           }
 
@@ -937,7 +989,6 @@ function WeTheMenu( props ){
             width: 85%;
             padding: 1rem;
             margin: 2rem auto;
-            font-size: 1.8rem;
           }
 
           #RemindMe .task-box ul {
@@ -961,7 +1012,6 @@ function WeTheMenu( props ){
 
           #RemindMe .task-box button {
             margin-left: 2rem;
-            font-size: 1.6rem;
             border: 1px solid #eee;
             border-radius: 5px;
             box-shadow: inset 0 -2px 5px rgba(0, 0, 0, 0.5) 1px 1px 1px black;
@@ -1011,7 +1061,6 @@ function WeTheMenu( props ){
             #RemindMe form select,
             #RemindMe form label {
               line-height: 2.5rem;
-              font-size: 2rem;
             }
 
             #RemindMe form .full-width input {
@@ -1235,12 +1284,30 @@ function WeTheMenu( props ){
     <style>{`
       #WeTheMenu {
         transition: all .2s;
-        grid-row: 4 / -1;
-        grid-column: 1 / 3;
-        margin-right: 2rem;
-        margin-left: 2rem;
-        z-index: 2;
-        position: absolute;
+        grid-area: menu;
+        position: relative;
+      }
+      @media ( orientation: landscape ){
+        #WeTheMenu {
+          width: 33vw;
+          height: 33vw;
+          place-self: end;
+        }
+        #WeTheMenu.collapsed{
+          margin-bottom: -8vw;
+        }
+      }
+      @media ( orientation: portrait ){
+        #WeTheMenu {
+          width: 80vw;
+          height: 80vw;
+          position: absolute;
+          left: 10vw;
+          bottom: 0;
+        }
+        #WeTheMenu.collapsed{
+          margin-bottom: -25vw;
+        }
       }
       #WeTheMenu::before {
         content: '';
@@ -1252,10 +1319,6 @@ function WeTheMenu( props ){
       }
       #WeTheMenu.collapsed{
         background: linear-gradient( 11deg, #63000077, black, #00003677);
-        height: 19em;
-        width: 19em;
-        bottom: 0;
-        margin-bottom: -6em;
         transform: rotateX(72deg) rotateY(4deg) rotateZ( 4deg );
         cursor: pointer;
         border-radius: 50%;
@@ -1264,12 +1327,7 @@ function WeTheMenu( props ){
       }
       #WeTheMenu.open{
         border: none;
-        width: 38em;
-        height: 38em;
         border-radius: 50%;
-        position: absolute;
-        bottom: 0;
-        left: 0;
       }
 
       .menu_title{
@@ -1280,6 +1338,17 @@ function WeTheMenu( props ){
         position: absolute;
         display: grid;
         position: relative;
+        transition: all 0.5s 0.2s;
+      }
+      .menu_title::before{
+        content: '';
+        height: 100%; width: 100%;
+        opacity: 0;
+        background: radial-gradient(var(--o1),var(--o3), #fff0 70%);
+        transition: opacity 0.5s 0.2s;
+      }
+      .menu_title:hover::before{
+        opacity: 1;
       }
       .collapsed > .menu_title{
         margin: auto;
@@ -1289,10 +1358,9 @@ function WeTheMenu( props ){
       }
 
       .menu_title .menu_label{
-        color: goldenrod;
-        font-size: 3rem;
         position: absolute;
         bottom: 100%;
+        font-size: 2em;
       }
       .menu_title .menu_icon{
         width: 100%;
@@ -1317,8 +1385,19 @@ function WeTheMenu( props ){
         background: linear-gradient( 11deg, #000036, black, #630000);
       }
       .menu_choice:hover{
-        color: #DDD;
         z-index: 7;
+      }
+      .menu_choice::before{
+        content: '';
+        position: absolute;
+        z-index: -1;
+        border-radius: 50%;
+        height: 100%; width: 100%;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+      .menu_choice:hover::before{
+        opacity: 1;
       }
       .collapsed > .menu_choice{
         pointer-events: none;
@@ -1329,112 +1408,113 @@ function WeTheMenu( props ){
       }
       .menu_choice[data-position="0"]{
         height: 32%; width: 32%;
-        border-color: #9400D3;
+        border-color: var(--r1);
         left: 34%; top: 34%;
       }
-      .menu_choice[data-position="0"]:hover{
-        background: linear-gradient( 135deg, #a23745, #9400D3, #552B72);
+      .menu_choice[data-position="0"]:hover::before{
+        background: linear-gradient( 135deg, var(--v2), var(--r2), var(--o2));
       }
       .menu_choice[data-position="1"]{
         height: 29%; width: 29%;
-        border-color: #552B72;
+        border-color: var(--r1);
         left: 2%; top: 22%;
       }
-      .menu_choice[data-position="1"]:hover{
-        background: linear-gradient( 135deg, #9400D3, #552B72, #313C74);
+      .menu_choice[data-position="1"]:hover::before{
+        background: linear-gradient( 135deg, var(--v2), var(--r2), var(--o2));
       }
       .menu_choice[data-position="2"]{
         height: 27.5%; width: 27.5%;
-        border-color: #313C74;
+        border-color: var(--o1);
         left: 31%; top: 1%;
       }
-      .menu_choice[data-position="2"]:hover{
-        background: linear-gradient( 180deg, #552B72, #313C74, #265B6A);
+      .menu_choice[data-position="2"]:hover::before{
+        background: linear-gradient( 135deg, var(--r2), var(--o2), var(--y2));
       }
       .menu_choice[data-position="3"]{
         height: 24%; width: 24%;
-        border-color: #265B6A;
+        border-color: var(--y1);
         left: 63%; top: 14%;
       }
-      .menu_choice[data-position="3"]:hover{
-        background: linear-gradient( 225deg, #313C74, #265B6A, #2E882E);
+      .menu_choice[data-position="3"]:hover::before{
+        background: linear-gradient( 135deg, var(--o2), var(--y2), var(--g2));
       }
       .menu_choice[data-position="4"]{
         height: 21%; width: 21%;
-        border-color: #2E882E;
+        border-color: var(--g1);
         left: 70%; top: 45%;
       }
-      .menu_choice[data-position="4"]:hover{
-        background: linear-gradient( 305deg, #aaa339, #2E882E, #265B6A);
+      .menu_choice[data-position="4"]:hover::before{
+        background: linear-gradient( 135deg, var(--y2), var(--g2), var(--b2));
       }
       .menu_choice[data-position="5"]{
         height: 17%; width: 17%;
-        border-color: #aaa339;
+        border-color: var(--b1);
         left: 55%; top: 69%;
       }
-      .menu_choice[data-position="5"]:hover{
-        background: linear-gradient( 325deg, #aa7a39, #aaa339, #2E882E);
+      .menu_choice[data-position="5"]:hover::before{
+        background: linear-gradient( 135deg, var(--g2), var(--b2), var(--i2));
       }
       .menu_choice[data-position="6"]{
         height: 14%; width: 14%;
-        border-color: #aa7a39;
+        border-color: var(--i1);
         left: 34%; top: 75%;
       }
-      .menu_choice[data-position="6"]:hover{
-        background: linear-gradient( 5deg, #a23745, #aa7a39, #aaa339);
+      .menu_choice[data-position="6"]:hover::before{
+        background: linear-gradient( 135deg, var(--b2), var(--i2), var(--v2));
       }
       .menu_choice[data-position="7"]{
         height: 11%; width: 11%;
-        border-color: #a23745;
+        border-color: var(--v1);
         left: 21%; top: 60%;
       }
-      .menu_choice[data-position="7"]:hover{
-        background: linear-gradient( 45deg, #9400D3, #a23745, #aa7a39);
+      .menu_choice[data-position="7"]:hover::before{
+        background: linear-gradient( 135deg, var(--i2), var(--v2), var(--r2));
       }
 
       .menu_choice:hover label{
         opacity: 1;
+        background: linear-gradient( 90deg, var(--i2), #0007 );
       }
       .menu_choice label{
-        font-size: 1.5rem;
         position: absolute;
         opacity: 0;
         bottom: 100%;
-        transition: all .2s;
+        white-space: nowrap;
+        transition: opacity .5s .2s;
       }
 
     `}</style>
     <div id="WeTheMenu" ref={panel} className={props.mode} >
       <div className="menu_title" onClick={toggleMenu}>
-        <label htmlFor="OpenWeTheMenu" className="menu_label">System Menu</label>
+        <label htmlFor="OpenWeTheMenu" className="menu_label pip_title">System Menu</label>
         <input type="image" src=".\both_wethebrand.png" name="OpenWeTheMenu" className="menu_icon" />
       </div>
       <div className="menu_choice" data-position={1} onClick={toggleGlyphScanner} >
-        <label htmlFor="OpenGlyphScanner">Scan a Glyph</label>
+        <label htmlFor="OpenGlyphScanner" className="pip_text">Scan a Glyph</label>
         <input type="image" src=".\both_glyphscanner.png" name="OpenGlyphScanner" />
       </div>
       <div className="menu_choice" data-position={2} onClick={toggleShareContact} >
         <input type="image" src=".\both_atme_safe.png" name="OpenShareContact" />
-        <label htmlFor="OpenShareContact">Share Contact</label>
+        <label htmlFor="OpenShareContact" className="pip_text">Share Contact</label>
       </div>
       <div className="menu_choice" data-position={3} onClick={toggleDropPin} >
-        <label htmlFor="OpenDropPin">Drop-A-Pin</label>
+        <label htmlFor="OpenDropPin" className="pip_text">Drop-A-Pin</label>
         <input type="image" src=".\dark_pindrop.png" name="OpenDropPin" />
       </div>
       <div className="menu_choice" data-position={4} onClick={toggleSnapPix} >
-        <label htmlFor="OpenSnapPix">Snap Pix</label>
+        <label htmlFor="OpenSnapPix" className="pip_text">Snap Pix</label>
         <input type="image" src=".\both_camera.png" name="OpenSnapPix"/>
       </div>
       <div className="menu_choice" data-position={5} onClick={toggleRecordNote} >
-        <label htmlFor="OpenRecordNote">Record Audio</label>
+        <label htmlFor="OpenRecordNote" className="pip_text">Record Audio</label>
         <input type="image" src=".\both_mic.png" name="OpenRecordNote"/>
       </div>
       <div className="menu_choice" data-position={6} onClick={toggleRemindMe} >
         <input type="image" src=".\both_stickynote.png" name="OpenRemindMe" />
-        <label htmlFor="OpenRemindMe">Remind Me!</label>
+        <label htmlFor="OpenRemindMe" className="pip_text">Remind Me!</label>
       </div>
       <div className="menu_choice" data-position={7} onClick={toggleQuickComms} >
-        <label htmlFor="OpenQuickComms">Quick Comms</label>
+        <label htmlFor="OpenQuickComms" className="pip_text">Quick Comms</label>
         <input type="image" src=".\both_comms.png" name="OpenQuickComms" />
       </div>
     </div>
@@ -3397,11 +3477,8 @@ function WeTheHeader( props ){
   return( <>
     <style>{`
       #WeTheHeader{
-        grid-row: 1;
-        grid-column: 1 / -1;
-        display: grid;
-        grid-auto-rows: 9vh auto;
-        background: linear-gradient( 11deg, #000036, black, #630000);
+        grid-area: head;
+        background: linear-gradient( 11deg, #000036, black, #630000 );
         transition: all .2s;
         z-index: 2;
       }
@@ -3410,15 +3487,14 @@ function WeTheHeader( props ){
 
       }
       #WeTheHeader.desktop{
-        height: 9vh;
-        width: 100vw;
+
       }
       #WeTheHeader > ul.menu_items{
         grid-row: 1;
         margin: 0;
         padding: 0;
         display: grid;
-        grid-auto-columns: 1fr 1fr 1fr 1fr 1fr 1fr 3fr 1fr 1fr;
+        grid-template-columns: repeat( 9, 1fr );
       }
       #WeTheHeader li{
 
@@ -3426,58 +3502,96 @@ function WeTheHeader( props ){
       #WeTheHeader .header_menu_item{
         display: grid;
         text-align: center;
-        font-size: 2vh;
-        color: #339af0;
+        color: var(--y1);
         align-content: center;
         margin: auto;
-
-        grid-row: 1;
+        position: relative;
         cursor: pointer;
-        padding: 0vh 2vh 0.5vh 2vh;
         transition: all 0.1s;
       }
       #WeTheHeader .header_menu_item:hover{
         background: linear-gradient( 11deg, #000036, black, #630000);
         color: #DDD;
       }
-      #WeTheHeader .header_menu_panel{
+
+      #WeTheHeader .header_menu_item img{
+        height: 4em;
+        margin: auto;
+      }
+      .header_menu_item > .alerts{
+        position: absolute;
+        bottom: 0.25em;
+        color: var(--g2);
+        font-size: 1em;
+        font-weight: bold;
+        right: 0;
+        border-radius: 50%;
+        height: 1.5em;
+        width: 1.5em;
+        background: var(--g3);
+      }
+      .header_menu_item.account{
+      }
+      .header_menu_item > .account_change{
+        position: absolute;
+        bottom: 0.25em;
+        color: var(--g2);
+        font-size: 1.5em;
+        font-weight: bold;
+        right: -1em;
+      }
+      .header_menu_item.contacts{
+      }
+      .header_menu_item.collections{
+      }
+      .header_menu_item > .collections_alerts{
+
+      }
+      .header_menu_item.discussions{
+      }
+      .header_menu_item > .discussions_alerts{
+
+      }
+      .header_menu_item.events{
+      }
+      .header_menu_item > .events_alerts{
+
+      }
+      .header_menu_item.classifieds{
+
+      }
+      .header_menu_item > .classifieds_alerts{
+
+      }
+      .header_menu_item.ticker{
+        overflow: hidden;
+        grid-row: 2;
+        grid-column: 4 / -1;
+      }
+      .ticker .ticker_content{
+        white-space: nowrap;
+      }
+      .header_menu_item.architect{
+      }
+      .header_menu_item.information{
+
+      }
+
+      .header_menu_panel{
         display: grid;
         border-radius: 0% 0% 25% 25%
         text-align: center;
-        font-size: 2vh;
         color: #339af0;
         align-content: center;
         margin: auto;
         transition: all 0.2s;
         background: linear-gradient( 11deg, #000036, black, #630000);
       }
-      #WeTheHeader .header_menu_item img{
-        height: 6vh;
-        margin: auto;
-      }
-      .header_menu_item.search{
-        position: absolute;
-        top: 9vh; left: 0;
-        padding: 1rem;
-      }
-      header_menu_item.account{
-      }
-      header_menu_item.contacts{
-      }
-      header_menu_item.galleries{
-      }
-      header_menu_item.capsules{
-      }
-      header_menu_item.spacedock{
-      }
-      header_menu_item.ticker{
-      }
-      header_menu_item.architect{
-      }
-      header_menu_item.information{
 
+      #search_panel{}{
+        grid-area: search;
+        color: var(--y1);
       }
-      #search_panel{}
       #account_panel{}
       #contacts_panel{}
       #collections_panel{}
@@ -3488,6 +3602,9 @@ function WeTheHeader( props ){
       #architect_panel{}
       #architect_panel > .lil-gui.root{
         margin: 1rem;
+      }
+      #information_panel{
+        grid-area: body;
       }
 
       @media only screen and (orientation: landscape){
@@ -3500,32 +3617,38 @@ function WeTheHeader( props ){
 
         <li className="header_menu_item account" onClick={toggleAccount}>
           <img src=".\both_vault.png" />
-          <span className="account_balance">{account_balance}</span><span className="account_change">{account_change}</span>
+          <span className="account_balance">{account_balance}</span>
+          <span className="account_change">{account_change}</span>
         </li>
 
         <li className="header_menu_item contacts" onClick={toggleContacts}>
           <img src=".\both_groups.png" />
-          <span className="online_contacts">{online_contacts}</span><span className="contacts_alerts">{contacts_alerts}</span>
+          <span className="online_contacts">{online_contacts}</span>
+          <span className="alerts">{contacts_alerts}</span>
         </li>
 
         <li className="header_menu_item collections" onClick={toggleCollections}>
           <img src=".\both_museum.png" />
-          <span className="active_collections">{active_collections}</span><span className="collections_alerts">{collections_alerts}</span>
+          <span className="active_collections">{active_collections}</span>
+          <span className="alerts">{collections_alerts}</span>
         </li>
 
         <li className="header_menu_item discussions" onClick={toggleDiscussions}>
           <img src=".\both_wethebrand.png" />
-          <span className="active_discussions">{active_discussions}</span><span className="discussions_alerts">{discussions_alerts}</span>
+          <span className="active_discussions">{active_discussions}</span>
+          <span className="alerts">{discussions_alerts}</span>
         </li>
 
         <li className="header_menu_item events" onClick={toggleEvents}>
           <img src=".\both_planet_alert.png" />
-          <span className="active_events">{active_events}</span><span className="events_alerts">{events_alerts}</span>
+          <span className="active_events">{active_events}</span>
+          <span className="alerts">{events_alerts}</span>
         </li>
 
         <li className="header_menu_item classifieds" onClick={toggleClassifieds}>
           <img src=".\both_postboard_alert.png" />
-          <span className="active_classifieds">{active_classifieds}</span><span className="classifieds_alerts">{classifieds_alerts}</span>
+          <span className="active_classifieds">{active_classifieds}</span>
+          <span className="alerts">{classifieds_alerts}</span>
         </li>
 
         <li className="header_menu_item ticker" onClick={toggleTicker}>
