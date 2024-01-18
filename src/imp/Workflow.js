@@ -131,7 +131,6 @@ class VerifyCapabilitiesModal extends Component {
             let cqt = compiled_test_results.time / compiled_test_results.time_total;
             compiled_test_results.score = Math.floor( test_results.mean_fps * cqt );
             // ... then post the results to the console and the test_results stack
-            console.log( compiled_test_results );
             this.setState( { test_results: compiled_test_results, test_complete: true });
             if ( this.screenplay.CAN_SAVE ) localStorage.setItem( "ups_test", JSON.stringify(compiled_test_results) );
             this.displayTestResults();
@@ -399,8 +398,9 @@ class Workflow extends _Workflow{
                   You are welcome to investigate 'under the hood', though the code in your browser is compiled and difficult to traverse.<br/>
                   The full codebase upon which this app is running may be <a href="https://github.com/phxsol/pale-blue-dot" target="_blank">found here on GitHub</a>.<br/>
                 </span>
-                <input style={{ gridRow: 25}} name="ack_user_instruction" className="pip_continue user_side" type="button" onClick={this.handleAckClick} value="OK" />
-
+                <span className="user_side" style={{ gridRow: 25}}>
+                  <input name="ack_user_instruction" className="pip_continue" type="button" onClick={this.handleAckClick} value="Ok" />
+                </span>
 
               </div>
             </>
@@ -433,7 +433,7 @@ class Workflow extends _Workflow{
     const verifyToken = async ( uname, token ) => {
       if( !uname && !token ) return false;
 
-      let login = new Request("/tokens",{
+      let resume = new Request("/tokens",{
         method:"POST",
         headers: {
           "Content-Type": "application/json",
@@ -442,7 +442,7 @@ class Workflow extends _Workflow{
         }
       });
 
-      return await fetch( login ).then( async res => {
+      return await fetch( resume ).then( async res => {
         let status = res.status;
         if(status==200) return {
           valid: true,
@@ -609,16 +609,28 @@ class Workflow extends _Workflow{
             fetch( login ).then( async res => {
               submitButton.disabled = false
 
-              if( res.status == 200 ){
-
+              if( res.status >= 100 && res.status <= 199 ){
+                alert( 'Hrm... not a clue why you are receiving this response... continuing anonymously.  I guess, log in later?!' );
+                screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+              }
+              if( res.status >= 200 && res.status <= 299 ){
                 let _uname = res.headers.get("uname");
                 if ( screenplay.CAN_SAVE ) localStorage.setItem( "uname", _uname );
                 let _token = res.headers.get("token");
                 if ( screenplay.CAN_SAVE ) localStorage.setItem( "token", _token );
                 ResumeUser( _uname, _token );
                 screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
-              } else {
-                alert( 'Invalid Login!  Try harder.');
+              }
+              if( res.status >= 300 && res.status <= 399 ){
+                alert( 'Danger!  An unauthorized redirection has occurred with your login credentials... continuing anonymously.');
+                screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+              }
+              if( res.status >= 400 && res.status <= 499 ){
+                alert( 'Unauthorized.  Verify the credentials used and retry, or create a new user if you are not yet registered!' );
+              }
+              if( res.status >= 500 && res.status <= 599 ){
+                alert( 'You are disconnected from the WeThe Network... system will continue anonymously.');
+                screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
               }
             });
           }
@@ -645,9 +657,29 @@ class Workflow extends _Workflow{
             fetch( register ).then( res => {
               submitButton.disabled = false
 
-              // TODO: Validate this shit! Then close up shop.
-
-              screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+              if( res.status >= 100 && res.status <= 199 ){
+                alert( 'Hrm... not a clue why you are receiving this response... continuing anonymously.  I guess, register later?!' );
+                screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+              }
+              if( res.status >= 200 && res.status <= 299 ){
+                let _uname = res.headers.get("uname");
+                if ( screenplay.CAN_SAVE ) localStorage.setItem( "uname", _uname );
+                let _token = res.headers.get("token");
+                if ( screenplay.CAN_SAVE ) localStorage.setItem( "token", _token );
+                ResumeUser( _uname, _token );
+                screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+              }
+              if( res.status >= 300 && res.status <= 399 ){
+                alert( 'Danger!  An unauthorized redirection has occurred with your login credentials... continuing anonymously.');
+                screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+              }
+              if( res.status >= 400 && res.status <= 499 ){
+                alert( 'Unauthorized Registration... did you mean to log in instead?' );
+              }
+              if( res.status >= 500 && res.status <= 599 ){
+                alert( 'You are disconnected from the WeThe Network... system will continue anonymously.');
+                screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit );
+              }
             });
           }
 
@@ -681,7 +713,7 @@ class Workflow extends _Workflow{
                   Greetings Captain.
                   </span>
                   <span className="ui_side pip_text" style={{ gridRow: 3 }}>What are your orders?</span>
-                  <div className="user_side" style={{ gridRow: 5, display: 'flex' }}>
+                  <div className="user_side pip_text" style={{ gridRow: 25}}>
                     <input
                       name="login_button"
                       className="pip_accept"
@@ -716,7 +748,7 @@ class Workflow extends _Workflow{
                   Greetings Captain.
                   </span>
                   <span className="ui_side pip_text" style={{ gridRow: 3 }}>How do you prefer to be addressed?</span>
-                  <form onSubmit={handleSubmitResumeUser} className="user_side" style={{ gridRow: 5 }}>
+                  <form onSubmit={handleSubmitResumeUser} className="user_side pip_text" style={{ gridRow: 25}}>
                     <label htmlFor="username">User:</label>
                       <input
                         name="username"
@@ -734,14 +766,16 @@ class Workflow extends _Workflow{
                         value={pword}
                         onChange={(e) => changeInputs(e, 2)}
                       />
+                    <br />
                     <label htmlFor="back">Go Back:</label>
                     <input
                       name="back"
                       className="pip_cancel"
                       style={{ marginLeft: '1rem' }}
                       type="button"
-                      onClick={(e) => setPhase( 0 )} value="Go Back"/>
-                    <input type="submit" className="pip_accept" ref={ submitButton } />
+                      onClick={(e) => setPhase( 0 )} value="Back"/>
+                    <input name="submit" type="submit" value="Go" className="pip_accept" ref={ submitButton } />
+                    <br />
                     <label htmlFor="keep_logged">Keep me logged in:</label>
                       <input
                         name="keep_logged"
@@ -764,7 +798,7 @@ class Workflow extends _Workflow{
                   Greetings Captain.
                   </span>
                   <span className="ui_side pip_text" style={{ gridRow: 3 }}>How do you prefer to be addressed?</span>
-                  <form onSubmit={handleSubmitNewUser} className="user_side" style={{ gridRow: 5 }}>
+                  <form onSubmit={handleSubmitNewUser} className="user_side pip_text" style={{ gridRow: 25}}>
 
                   <label htmlFor="username">User:</label>
                     <input
@@ -783,15 +817,17 @@ class Workflow extends _Workflow{
                       value={pword}
                       onChange={(e) => changeInputs(e, 2)}
                     />
+                  <br />
                   <label htmlFor="back">Go Back:</label>
                   <input
                     name="back"
                     className="pip_cancel"
                     style={{ marginLeft: '1rem' }}
                     type="button"
-                    onClick={(e) => setPhase( 0 )} value="Go Back"/>
+                    onClick={(e) => setPhase( 0 )} value="Back"/>
                   <label htmlFor="submit">Submit:</label>
-                  <input name="submit" type="submit" className="pip_accept" ref={ submitButton } />
+                  <input name="submit" type="submit" value="Go" className="pip_accept" ref={ submitButton } />
+                  <br />
                   <label htmlFor="keep_logged">Keep me logged in:</label>
                     <input
                       name="keep_logged"
@@ -812,19 +848,19 @@ class Workflow extends _Workflow{
                     <h1 className="pip_title">Anonymous Pilot</h1>
                     <span className="ui_side pip_text" style={{ gridRow: 2 }}>As you wish.  Welcome pilot!</span>
                     <span className="ui_side pip_text" style={{ gridRow: 3 }}>I must inform you that persistant changes will NOT be available to you until you choose to login to a registered Captain's chair.</span>
-                    <div className="user_side" style={{ gridRow: 5, display: 'flex' }}>
+                    <div className="user_side pip_text" style={{ gridRow: 25}}>
                       <label>Acknowledge:<input
                         name="ack"
                         className="pip_accept"
                         style={{ marginLeft: '1rem' }}
                         type="button"
-                        onClick={handleAnonymousUser} value="Acknowledge"/></label>
+                        onClick={handleAnonymousUser} value="Ok"/></label>
                       <label>Reconsider:<input
                         name="back"
                         className="pip_cancel"
                         style={{ marginLeft: '1rem' }}
                         type="button"
-                        onClick={(e) => setPhase( 0 )} value="Reconsider"/></label>
+                        onClick={(e) => setPhase( 0 )} value="Back"/></label>
                     </div>
                   </div>
                 </>);
@@ -860,7 +896,6 @@ class Workflow extends _Workflow{
         if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
 
           const constraints = { video: { facingMode: 'user' } };
-          debugger;
           navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
 
             // apply the stream to the video element used in the texture
@@ -916,7 +951,6 @@ class Workflow extends _Workflow{
 
     try{
 
-      // Instantiate a exporter
       let sys_ve_scene = screenplay.sys_ve_scene;
       let sys_ui_scene = screenplay.sys_ui_scene;
       let page_ve_scene = screenplay.page_ve_scene;
@@ -927,7 +961,7 @@ class Workflow extends _Workflow{
       director.emit( `${dictum_name}_failure`, dictum_name, ndx );
 
     } finally{
-      //
+
       this.react_app.render( <><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /><ViewScreenDisplay screenplay={screenplay} onDisplay={false} selfCamStream={selfCamStream} videoStreams={videoStreams} /></> );
       director.emit( `${dictum_name}_progress`, dictum_name, ndx );
     }
@@ -1049,7 +1083,6 @@ class Workflow extends _Workflow{
         let glyphon = [];
         let page = "data:img/glyphon;page:0;" + encodeURIComponent( JSON.stringify( exportObj ) );
 
-        console.log( 'here' );
         //let raw_string = encodeURIComponent( JSON.stringify( exportObj ) );
         wrap.generateGlyphon( raw_string );
         var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent( JSON.stringify( exportObj ) );

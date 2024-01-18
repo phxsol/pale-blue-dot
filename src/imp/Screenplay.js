@@ -832,12 +832,12 @@ class Screenplay extends _Screenplay{
               let _tprog = cache.frame / cache.turn_duration;
               let turn_progress = _tprog ** (10-(10.05*_tprog));
 
-              let curQ = new THREE.Quaternion().slerpQuaternions( iniQ, endQ, turn_progress ).normalize();
+              let curQ = new THREE.Quaternion().slerpQuaternions( cache.iniQ, cache.endQ, turn_progress ).normalize();
               this.actors.Starship.quaternion.copy( curQ );
 
               this.actors.Starship.updateMatrixWorld( true );
-              var rotationMatrix = new THREE.Matrix4().extractRotation( this.actors.Starship.matrixWorld );
-              var up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
+              let rotationMatrix = new THREE.Matrix4().extractRotation( this.actors.Starship.matrixWorld );
+              let up_now = new THREE.Vector3( 0, 1, 0 ).applyMatrix4( rotationMatrix ).normalize();
 
               this.actors.Starship.up.lerpVectors( cache.up_now, up_now, _tprog );
 
@@ -857,6 +857,7 @@ class Screenplay extends _Screenplay{
                   break;
 
                 case 'CaptainCam':
+                  debugger;
                     this.actors.Starship.NavDots.sight_target.getWorldPosition( sight_target );
                     this.active_cam.up.lerpVectors( cache.up_now, up_now, turn_progress );
                     this.active_cam.lookAt( sight_target );

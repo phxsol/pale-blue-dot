@@ -22,7 +22,6 @@ class SceneDirections extends _SceneDirections {
 
   // Ready //
   enter_ready = async ( screenplay, dictum_name, next_emit, director )=>{
-   console.log(`SceneDirections.enter_ready: ${next_emit} | ${dictum_name}`);
 
    let sys_ve_scene = screenplay.sys_ve_scene;
    let sys_ui_scene = screenplay.sys_ui_scene;
@@ -47,18 +46,15 @@ class SceneDirections extends _SceneDirections {
    director.emit( next_emit, dictum_name );
   };
   idle_on_ready = async ( screenplay, dictum_name, next_emit, director )=>{
-   console.log(`SceneDirections.idle_on_ready: ${next_emit} | ${dictum_name}`);
 
    director.emit( next_emit, dictum_name );
   };
   progress_ready = async ( screenplay, dictum_name, ndx )=>{
-    console.log(`SceneDirections.progress_ready: ${ndx} | ${dictum_name}`);
   };
   ready_failure = async ( screenplay, dictum_name, ndx  )=>{
-   console.log(`SceneDirections.ready_failure: ${ndx} | ${dictum_name}`);
+
   };
   ready_for_anything = async ( screenplay, dictum_name, next_emit, director )=>{
-   console.log(`SceneDirections.ready_for_anything: ${next_emit} | ${dictum_name}`);
 
    const gui = screenplay.lil_gui;
    let sys_ve_scene = screenplay.sys_ve_scene;

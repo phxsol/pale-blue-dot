@@ -194,15 +194,84 @@ class Screenplay{
   sys_ve_renderer; sys_ui_renderer; page_ve_renderer; page_ui_renderer;
   sys_ve_post; sys_ui_post; page_ve_post; page_ui_post;
   sys_ve_composer = false; sys_ui_composer = false; page_ve_composer = false; page_ui_composer = false;
-  clock; delta; fps; interval; raycaster; mouse;
+  clock; delta = 0; fps; frame_delta = 0; heartbeat_delta = 0; qm_delta = 0; m_delta = 0; qh_delta = 0; hh_delta = 0; h_delta = 0; qd_delta = 0; hd_delta = 0; d_delta = 0;
+  raycaster; mouse;
   stop_me;
   VIEW; aspect; major_dim; minor_dim;height;width;
+  beat = ( delta )=>{
+    const beat_delta = delta;
+    this.heartbeat_delta += beat_delta;
+    this.qm_delta += beat_delta;
+    this.m_delta += beat_delta;
+    this.qh_delta += beat_delta;
+    this.hh_delta += beat_delta;
+    this.h_delta += beat_delta;
+    this.qd_delta += beat_delta;
+    this.hd_delta += beat_delta;
+    this.d_delta += beat_delta;
+    if ( this.heartbeat_delta  >= this.heartbeat_interval ) {
+      const next_delta = this.heartbeat_delta % this.heartbeat_interval;
+      this.heartbeat( this.heartbeat_delta );
+      this.heartbeat_delta = next_delta;
+      console.log( 'beat.. next @ ' + next_delta + 'latest delta: ' + delta );
+    }
+    if ( this.qm_delta  >= this.qm_interval ) {
+      const next_delta = this.qm_delta % this.qm_interval;
+      this.poller.quarter_minute( this.qm_delta, 2 );
+      this.qm_delta = next_delta;
+      console.log( 'quarter_minute.. next @ ' + next_delta + 'latest delta: ' + delta );
+    }
+    if ( this.m_delta  >= this.m_interval ) {
+      const next_delta = this.m_delta % this.m_interval;
+      this.poller.minute( this.m_delta, 3 );
+      this.m_delta = next_delta;
+      console.log( 'minute.. next @ ' + next_delta + 'latest delta: ' + delta );
+    }
+    if ( this.qh_delta  >= this.qh_interval ) {
+      const next_delta = this.qh_delta % this.qh_interval;
+      this.poller.quarter_hour( this.qh_delta, 4 );
+      this.qh_delta = next_delta;
+      console.log( 'quarter_hour.. next @ ' + next_delta + 'latest delta: ' + delta );
+    }
+    if ( this.hh_delta  >= this.hh_interval ) {
+      const next_delta = this.hh_delta % this.hh_interval;
+      this.poller.half_hour( this.hh_delta, 5 );
+      this.hh_delta = next_delta;
+      console.log( 'half_hour.. next @ ' + next_delta + 'latest delta: ' + delta );
+    }
+    if ( this.h_delta  >= this.h_interval ) {
+      const next_delta = this.h_delta % this.h_interval;
+      this.poller.hour( this.h_delta, 6 );
+      this.h_delta = next_delta;
+      console.log( 'hour.. next @ ' + next_delta + 'latest delta: ' + delta );
+    }
+    if ( this.qd_delta  >= this.qd_interval ) {
+      const next_delta = this.qd_delta % this.qd_interval;
+      this.poller.quarter_day( this.qd_delta, 7 );
+      this.qd_delta = next_delta;
+      console.log( 'quarter_day.. next @ ' + next_delta + 'latest delta: ' + delta );
+    }
+    if ( this.hd_delta  >= this.hd_interval ) {
+      const next_delta = this.hd_delta % this.hd_interval;
+      this.poller.half_day( this.hd_delta, 8 );
+      this.hd_delta = next_delta;
+      console.log( 'half_day.. next @ ' + next_delta + 'latest delta: ' + delta );
+    }
+    if ( this.d_delta  >= this.d_interval ) {
+      const next_delta = this.d_delta % this.d_interval;
+      this.poller.day( this.d_delta, 9 );
+      this.d_delta = next_delta;
+      console.log( 'day.. next @ ' + next_delta + 'latest delta: ' + delta );
+    }
+  }
   animate = ()=>{
     requestAnimationFrame( this.animate );
-    this.delta += this.clock.getDelta();
-    if (this.delta  >= this.interval) {
-      let next_delta = this.delta % this.interval;
-      this.update( this.delta );
+    const delta = this.clock.getDelta();
+    this.beat( delta );
+    this.delta += delta;
+    if ( this.delta  >= this.frame_interval ) {
+      let next_delta = this.delta % this.frame_interval;
+      this.update( this.delta, 0 );
       this.direct( this.delta );
 
       this.render_sys_ve();
@@ -238,56 +307,55 @@ class Screenplay{
   // Rendering & Update Logic
   update = ( delta )=>{
     this.updatables.forEach(( updatable, name )=>{
-      if ( updatable.update ) updatable.update( delta );
+      if ( updatable.update ) updatable.update( delta, 0 );
     });
   }
 
   heartbeat = ( delta )=>{
     this.heartbeats.forEach(( heartbeat, name )=>{
-      if ( heartbeat.update ) heartbeat.update( delta );
+      if ( heartbeat.update ) heartbeat.update( delta, 1 );
     });
   }
 
   poller = {
     quarter_minute: ( delta )=>{
       this.polls.quarter_minute.forEach(( poll, name )=>{
-        debugger;
-        try { poll( delta ) } catch(e) { console.error( e ) };
+        try { poll.update( delta, 2 ) } catch(e) { console.error( e ) };
       });
     },
     minute: ( delta )=>{
       this.polls.minute.forEach(( poll, name )=>{
-        try { poll.update( delta ) } catch(e) { console.error( e ) };
+        try { poll.update( delta, 3 ) } catch(e) { console.error( e ) };
       });
     },
     quarter_hour: ( delta )=>{
       this.polls.quarter_hour.forEach(( poll, name )=>{
-        try { poll.update( delta ) } catch(e) { console.error( e ) };
+        try { poll.update( delta, 4 ) } catch(e) { console.error( e ) };
       });
     },
     half_hour: ( delta )=>{
       this.polls.half_hour.forEach(( poll, name )=>{
-        try { poll.update( delta ) } catch(e) { console.error( e ) };
+        try { poll.update( delta, 5 ) } catch(e) { console.error( e ) };
       });
     },
     hour: ( delta )=>{
       this.polls.hour.forEach(( poll, name )=>{
-        try { poll.update( delta ) } catch(e) { console.error( e ) };
+        try { poll.update( delta, 6 ) } catch(e) { console.error( e ) };
       });
     },
     quarter_day: ( delta )=>{
       this.polls.quarter_day.forEach(( poll, name )=>{
-        try { poll.update( delta ) } catch(e) { console.error( e ) };
+        try { poll.update( delta, 7 ) } catch(e) { console.error( e ) };
       });
     },
     half_day: ( delta )=>{
       this.polls.half_day.forEach(( poll, name )=>{
-        try { poll.update( delta ) } catch(e) { console.error( e ) };
+        try { poll.update( delta, 8 ) } catch(e) { console.error( e ) };
       });
     },
     day: ( delta )=>{
       this.polls.day.forEach(( poll, name )=>{
-        try { poll.update( delta ) } catch(e) { console.error( e ) };
+        try { poll.update( delta, 9 ) } catch(e) { console.error( e ) };
       });
     }
 
@@ -387,7 +455,7 @@ class Screenplay{
   }
   constructor( ){
 
-    this.CAN_SAVE = (typeof(Storage) !== "undefined") || false;
+    this.CAN_SAVE = ( typeof(Storage) !== "undefined" && typeof( window.indexedDB ) !== "undefined" ) || false;
     if( this.CAN_SAVE ){
       let should = localStorage.getItem("should_save") || true; // Defaults to true, false must be explicitly saved to take affect.
       this.SHOULD_SAVE = should;
@@ -417,7 +485,20 @@ class Screenplay{
     this.clock = new THREE.Clock();
     this.delta = 0;
     let fps = this.fps = 60;
-    this.interval = 1 / fps;
+    this.frame_interval = 1 / fps;
+    let second = 1;
+    this.heartbeat_interval = second;
+    this.qm_interval = 15 * second;
+    let minute = 60 * second;
+    this.m_interval = minute;
+    this.qh_interval = 15 * minute;
+    this.hh_interval = 30 * minute;
+    let hour = 60 * minute;
+    this.h_interval = hour;
+    this.qd_interval = 6 * hour;
+    this.hd_interval = 12 * hour;
+    let day = 24 * hour;
+    this.d_interval = day;
 
     // Mouse Interaction Capture
     this.raycaster = new THREE.Raycaster();

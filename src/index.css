@@ -3,6 +3,7 @@
   --r1: #FFA9A9;
   --r2: #AB3939;
   --r3: #560000;
+  --r3a: #56000077;
   /* Orange */
   --o1: #FFE2A9;
   --o2: #AB8539;
@@ -19,6 +20,7 @@
   --b1: #7887AB;
   --b2: #2E4372;
   --b3: #061539;
+  --b3a: #06153977;
   /* Indigo */
   --i1: #877BB0;
   --i2: #413077;
@@ -28,6 +30,8 @@
   --v2: #8A2E62;
   --v3: #470028;
 
+  --panelBG: linear-gradient( 11deg, var(--b3), black, var(--r3));
+  --menuBG: radial-gradient( var( --r3a ), black, var( --b3a) );
 }
 @media ( orientation: portrait ){
   :root{
@@ -277,12 +281,13 @@
   .pip_continue, .pip_cancel, .pip_accept{
     border-radius: 50%;
     border: none;
-    width: calc( var(--sF) * 3rem);
-    height: calc( var(--sF) * 3rem);
+    width: calc( var(--sF) * 3.5rem);
+    height: calc( var(--sF) * 3.5rem);
     font-size: calc( var(--sF) * 1.25rem);
     pointer-events: all;
     cursor: pointer;
     transition: 0.2s;
+    margin-right: 2rem;
   }
   .pip_continue:disabled, .pip_cancel:disabled, .pip_accept:disabled{
     cursor: not-allowed;
@@ -335,6 +340,7 @@
   }
   .pip_gui{
     display: grid;
+    overflow: auto;
   }
   @media ( orientation: landscape ){
     .pip_gui{
@@ -375,13 +381,15 @@
     border-radius: 0px 4rem 4rem 4rem;
     margin-left: 0;
     margin-right: auto;
+    display: flex;
   }
   .pip_gui.pip_chat .user_side{
+    text-align: right;
     grid-column-end: 5;
-    flex-direction: row-reverse;
-    border-radius: 4rem 4rem 4rem 4rem;
+    border-radius: 4rem 4rem 0rem 4rem;
     margin-right: 0;
     margin-left: auto;
+    background: linear-gradient( 270deg, var(--b2), #fff1 ) !important;
   }
   .pip_gui.pip_chat .pip_title{
     grid-column: 1 / -1;
@@ -534,7 +542,6 @@
     grid-area: body;
     transition: all 1s;
     border-radius: 0 10vh 0 10vh;
-    overflow: hidden;
 
     --s: 80px; /* the size */
     --c: #230339;
