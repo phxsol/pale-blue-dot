@@ -290,9 +290,9 @@
     margin-right: 2rem;
   }
   .pip_continue:disabled, .pip_cancel:disabled, .pip_accept:disabled{
-    cursor: not-allowed;
-    background-color: #444;
-    color: #111;
+    cursor: not-allowed !important;
+    background-color: #444 !important;
+    color: #111 !important;
   }
   .pip_continue{
     background-color: var(--b2);
@@ -328,8 +328,8 @@
     background-color: var(--g3);
   }
   .pip_title{
-      color: var(--o2);
-      font-size: calc( var(--sF) * 2.5rem);
+    color: var(--o2);
+    font-size: calc( var(--sF) * 2.5rem);
   }
   .pip_text{
     color: var(--b1);
@@ -468,35 +468,35 @@
       calc( .9*var(--s)) calc( .9*var(--s)),
       calc(-.1*var(--s)) calc(-.1*var(--s)),
       calc( .7*var(--s)) calc( .7*var(--s)),
-      calc(-.3*var(--s)) calc(-.3*var(--s)),0 0
+      calc(-.3*var(--s)) calc(-.3*var(--s)),0 0;
     }
     25% {
      background-position:
       calc(1.9*var(--s)) calc( .9*var(--s)),
       calc(-1.1*var(--s)) calc(-.1*var(--s)),
       calc(1.7*var(--s)) calc( .7*var(--s)),
-      calc(-1.3*var(--s)) calc(-.3*var(--s)),0 0
+      calc(-1.3*var(--s)) calc(-.3*var(--s)),0 0;
     }
     50% {
      background-position:
       calc(1.9*var(--s)) calc(-.1*var(--s)),
       calc(-1.1*var(--s)) calc( .9*var(--s)),
       calc(1.7*var(--s)) calc(-.3*var(--s)),
-      calc(-1.3*var(--s)) calc( .7*var(--s)),0 0
+      calc(-1.3*var(--s)) calc( .7*var(--s)),0 0;
     }
     75% {
      background-position:
       calc(2.9*var(--s)) calc(-.1*var(--s)),
       calc(-2.1*var(--s)) calc( .9*var(--s)),
       calc(2.7*var(--s)) calc(-.3*var(--s)),
-      calc(-2.3*var(--s)) calc( .7*var(--s)),0 0
+      calc(-2.3*var(--s)) calc( .7*var(--s)),0 0;
     }
     100% {
      background-position:
       calc(2.9*var(--s)) calc(-1.1*var(--s)),
       calc(-2.1*var(--s)) calc(1.9*var(--s)),
       calc(2.7*var(--s)) calc(-1.3*var(--s)),
-      calc(-2.3*var(--s)) calc(1.7*var(--s)),0 0
+      calc(-2.3*var(--s)) calc(1.7*var(--s)),0 0;
     }
   }
   .pip_gui.pip_splash .pip_title{
@@ -544,11 +544,11 @@
     border-radius: 0 10vh 0 10vh;
 
     --s: 80px; /* the size */
-    --c: #230339;
+    --c: var(--i3);
 
     --_s: calc(2*var(--s)) calc(2*var(--s));
     --_g: 35.36% 35.36% at;
-    --_c: #0000 66%,#241858 68% 70%,#0000 72%;
+    --_c: #0000 66%,var(--i2) 68% 70%,#0000 72%;
     background:
       radial-gradient(var(--_g) 100% 25%,var(--_c)) var(--s) var(--s)/var(--_s),
       radial-gradient(var(--_g) 0    75%,var(--_c)) var(--s) var(--s)/var(--_s),
@@ -621,7 +621,8 @@
     border: solid 1px var(--o3);
   }
   .pip_gui.pip_post .pip_title{
-
+    background: linear-gradient( 90deg, var(--i2), #0007 );
+    margin: 0;
   }
   .pip_gui.pip_post .pip_text{
     border: none;
