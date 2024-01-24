@@ -132,7 +132,7 @@ function WeTheMenu( props ){
           place-self: end;
         }
         #WeTheMenu.collapsed{
-          margin-bottom: -8vw;
+          transform: rotateX(72deg) translateY(33vw) rotateY(4deg) rotateZ( 4deg );
         }
       }
       @media ( orientation: portrait ){
@@ -144,7 +144,7 @@ function WeTheMenu( props ){
           bottom: 0;
         }
         #WeTheMenu.collapsed{
-          margin-bottom: -25vw;
+          transform: rotateX(72deg) translateY(80vw) rotateY(4deg) rotateZ( 4deg );
         }
       }
       #WeTheMenu::before {
@@ -157,7 +157,6 @@ function WeTheMenu( props ){
       }
       #WeTheMenu.collapsed{
         background: var( --menuBG );
-        transform: rotateX(72deg) rotateY(4deg) rotateZ( 4deg );
         cursor: pointer;
         border-radius: 50%;
         border: outset 3px;
@@ -499,7 +498,6 @@ function GlyphScanner( props ){
 
       #GlyphScanner .loadingMessage {
         text-align: center;
-        padding: 40px;
       }
 
       #GlyphScanner .video{
@@ -516,12 +514,9 @@ function GlyphScanner( props ){
         grid-row: 2 / 5;
         grid-column: 3 / 5;
         background: #33333333;
-        padding: 10px;
-        padding-bottom: 0;
       }
 
       #GlyphScanner .output div {
-        padding-bottom: 10px;
         word-wrap: break-word;
       }
 
@@ -712,9 +707,9 @@ function DropPin( props ) {
 }
 function SnapPix( props ) {
   const [onDisplay, setOnDisplay] = useState( false );
-  const [phase, setPhase] = useState( 0 );
+  const [phase, setPhase] = useState( 2 );
   const [phase_description, setPhaseDescription] = useState();
-  const [dId, setDId] = useState( 0 );
+  const [dId, setDId] = useState( -1 );
   const [file_list, setFileList] = useState( [] );
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
@@ -793,7 +788,7 @@ function SnapPix( props ) {
     switch( phase ){
       case 0:
         setPhaseDescription( 'Would you like to take a picture now or upload one from earlier?' );
-        reset.current.disabled = true;
+        reset.current.disabled = false
         break;
 
       case 1:
@@ -803,7 +798,7 @@ function SnapPix( props ) {
 
       case 2:
         setPhaseDescription( 'Select which camera to use.' );
-        reset.current.disabled = false
+        reset.current.disabled = true;
         break;
 
       case '3a':
@@ -811,11 +806,12 @@ function SnapPix( props ) {
         reset.current.disabled = false
         break;
     }
+    setDId( -1 );
   },[phase]);
 
   function processFiles( e ){
     e.preventDefault();
-    
+
     debugger;
   }
 
@@ -834,9 +830,9 @@ function SnapPix( props ) {
         #SnapPix{
           grid-template-areas:
             "head  head  head  head head"
-            "image image image formtop formtop"
-            "image image image formmid formmid"
-            "image image image formlow formlow"
+            "form image image image image"
+            "form image image image image"
+            "status status status status status"
             "foot  foot  foot  foot foot";
           grid-template-columns: repeat( 5, 1fr );
           grid-template-rows: auto 1fr 1fr 1fr auto;
@@ -845,14 +841,18 @@ function SnapPix( props ) {
       @media ( orientation: portrait ){
         #SnapPix{
           grid-template-areas:
-            "head  head  head  head  head"
-            "image image image image image"
-            "image image image image image"
-            "form  form  form  foot  foot"
-            "form  form  form  foot  foot";
+          "head  head  head  head head"
+          "form image image image image"
+          "form image image image image"
+          "status status status status status"
+          "foot  foot  foot  foot foot";
           grid-template-columns: repeat( 5, 1fr );
           grid-template-rows: auto 1fr 1fr 1fr auto;
         }
+      }
+
+      #SnapPix label{
+        color: var(--b1);
       }
 
       #SnapPix .pip_title{
@@ -860,48 +860,63 @@ function SnapPix( props ) {
       }
       #SnapPix .phase_description{
         grid-area: image;
+        font-size: 3rem;
+        text-align: left;
       }
       #SnapPix .description{
-        grid-area: formlow;
+        grid-area: status;
+        position: relative;
+      }
+      #SnapPix .description > label, #SnapPix .description > span{
+        position: absolute;
       }
       #SnapPix input[type="image"]{
         width: fit-content;
         height: fit-content;
         place-self: center;
-        padding: 3rem;
         border-radius: 25%;
         cursor: pointer;
       }
       #SnapPix .upload_image_button{
         background: radial-gradient( var(--v3), var(--v2));
-        grid-area: formtop;
+        grid-area: form;
       }
       #SnapPix .upload_image_button:hover{
         background: radial-gradient( var(--v2), var(--v2));
       }
       #SnapPix .camera_button{
-        grid-area: formmid;
+        grid-area: form;
         background: radial-gradient( var(--g3), var(--g2));
       }
       #SnapPix .camera_button:hover{
         background: radial-gradient( var(--g2), var(--g2));
       }
       #SnapPix .selfie_camera{
-        grid-area: formtop;
+        grid-area: form;
+        grid-row: 2;
+        margin: auto;
+        text-align: center;
+      }
+      #SnapPix .selfie_camera input{
         background: radial-gradient( var(--g3), var(--g2));
       }
-      #SnapPix .selfie_camera:hover{
+      #SnapPix .selfie_camera input:hover{
         background: radial-gradient( var(--g2), var(--g2));
       }
       #SnapPix .environment_camera{
-        background: radial-gradient( var(--v3), var(--v2));
-        grid-area: formmid;
+        grid-area: form;
+        grid-row: 3;
+        margin: auto;
+        text-align: center;
       }
-      #SnapPix .environment_camera:hover{
+      #SnapPix .environment_camera input{
+        background: radial-gradient( var(--v3), var(--v2));
+      }
+      #SnapPix .environment_camera input:hover{
         background: radial-gradient( var(--v2), var(--v2));
       }
       #SnapPix .snap_photo{
-        grid-area: formmid;
+        grid-area: form;
         background: radial-gradient( var(--g3), var(--g2));
       }
       #SnapPix .snap_photo:hover{
@@ -910,14 +925,11 @@ function SnapPix( props ) {
       #SnapPix .pip_cancel, #SnapPix .pip_continue, #SnapPix .pip_accept{
         grid-area: foot;
       }
-      #SnapPix .pip_cancel{
+      #SnapPix .exit_SnapPix{
+        grid-column: 5;
+      }
+      #SnapPix .reset_SnapPix{
         grid-column: 4;
-      }
-      #SnapPix .pip_continue{
-        grid-column: 3;
-      }
-      #SnapPix .pip_accept{
-        grid-column: 2;
       }
       `}</style>
     <div id="SnapPix" ref={panel} className="pip_gui pip_post">
@@ -926,11 +938,17 @@ function SnapPix( props ) {
       <span className="pip_text phase_description">{phase_description}</span>
       {phase === 0 ? <>
         <input name="upload_image_button" src=".\both_upload-image.png" type="image" className="upload_image_button" onMouseOver={()=>{setDId( 0 )}} onClick={()=>{setPhase( 1 )}}></input>
-        <input type="image" src=".\both_camera.png" className="camera_button" onMouseOver={()=>{setDId( 1 )}} onClick={()=>{setPhase( 2 )}}></input>
+        <br />
+        <label htmlFor="upload_image_button" style={{ gridArea: 'form' }} >Upload Image</label>
+        <input name="camera_button" type="image" src=".\both_camera.png" className="camera_button" onMouseOver={()=>{setDId( 1 )}} onClick={()=>{setPhase( 2 )}}></input>
+        <br />
+        <label htmlFor="camera_button" style={{ gridArea: 'form' }} >Snap a Photo</label>
         </> : <></>}
       {phase === 1 ? <>
         <form onSubmit={processFiles}>
           <input ref={fileinput} type="file" name="filename" accept="image/*" multiple onMouseOver={()=>{setDId( 2 )}} ></input>
+          <br />
+          <label htmlFor="filename" style={{ gridArea: 'form' }} >Selfie Camera</label>
           <ul>
             {file_list}
           </ul>
@@ -938,23 +956,34 @@ function SnapPix( props ) {
           </form>
           </> : <></>}
       {phase === 2 ? <>
-        <input type="image" name="selfie" src=".\both_selfie.png" className="selfie_camera" onMouseOver={()=>{setDId( 3 )}} onClick={()=>{setPhase( '3a' )}} />
-        <input type="image" name="picture" src=".\both_take-a-photo.png" className="environment_camera" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '3a' )}}  />
+        <div className="selfie_camera" >
+          <input type="image" name="selfie" src=".\both_selfie.png" onMouseOver={()=>{setDId( 3 )}} onClick={()=>{setPhase( '3a' )}} alt="Selfie Camera" />
+          <br />
+          <label htmlFor="selfie" style={{ gridArea: 'form' }} >Selfie Camera</label>
+        </div>
+        <div className="environment_camera" >
+          <input type="image" name="picture" src=".\both_take-a-photo.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '3a' )}} alt="Environment Camera" />
+          <br />
+          <label htmlFor="picture">Environment Camera</label>
+        </div>
+
         </> : <></>}
 
       {phase === '3a' ? <>
         <input type="image" name="snap" src=".\both_capture-photo.png" className="snap_photo" onMouseOver={()=>{setDId( 5 )}} onMouseDown={snapPix} onMouseUp={stopPix} />
+        <br />
+        <label htmlFor="snap" style={{ gridArea: 'form' }} >Take Photo</label>
         </> : <></>}
       <span className="pip_text description">
-        { ( dId === 0 ) ? <label htmlFor="upload_image_button">Upload an image from local storage, or from a publicly accessible url.</label> : <></> }
-        { ( dId === 1 ) ? <label htmlFor="camera_button">Use your camera to add new images to your collections.</label> : <></> }
-        { ( dId === 2 ) ? <label htmlFor="upload_image_button">Import as many images as you like into your collection.</label> : <></> }
-        { ( dId === 3 ) ? <label for="selfie">Take a picture of your face<br/>"Don't for get to smile!" - Mona Lisa</label> : <></> }
-        { ( dId === 4 ) ? <label for="picture">Take a picture using back-facing camera<br />"I count to 5... that's when $@#! gets real." - Demetri Martin?</label> : <></> }
-        { ( dId === 5 ) ? <label for="snap">Click to snap a photo.  Hold it down for rapid-fire mode!</label> : <></> }
+        <span style={{ opacity:  ( dId === 0 ) ? 1 : 0} }>Upload an image from local storage, or from a publicly accessible url.</span>
+        <span style={{ opacity:  ( dId === 1 ) ? 1 : 0} }>Use your camera to add new images to your collections.</span>
+        <span style={{ opacity:  ( dId === 2 ) ? 1 : 0} }>Import as many images as you like into your collection.</span>
+        <span style={{ opacity:  ( dId === 3 ) ? 1 : 0} }>Take a picture of your face<br/>"Don't for get to smile!" - Mona Lisa</span>
+        <span style={{ opacity:  ( dId === 4 ) ? 1 : 0} }>Take a picture using back-facing camera<br />"I count to 5... that's when things get real." - Demetri Martin perhaps?</span>
+        <span style={{ opacity:  ( dId === 5 ) ? 1 : 0} }>Click to snap a photo.  Hold it down for rapid-fire mode!</span>
       </span>
       <button name="exit_SnapPix" className="pip_cancel exit_SnapPix" type="button" onClick={props.toggle}>Exit</button>
-      <button ref={reset} name="reset_SnapPix" className="pip_continue reset_SnapPix" type="button" onClick={()=>{setPhase( 0 )}}>Back</button>
+      <button ref={reset} name="reset_SnapPix" className="pip_continue reset_SnapPix" type="button" onClick={()=>{setPhase( 2 )}}>Back</button>
     </div>
     </>
   )
@@ -1421,7 +1450,6 @@ function RemindMe( props ) {
         #RemindMe #notifications {
           margin: 0;
           position: relative;
-          padding: 0.3rem;
           background: #ddd;
           position: absolute;
           top: 0rem;
@@ -1441,7 +1469,6 @@ function RemindMe( props ) {
         #RemindMe .form-box {
           background: #d66;
           width: 85%;
-          padding: 1rem;
           margin: 2rem auto;
           box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
         }
@@ -1468,7 +1495,6 @@ function RemindMe( props ) {
         #RemindMe form div label {
           width: 10rem;
           float: left;
-          padding-right: 1rem;
           line-height: 1.6;
         }
 
@@ -1498,18 +1524,15 @@ function RemindMe( props ) {
 
         #RemindMe .task-box {
           width: 85%;
-          padding: 1rem;
           margin: 2rem auto;
         }
 
         #RemindMe .task-box ul {
           margin: 0;
-          padding: 0;
         }
 
         #RemindMe .task-box li {
           list-style-type: none;
-          padding: 1rem;
           border-bottom: 2px solid #d33;
         }
 
@@ -1565,7 +1588,6 @@ function RemindMe( props ) {
 
           #RemindMe form div label {
             width: 36%;
-            padding-left: 1rem;
           }
 
           #RemindMe form input,
@@ -1970,22 +1992,26 @@ function WeTheHeader( props ){
         transition: all .2s;
         z-index: 2;
       }
-      #WeTheHeader.handheld{
-
-
-      }
-      #WeTheHeader.desktop{
-
+      @media ( orientation: portrait ){
+        #WeTheHeader{
+          border-bottom: var(--b1) solid;
+        }
       }
       #WeTheHeader > ul.menu_items{
         grid-row: 1;
         margin: 0;
         padding: 0;
         display: grid;
-        grid-template-columns: repeat( 9, 1fr );
       }
-      #WeTheHeader li{
-
+      @media ( orientation: portrait ){
+        #WeTheHeader > ul.menu_items{
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      @media ( orientation: landscape ){
+        #WeTheHeader > ul.menu_items{
+          grid-template-columns: repeat(8, 1fr);
+        }
       }
       #WeTheHeader .header_menu_item{
         display: grid;
@@ -1996,6 +2022,11 @@ function WeTheHeader( props ){
         position: relative;
         cursor: pointer;
         transition: all 0.1s;
+      }
+      @media ( orientation: portrait ){
+        #WeTheHeader .header_menu_item:nth-child(2n){
+          grid-row: 2;
+        }
       }
       #WeTheHeader .header_menu_item:hover{
         background: var( --panelBG );
@@ -2028,47 +2059,23 @@ function WeTheHeader( props ){
         font-weight: bold;
         right: -1em;
       }
-      .header_menu_item.contacts{
-      }
-      .header_menu_item.collections{
-      }
-      .header_menu_item > .collections_alerts{
-
-      }
-      .header_menu_item.discussions{
-      }
-      .header_menu_item > .discussions_alerts{
-
-      }
-      .header_menu_item.events{
-      }
-      .header_menu_item > .events_alerts{
-
-      }
-      .header_menu_item.classifieds{
-
-      }
-      .header_menu_item > .classifieds_alerts{
-
-      }
       .header_menu_item.ticker{
         overflow: hidden;
-        grid-row: 2;
         grid-column: 1 / -1;
         width: 100%;
       }
+      @media ( orientation: portrait ){
+        .header_menu_item.ticker{
+          grid-row: 3;
+        }
+      }
+      @media ( orientation: landscape ){
+        .header_menu_item.ticker{
+          grid-row: 2;
+        }
+      }
       .ticker .ticker_content{
         white-space: nowrap;
-      }
-      .header_menu_item.architect{
-        grid-column: 8;
-      }
-      .header_menu_item.information{
-        grid-column: 9;
-      }
-
-      .header_menu_panel{
-
       }
 
       #search_panel{
@@ -2100,9 +2107,7 @@ function WeTheHeader( props ){
       #architect_panel > .lil-gui.root{
         margin: 1rem;
       }
-      #information_panel{
-        grid-area: body;
-      }
+      #information_panel{}
 
       @media only screen and (orientation: landscape){
       }

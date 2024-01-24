@@ -465,19 +465,24 @@ function LoginForm( { director, screenplay, dictum_name, ndx }) {
           </span>
           <span className="ui_side pip_text" style={{ gridRow: 3 }}>What are your orders?</span>
           <div className="user_side pip_text" style={{ gridRow: 25}}>
+            <label htmlFor="login_button">Login:</label>
             <input
               name="login_button"
               className="pip_accept"
               type="button"
               value="login"
               onClick={(e) => setPhase( 1 )}/>
-            <input
+              <br />
+              <label htmlFor="new_user_button">New Captain:</label>
+              <input
               name="new_user_button"
               className="pip_accept"
               type="button"
               value="New"
               onClick={(e) => setPhase( 2 )} />
-            <input
+              <br />
+              <label htmlFor="anonymous_button">Anonymously:</label>
+              <input
               name="anonymous_button"
               className="pip_cancel"
               type="button"
@@ -501,31 +506,33 @@ function LoginForm( { director, screenplay, dictum_name, ndx }) {
           <span className="ui_side pip_text" style={{ gridRow: 3 }}>How do you prefer to be addressed?</span>
           <form onSubmit={handleSubmitResumeUser} className="user_side pip_text" style={{ gridRow: 25}}>
             <label htmlFor="username">User:</label>
-              <input
-                name="username"
-                type="text"
-                autoComplete="username"
-                value={uname}
-                onChange={(e) => changeInputs(e, 1)}
+            <input
+              name="username"
+              type="text"
+              autoComplete="username"
+              value={uname}
+              onChange={(e) => changeInputs(e, 1)}
 
-              />
+            /><br />
             <label htmlFor="password">Pass:</label>
-              <input
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                value={pword}
-                onChange={(e) => changeInputs(e, 2)}
-              />
+            <input
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              value={pword}
+              onChange={(e) => changeInputs(e, 2)}
+            />
             <br />
-            <label htmlFor="back">Go Back:</label>
+            <label htmlFor="submit">Submit:</label>
+            <input name="submit" type="submit" value="Go" className="pip_accept" ref={ submitButton } />
+            <br />
+            <label htmlFor="back">Return:</label>
             <input
               name="back"
               className="pip_cancel"
               style={{ marginLeft: '1rem' }}
               type="button"
               onClick={(e) => setPhase( 0 )} value="Back"/>
-            <input name="submit" type="submit" value="Go" className="pip_accept" ref={ submitButton } />
             <br />
             <label htmlFor="keep_logged">Keep me logged in:</label>
               <input
@@ -552,14 +559,15 @@ function LoginForm( { director, screenplay, dictum_name, ndx }) {
           <form onSubmit={handleSubmitNewUser} className="user_side pip_text" style={{ gridRow: 25}}>
 
           <label htmlFor="username">User:</label>
-            <input
-              name="username"
-              type="text"
-              autoComplete="username"
-              value={uname}
-              onChange={(e) => changeInputs(e, 1)}
+          <input
+            name="username"
+            type="text"
+            autoComplete="username"
+            value={uname}
+            onChange={(e) => changeInputs(e, 1)}
 
-            />
+          />
+          <br />
           <label htmlFor="password">Pass:</label>
             <input
               name="password"
@@ -569,6 +577,9 @@ function LoginForm( { director, screenplay, dictum_name, ndx }) {
               onChange={(e) => changeInputs(e, 2)}
             />
           <br />
+          <label htmlFor="submit">Submit:</label>
+          <input name="submit" type="submit" value="Go" className="pip_accept" ref={ submitButton } />
+          <br />
           <label htmlFor="back">Go Back:</label>
           <input
             name="back"
@@ -576,8 +587,6 @@ function LoginForm( { director, screenplay, dictum_name, ndx }) {
             style={{ marginLeft: '1rem' }}
             type="button"
             onClick={(e) => setPhase( 0 )} value="Back"/>
-          <label htmlFor="submit">Submit:</label>
-          <input name="submit" type="submit" value="Go" className="pip_accept" ref={ submitButton } />
           <br />
           <label htmlFor="keep_logged">Keep me logged in:</label>
             <input
@@ -606,6 +615,7 @@ function LoginForm( { director, screenplay, dictum_name, ndx }) {
                 style={{ marginLeft: '1rem' }}
                 type="button"
                 onClick={handleAnonymousUser} value="Ok"/></label>
+              <br />
               <label>Reconsider:<input
                 name="back"
                 className="pip_cancel"
