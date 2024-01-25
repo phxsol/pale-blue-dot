@@ -801,7 +801,7 @@ function SnapPix( props ) {
         reset.current.disabled = true;
         break;
 
-      case '3a':
+      case '2a':
         setPhaseDescription( 'Take a pic...  Hold down to rapid fire!' );
         reset.current.disabled = false
         break;
@@ -826,38 +826,6 @@ function SnapPix( props ) {
   return(
     <>
     <style>{`
-      @media ( orientation: landscape ){
-        #SnapPix{
-          grid-template-areas:
-            "head  head  head  head head"
-            "form image image image image"
-            "form image image image image"
-            "status status status status status"
-            "foot  foot  foot  foot foot";
-          grid-template-columns: repeat( 5, 1fr );
-          grid-template-rows: auto 1fr 1fr 1fr auto;
-        }
-      }
-      @media ( orientation: portrait ){
-        #SnapPix{
-          grid-template-areas:
-          "head  head  head  head head"
-          "form image image image image"
-          "form image image image image"
-          "status status status status status"
-          "foot  foot  foot  foot foot";
-          grid-template-columns: repeat( 5, 1fr );
-          grid-template-rows: auto 1fr 1fr 1fr auto;
-        }
-      }
-
-      #SnapPix label{
-        color: var(--b1);
-      }
-
-      #SnapPix .pip_title{
-        grid-area: head;
-      }
       #SnapPix .phase_description{
         grid-area: image;
         font-size: 3rem;
@@ -917,9 +885,14 @@ function SnapPix( props ) {
       }
       #SnapPix .snap_photo{
         grid-area: form;
+        grid-row: 3;
+        margin: auto;
+        text-align: center;
+      }
+      #SnapPix .snap_photo input{
         background: radial-gradient( var(--g3), var(--g2));
       }
-      #SnapPix .snap_photo:hover{
+      #SnapPix .snap_photo input:hover{
         background: radial-gradient( var(--g2), var(--g2));
       }
       #SnapPix .pip_cancel, #SnapPix .pip_continue, #SnapPix .pip_accept{
@@ -939,16 +912,16 @@ function SnapPix( props ) {
       {phase === 0 ? <>
         <input name="upload_image_button" src=".\both_upload-image.png" type="image" className="upload_image_button" onMouseOver={()=>{setDId( 0 )}} onClick={()=>{setPhase( 1 )}}></input>
         <br />
-        <label htmlFor="upload_image_button" style={{ gridArea: 'form' }} >Upload Image</label>
+        <label htmlFor="upload_image_button" className="pip_text" style={{ gridArea: 'form' }} >Upload Image</label>
         <input name="camera_button" type="image" src=".\both_camera.png" className="camera_button" onMouseOver={()=>{setDId( 1 )}} onClick={()=>{setPhase( 2 )}}></input>
         <br />
-        <label htmlFor="camera_button" style={{ gridArea: 'form' }} >Snap a Photo</label>
+        <label htmlFor="camera_button" className="pip_text" style={{ gridArea: 'form' }} >Snap a Photo</label>
         </> : <></>}
       {phase === 1 ? <>
         <form onSubmit={processFiles}>
           <input ref={fileinput} type="file" name="filename" accept="image/*" multiple onMouseOver={()=>{setDId( 2 )}} ></input>
           <br />
-          <label htmlFor="filename" style={{ gridArea: 'form' }} >Selfie Camera</label>
+          <label htmlFor="filename" className="pip_text" style={{ gridArea: 'form' }} >Selfie Camera</label>
           <ul>
             {file_list}
           </ul>
@@ -957,30 +930,32 @@ function SnapPix( props ) {
           </> : <></>}
       {phase === 2 ? <>
         <div className="selfie_camera" >
-          <input type="image" name="selfie" src=".\both_selfie.png" onMouseOver={()=>{setDId( 3 )}} onClick={()=>{setPhase( '3a' )}} alt="Selfie Camera" />
+          <input type="image" name="selfie" src=".\both_selfie.png" onMouseOver={()=>{setDId( 3 )}} onClick={()=>{setPhase( '2a' )}} alt="Selfie Camera" />
           <br />
-          <label htmlFor="selfie" style={{ gridArea: 'form' }} >Selfie Camera</label>
+          <label htmlFor="selfie" className="pip_text" style={{ gridArea: 'form' }} >Selfie Camera</label>
         </div>
         <div className="environment_camera" >
-          <input type="image" name="picture" src=".\both_take-a-photo.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '3a' )}} alt="Environment Camera" />
+          <input type="image" name="picture" src=".\both_take-a-photo.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '2a' )}} alt="Environment Camera" />
           <br />
-          <label htmlFor="picture">Environment Camera</label>
+          <label htmlFor="picture" className="pip_text" >Environment Camera</label>
         </div>
 
         </> : <></>}
 
-      {phase === '3a' ? <>
-        <input type="image" name="snap" src=".\both_capture-photo.png" className="snap_photo" onMouseOver={()=>{setDId( 5 )}} onMouseDown={snapPix} onMouseUp={stopPix} />
-        <br />
-        <label htmlFor="snap" style={{ gridArea: 'form' }} >Take Photo</label>
+      {phase === '2a' ? <>
+        <div className="snap_photo">
+          <input type="image" name="snap" src=".\both_capture-photo.png" onMouseOver={()=>{setDId( 5 )}} onMouseDown={snapPix} onMouseUp={stopPix} />
+          <br />
+          <label htmlFor="snap" className="pip_text" style={{ gridArea: 'form' }} >Take Photo</label>
+        </div>
         </> : <></>}
-      <span className="pip_text description">
-        <span style={{ opacity:  ( dId === 0 ) ? 1 : 0} }>Upload an image from local storage, or from a publicly accessible url.</span>
-        <span style={{ opacity:  ( dId === 1 ) ? 1 : 0} }>Use your camera to add new images to your collections.</span>
-        <span style={{ opacity:  ( dId === 2 ) ? 1 : 0} }>Import as many images as you like into your collection.</span>
-        <span style={{ opacity:  ( dId === 3 ) ? 1 : 0} }>Take a picture of your face<br/>"Don't for get to smile!" - Mona Lisa</span>
-        <span style={{ opacity:  ( dId === 4 ) ? 1 : 0} }>Take a picture using back-facing camera<br />"I count to 5... that's when things get real." - Demetri Martin perhaps?</span>
-        <span style={{ opacity:  ( dId === 5 ) ? 1 : 0} }>Click to snap a photo.  Hold it down for rapid-fire mode!</span>
+      <span className="description">
+        {( dId === 0 ) ? <span className="pip_text">Upload an image from local storage, or from a publicly accessible url.</span> : <></> }
+        {( dId === 1 ) ? <span className="pip_text">Use your camera to add new images to your collections.</span> : <></> }
+        {( dId === 2 ) ? <span className="pip_text">Import as many images as you like into your collection.</span> : <></> }
+        {( dId === 3 ) ? <span className="pip_text">Take a picture of your face<br/>"Don't for get to smile!" - Mona Lisa</span> : <></> }
+        {( dId === 4 ) ? <span className="pip_text">Take a picture using back-facing camera<br />"I count to 5... that's when things get real." - Demetri Martin perhaps?</span> : <></> }
+        {( dId === 5 ) ? <span className="pip_text">Click to snap a photo.  Hold it down for rapid-fire mode!</span> : <></> }
       </span>
       <button name="exit_SnapPix" className="pip_cancel exit_SnapPix" type="button" onClick={props.toggle}>Exit</button>
       <button ref={reset} name="reset_SnapPix" className="pip_continue reset_SnapPix" type="button" onClick={()=>{setPhase( 2 )}}>Back</button>

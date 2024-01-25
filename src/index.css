@@ -329,9 +329,6 @@
     color: var(--b1);
     font-size: calc( var(--sF) * 1rem);
   }
-  .pip_reply{
-
-  }
   .pip_gui{
     display: grid;
     overflow: auto;
@@ -394,21 +391,14 @@
     border: none;
     background: linear-gradient( 90deg, var(--b2), #fff1 );
   }
-  .pip_gui.pip_chat .pip_reply{
-    border: none;
-    background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
-    min-width: 5rem;
-  }
 
   @media ( orientation: landscape ){
-    .pip_gui.pip_chat .pip_text,
-    .pip_gui.pip_chat .pip_reply{
+    .pip_gui.pip_chat .pip_text{
       min-width: 42vw;
     }
   }
   @media ( orientation: portrait ){
-    .pip_gui.pip_chat .pip_text,
-    .pip_gui.pip_chat .pip_reply{
+    .pip_gui.pip_chat .pip_text{
       min-width: 58vw;
     }
   }
@@ -497,12 +487,6 @@
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     text-align: center;
   }
-  .pip_gui.pip_splash .pip_reply{
-    border: none;
-    background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
-    min-width: 11rem;
-    text-align: center;
-  }
   .pip_gui.pip_splash .pip_button{
     width: fit-content;
   }
@@ -558,12 +542,6 @@
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
   }
-  .pip_gui.pip_menu .pip_reply{
-    border: none;
-    background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
-    min-width: 11rem;
-    text-align: center;
-  }
   .pip_gui.pip_menu .pip_button{
     width: fit-content;
   }
@@ -588,9 +566,18 @@
      This style allows for the system to post information which the user may wish to examine further before continuing on. */
   .pip_gui.pip_post{
     grid-area: body;
+    grid-template-areas:
+      "head  head  head  head head"
+      "form image image image image"
+      "form image image image image"
+      "status status status status status"
+      "foot  foot  foot  foot foot";
+    grid-template-columns: repeat( 5, 1fr );
+    grid-template-rows: auto 1fr 1fr 1fr auto;
     transition: all 1s;
+    border: solid 1px var(--o3);
     border-radius: 0 10vh 0 10vh;
-
+    /* Background Pattern */
     --s: 100px; /* control the size */
     --t: transparent;
     --_g:
@@ -601,32 +588,17 @@
       radial-gradient(100% 100% at 0 100%,#0000, #0008 4%,var(--_g),var(--t) 96%)
       var(--t);
     background-size: var(--s) var(--s);
-    border: solid 1px var(--o3);
-  }
-  @media ( orientation: portrait ){
-    .pip_gui.pip_post{
-
-    }
-  }
-  @media ( orientation: landscape ){
-    .pip_gui.pip_post{
-
-    }
   }
   .pip_gui.pip_post .pip_title{
     background: linear-gradient( 90deg, var(--i2), #0007 );
     margin: 0;
+    grid-area: head;
   }
   .pip_gui.pip_post .pip_text{
     border: none;
+    color: var(--b1);
     background: linear-gradient( 90deg, var(--i2), #0007 );
 
-  }
-  .pip_gui.pip_post .pip_reply{
-    border: none;
-    background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
-    min-width: 11rem;
-    text-align: center;
   }
   .pip_gui.pip_post .pip_button{
   }
@@ -638,9 +610,6 @@
   .pip_gui.pip_post .pip_cancel{
   }
   .pip_gui.pip_post .pip_accept{
-    background-color: var(--g2);
-    color: var(--g1);
-
   }
 
 
@@ -664,12 +633,6 @@
 
   }
   .pip_gui.pip_import .pip_text{
-    border: none;
-    background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
-    min-width: 11rem;
-    text-align: center;
-  }
-  .pip_gui.pip_import .pip_reply{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
     min-width: 11rem;
