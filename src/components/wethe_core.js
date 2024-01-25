@@ -802,7 +802,12 @@ function SnapPix( props ) {
         break;
 
       case '2a':
-        setPhaseDescription( 'Take a pic...  Hold down to rapid fire!' );
+        setPhaseDescription( 'Take a selfie...  Hold down to rapid fire!' );
+        reset.current.disabled = false
+        break;
+
+      case '2b':
+        setPhaseDescription( 'Take a photo...  Hold down to rapid fire!' );
         reset.current.disabled = false
         break;
     }
@@ -885,7 +890,7 @@ function SnapPix( props ) {
       }
       #SnapPix .snap_photo{
         grid-area: form;
-        grid-row: 3;
+        grid-row: 2;
         margin: auto;
         text-align: center;
       }
@@ -894,6 +899,18 @@ function SnapPix( props ) {
       }
       #SnapPix .snap_photo input:hover{
         background: radial-gradient( var(--g2), var(--g2));
+      }
+      #SnapPix .switch_camera{
+        grid-area: form;
+        grid-row: 3;
+        margin: auto;
+        text-align: center;
+      }
+      #SnapPix .switch_camera input{
+        background: radial-gradient( var(--v3), var(--v2));
+      }
+      #SnapPix .switch_camera input:hover{
+        background: radial-gradient( var(--v2), var(--v2));
       }
       #SnapPix .pip_cancel, #SnapPix .pip_continue, #SnapPix .pip_accept{
         grid-area: foot;
@@ -947,6 +964,23 @@ function SnapPix( props ) {
           <input type="image" name="snap" src=".\both_capture-photo.png" onMouseOver={()=>{setDId( 5 )}} onMouseDown={snapPix} onMouseUp={stopPix} />
           <br />
           <label htmlFor="snap" className="pip_text" style={{ gridArea: 'form' }} >Take Photo</label>
+        </div>
+        <div className="switch_camera" >
+          <input type="image" name="picture" src=".\both_switch-camera.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '2b' )}} alt="Environment Camera" />
+          <br />
+          <label htmlFor="picture" className="pip_text" >Environment Camera</label>
+        </div>
+        </> : <></>}
+      {phase === '2b' ? <>
+        <div className="snap_photo">
+          <input type="image" name="snap" src=".\both_capture-photo.png" onMouseOver={()=>{setDId( 5 )}} onMouseDown={snapPix} onMouseUp={stopPix} />
+          <br />
+          <label htmlFor="snap" className="pip_text" style={{ gridArea: 'form' }} >Take Photo</label>
+        </div>
+        <div className="switch_camera" >
+          <input type="image" name="picture" src=".\both_switch-camera.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '2a' )}} alt="Environment Camera" />
+          <br />
+          <label htmlFor="picture" className="pip_text" >Environment Camera</label>
         </div>
         </> : <></>}
       <span className="description">
@@ -2870,6 +2904,7 @@ function InformationPanel( props ){
           <a target="_blank" href="https://icons8.com/icon/zPiI0jnS1y6H/selfie">Selfie</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
           <a target="_blank" href="https://icons8.com/icon/IeqVzLO7hTAe/take-a-photo">Take A Photo</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
           <a target="_blank" href="https://icons8.com/icon/YP2lOU31pp9S/affinity-photo">Affinity Photo</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+          <a target="_blank" href="https://icons8.com/icon/46861/switch-camera">Switch Camera</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
         </span>
 
         <div id="color_test" className="info_card">
