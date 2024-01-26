@@ -1,7 +1,7 @@
 import { SceneTransformation } from '../bin/ScreenDirector.js';
 import { AudioEngineWorker } from '../imp/workers/AudioEngine.ts';
 import React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 // Support Library Reference
 import * as THREE from 'three';
 import * as d3 from "d3";
@@ -706,17 +706,27 @@ function DropPin( props ) {
   )
 }
 function SnapPix( props ) {
-  const [onDisplay, setOnDisplay] = useState( false );
-  const [phase, setPhase] = useState( 2 );
-  const [phase_description, setPhaseDescription] = useState();
-  const [dId, setDId] = useState( -1 );
-  const [file_list, setFileList] = useState( [] );
+  const screenplay =  props.screenplay;
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
+  const [initialized, setInitialized] = useState( false );
+  const [phase_description, setPhaseDescription] = useState();
+  const [phase, setPhase] = useState( '2a' );
+  const [camera_type, setCameraType] = useState( 'user' );
+  const [dId, setDId] = useState( -1 );
+  const [file_list, setFileList] = useState( [] );
+  const [streaming, setStreaming] = useState( false );
+
   const panel = useRef();
   const reset = useRef();
+  const camera_list = useRef();
+  const video = useRef();
+  const canvas = useRef();
+  const snapped_photos = useRef();
+  const photos = useRef([]);
+  const snap_photo_button = useRef();
+
   const fileinput = useRef();
-  const screenplay =  props.screenplay;
 
   function cleanup(){}
   useEffect( ()=>{
@@ -779,38 +789,102 @@ function SnapPix( props ) {
       }
     });
     setExit( exit_transition );
-    screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
 
+    screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
     return cleanup;
   }, []);
 
   useEffect( ()=>{
-    switch( phase ){
-      case 0:
-        setPhaseDescription( 'Would you like to take a picture now or upload one from earlier?' );
-        reset.current.disabled = false
-        break;
+    let async_f = async ()=>{
+      switch( phase ){
+        case 0:
+          setPhaseDescription( 'Would you like to take a picture now or upload one from earlier?' );
+          reset.current.disabled = false
+          break;
 
-      case 1:
-        setPhaseDescription( 'Where is this image located?' );
-        reset.current.disabled = false;
-        break;
+        case 1:
+          setPhaseDescription( 'Where is this image located?' );
+          reset.current.disabled = false;
+          break;
 
-      case 2:
-        setPhaseDescription( 'Select which camera to use.' );
-        reset.current.disabled = true;
-        break;
+        case 2:
+          setPhaseDescription( 'Select which camera to use.' );
+          reset.current.disabled = true;
 
-      case '2a':
-        setPhaseDescription( 'Take a selfie...  Hold down to rapid fire!' );
-        reset.current.disabled = false
-        break;
+          break;
+        // User Camera
+        case '2a':
+          setPhaseDescription( 'Framing the USER camera.' );
+          setCameraType( 'user' );
+          reset.current.disabled = false
+          /*navigator.mediaDevices
+            .getUserMedia({ video: true, audio: false, facingMode: "user", width: { ideal: 4096 }, height: { ideal: 2160 }} )
+              .then((stream) => {
+                let settings = stream.getVideoTracks()[0].getSettings();
+                video.current.srcObject = stream;
+                video.current.play();
+                canvas.current.setAttribute( 'width', settings.width );
+                canvas.current.setAttribute( 'height', settings.height );
+                debugger;
+            })
+            .catch((err) => {
+              console.error(`An error occurred: ${err}`);
+            });*/
+          break;
+        // Environment Camera
+        case '2b':
+          setPhaseDescription( 'Framing the ENVIRONMENT camera.' );
+          reset.current.disabled = false
+          navigator.mediaDevices
+            .getUserMedia({ video: true, audio: false, facingMode: "environment", width: { ideal: 4096 }, height: { ideal: 2160 }} )
+              .then((stream) => {
+                let settings = stream.getVideoTracks()[0].getSettings();
+                video.current.srcObject = stream;
+                video.current.play();
+                canvas.current.setAttribute( 'width', settings.width );
+                canvas.current.setAttribute( 'height', settings.height );
+            })
+            .catch((err) => {
+              console.error(`An error occurred: ${err}`);
+            });
+          break;
+        // Left Camera
+        case '2c':
+          setPhaseDescription( 'Framing the LEFT camera.' );
+          reset.current.disabled = false
+          navigator.mediaDevices
+            .getUserMedia({ video: true, audio: false, facingMode: "left", width: { ideal: 4096 }, height: { ideal: 2160 }} )
+              .then((stream) => {
+                video.current.srcObject = stream;
+                video.current.play();
+                canvas.current.setAttribute( 'width', settings.width );
+                canvas.current.setAttribute( 'height', settings.height );
+            })
+            .catch((err) => {
+              console.error(`An error occurred: ${err}`);
+            });
+          break;
+        // Right Camera
+        case '2d':
+          setPhaseDescription( 'Framing the RIGHT camera.' );
+          reset.current.disabled = false
+          navigator.mediaDevices
+            .getUserMedia({ video: true, audio: false, facingMode: "right", width: { ideal: 4096 }, height: { ideal: 2160 }} )
+              .then((stream) => {
+                video.current.srcObject = stream;
+                video.current.play();
+                canvas.current.setAttribute( 'width', settings.width );
+                canvas.current.setAttribute( 'height', settings.height );
+            })
+            .catch((err) => {
+              console.error(`An error occurred: ${err}`);
+            });
+          break;
 
-      case '2b':
-        setPhaseDescription( 'Take a photo...  Hold down to rapid fire!' );
-        reset.current.disabled = false
-        break;
+
+      }
     }
+    async_f();
     setDId( -1 );
   },[phase]);
 
@@ -820,19 +894,43 @@ function SnapPix( props ) {
     debugger;
   }
 
-  function snapPix(){
+  function snapPix( e ){
+    e.preventDefault();
+
+    const rapid_fire = new SceneTransformation({
+      update: ()=>{
+        const context = canvas.current.getContext("2d");
+        context.drawImage(video.current, 0, 0, video.current.videoWidth, video.current.videoHeight);
+        const data = canvas.current.toDataURL("image/png");
+        photos.current.push( { d: data, t: Date.now() } );
+      }
+    });
+    screenplay.updatables.set( 'SnapPix_rapid_fire', rapid_fire );
 
   }
 
-  function stopPix(){
-
+  function stopPix( e ){
+    screenplay.updatables.delete( 'SnapPix_rapid_fire' );
+    e.preventDefault();
+    snapped_photos.current.replaceChildren();
+    for( const photo of photos.current ){
+      const li = document.createElement( "li" );
+      const photo_image = document.createElement( "image" );
+      photo_image.setAttribute( 'src', photo.d );
+      photo_image.setAttribute( 'alt', photo.t );
+      li.appendChild( photo_image );
+      snapped_photos.current.appendChild( li );
+    }
+    debugger;
   }
 
   return(
     <>
     <style>{`
+      #SnapPix video, #SnapPix canvas, #SnapPix .phase_description, #SnapPix_Photos{
+        grid-area: body;
+      }
       #SnapPix .phase_description{
-        grid-area: image;
         font-size: 3rem;
         text-align: left;
       }
@@ -926,6 +1024,11 @@ function SnapPix( props ) {
       <h1 className="pip_title">Snap Pix
       </h1>
       <span className="pip_text phase_description">{phase_description}</span>
+      <video ref={video}>Video has not finished loading.</video>
+      <canvas ref={canvas}></canvas>
+      <ul id="SnapPix_Photos" ref={snapped_photos}>
+
+      </ul>
       {phase === 0 ? <>
         <input name="upload_image_button" src=".\both_upload-image.png" type="image" className="upload_image_button" onMouseOver={()=>{setDId( 0 )}} onClick={()=>{setPhase( 1 )}}></input>
         <br />
@@ -946,41 +1049,33 @@ function SnapPix( props ) {
           </form>
           </> : <></>}
       {phase === 2 ? <>
+        <ul ref={camera_list} className="camera_list">
+
+        </ul>
+
         <div className="selfie_camera" >
           <input type="image" name="selfie" src=".\both_selfie.png" onMouseOver={()=>{setDId( 3 )}} onClick={()=>{setPhase( '2a' )}} alt="Selfie Camera" />
           <br />
           <label htmlFor="selfie" className="pip_text" style={{ gridArea: 'form' }} >Selfie Camera</label>
         </div>
         <div className="environment_camera" >
-          <input type="image" name="picture" src=".\both_take-a-photo.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '2a' )}} alt="Environment Camera" />
+          <input type="image" name="picture" src=".\both_take-a-photo.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '2b' )}} alt="Environment Camera" />
           <br />
           <label htmlFor="picture" className="pip_text" >Environment Camera</label>
         </div>
 
         </> : <></>}
 
-      {phase === '2a' ? <>
+      {phase === '2a' || phase === '2b' || phase === '2c' || phase === '2d' ? <>
         <div className="snap_photo">
-          <input type="image" name="snap" src=".\both_capture-photo.png" onMouseOver={()=>{setDId( 5 )}} onMouseDown={snapPix} onMouseUp={stopPix} />
+          <input type="file" name="snap" accept="image/*" capture={camera_type} />
           <br />
           <label htmlFor="snap" className="pip_text" style={{ gridArea: 'form' }} >Take Photo</label>
         </div>
         <div className="switch_camera" >
-          <input type="image" name="picture" src=".\both_switch-camera.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '2b' )}} alt="Environment Camera" />
+          <input type="image" name="switch_camera" src=".\both_switch-camera.png" onMouseOver={()=>{setDId( 6 )}} onClick={()=>{setPhase( 2 )}} alt="Switch Camera" />
           <br />
-          <label htmlFor="picture" className="pip_text" >Environment Camera</label>
-        </div>
-        </> : <></>}
-      {phase === '2b' ? <>
-        <div className="snap_photo">
-          <input type="image" name="snap" src=".\both_capture-photo.png" onMouseOver={()=>{setDId( 5 )}} onMouseDown={snapPix} onMouseUp={stopPix} />
-          <br />
-          <label htmlFor="snap" className="pip_text" style={{ gridArea: 'form' }} >Take Photo</label>
-        </div>
-        <div className="switch_camera" >
-          <input type="image" name="picture" src=".\both_switch-camera.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '2a' )}} alt="Environment Camera" />
-          <br />
-          <label htmlFor="picture" className="pip_text" >Environment Camera</label>
+          <label htmlFor="switch_camera" className="pip_text" >User Camera</label>
         </div>
         </> : <></>}
       <span className="description">
@@ -990,6 +1085,7 @@ function SnapPix( props ) {
         {( dId === 3 ) ? <span className="pip_text">Take a picture of your face<br/>"Don't for get to smile!" - Mona Lisa</span> : <></> }
         {( dId === 4 ) ? <span className="pip_text">Take a picture using back-facing camera<br />"I count to 5... that's when things get real." - Demetri Martin perhaps?</span> : <></> }
         {( dId === 5 ) ? <span className="pip_text">Click to snap a photo.  Hold it down for rapid-fire mode!</span> : <></> }
+        {( dId === 6 ) ? <span className="pip_text">Switch to another camera...  How very Bourgeoise!</span> : <></> }
       </span>
       <button name="exit_SnapPix" className="pip_cancel exit_SnapPix" type="button" onClick={props.toggle}>Exit</button>
       <button ref={reset} name="reset_SnapPix" className="pip_continue reset_SnapPix" type="button" onClick={()=>{setPhase( 2 )}}>Back</button>
