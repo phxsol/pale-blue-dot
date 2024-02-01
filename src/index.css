@@ -32,6 +32,9 @@
 
   --panelBG: linear-gradient( 11deg, var(--b3), black, var(--r3));
   --menuBG: radial-gradient( var( --r3a ), black, var( --b3a) );
+  --listItemBG: linear-gradient( 11deg, var(--b3a), black, var(--r3));
+  --listItemBG_Hover: linear-gradient( 11deg, var(--r3), black, var(--b3a));
+  --gridAreaBG: radial-gradient( #fff7, #fff3, #fff0 );
 }
 @media ( orientation: portrait ){
   :root{
@@ -157,6 +160,9 @@
       monospace;
   }
 
+  li{
+    list-style: none;
+  }
   iframe::before{
     content: 'All your base are belong to us.';
     background-color: #fff;
@@ -328,10 +334,11 @@
   .pip_text{
     color: var(--b1);
     font-size: calc( var(--sF) * 1rem);
+    width: 100%;
   }
   .pip_gui{
     display: grid;
-    overflow: auto;
+    overflow: clip;
   }
   @media ( orientation: landscape ){
     .pip_gui{
@@ -373,6 +380,8 @@
     margin-left: 0;
     margin-right: auto;
     display: flex;
+    width: calc( 100% - 2rem );
+    padding: 1rem;
   }
   .pip_gui.pip_chat .user_side{
     text-align: right;
@@ -380,6 +389,8 @@
     border-radius: 4rem 4rem 0rem 4rem;
     margin-right: 0;
     margin-left: auto;
+    width: calc( 100% - 2rem );
+    padding: 1rem;
     background: linear-gradient( 270deg, var(--b2), #fff1 ) !important;
   }
   .pip_gui.pip_chat .pip_title{
@@ -394,12 +405,12 @@
 
   @media ( orientation: landscape ){
     .pip_gui.pip_chat .pip_text{
-      min-width: 42vw;
+
     }
   }
   @media ( orientation: portrait ){
     .pip_gui.pip_chat .pip_text{
-      min-width: 58vw;
+
     }
   }
   .pip_gui.pip_chat .pip_button{
@@ -424,7 +435,6 @@
      This style is useful for displaying the status of running processes, which don't require acknowlegement. */
  .pip_gui.pip_splash{
     display: grid;
-    transition: all 1s;
     border: solid 1px var(--o3);
     grid-area: body;
     --s: 3rem; /* control the size */
@@ -511,7 +521,6 @@
      This style allows for the system to respond more complexly to the user requests. */
   .pip_gui.pip_menu{
     grid-area: body;
-    transition: all 1s;
     border-radius: 0 10vh 0 10vh;
 
     --s: 80px; /* the size */
@@ -540,7 +549,6 @@
   .pip_gui.pip_menu .pip_text{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
-    min-width: 11rem;
   }
   .pip_gui.pip_menu .pip_button{
     width: fit-content;
@@ -568,13 +576,12 @@
     grid-area: body;
     grid-template-areas:
       "head  head  head  head head"
-      "form body body body body"
-      "form body body body body"
+      "ctrl body body body body"
+      "ctrl body body body body"
       "status status status status status"
       "foot  foot  foot  foot foot";
     grid-template-columns: repeat( 5, 1fr );
-    grid-template-rows: auto 1fr 1fr 6rem auto;
-    transition: all 1s;
+    grid-template-rows: auto 2fr 2fr 1fr auto;
     border: solid 1px var(--o3);
     border-radius: 0 10vh 0 10vh;
     /* Background Pattern */
@@ -599,6 +606,9 @@
     color: var(--b1);
     background: linear-gradient( 90deg, var(--i2), #0007 );
 
+  }
+  .pip_gui.pip_post .controls{
+    grid-area: ctrl;
   }
   .pip_gui.pip_post .pip_button{
   }
@@ -635,7 +645,6 @@
   .pip_gui.pip_import .pip_text{
     border: none;
     background: linear-gradient( 90deg, #ffffff42, #ffffff00 );
-    min-width: 11rem;
     text-align: center;
   }
   .pip_gui.pip_import .pip_button{
@@ -657,19 +666,100 @@
 
   }
 
-
-  .css-gui-odykkp{text-decoration-line:none;background-color:#000000;border-radius:16px;-webkit-transition:all 350ms 0ms cubic-bezier(0, 0, 1, 1);transition:all 350ms 0ms cubic-bezier(0, 0, 1, 1);overflow:hidden;display:block;color:#ffffff;}
-  .css-gui-odykkp:hover{-webkit-filter:grayscale(0%);filter:grayscale(0%);}
-  .css-gui-cxbi66{max-width:100%;display:block;width:100%;}
-  .css-gui-tl6zyz{padding:32px;}
-  .css-gui-12rqme7{font-size:calc( var(--sF) * 0.75rem);;color:currentcolor;}
-  .css-gui-196s729{line-height:1.25;font-family:Inter;text-align:left;font-size:calc( var(--sF) * 2rem);;margin:0px;}
-  .css-gui-1bxrphh{max-width:80ch;margin:0;color:#ffffff;}
-
-
-
-
-
-
-
+  .pip_post .head, .pip_post .ctrl, .pip_post .body, .pip_post .status, .pip_post .foot{
+    position: relative;
+    height: 100%; width: 100%;
+    background: var(--gridAreaBG);
+  }
+  .pip_post .head{
+    grid-area: head;
+  }
+  .pip_post .ctrl{
+    grid-area: ctrl;
+  }
+  .pip_post .body{
+    grid-area: body;
+    display: flex;
+  }
+  .pip_post .status{
+    grid-area: status;
+    overflow-y: auto;
+  }
+  .pip_post .foot{
+    grid-area: foot;
+    display: grid;
+    grid-template-columns: repeat( 10, 1fr );
+    grid-auto-rows: 1fr;
+  }
+  .controls{
+    min-width: calc( var(--sF) * 10rem );
+  }
+  .controls > li{
+    display: grid;
+    grid-template-areas:
+      "label label"
+      "icon list";
+  }
+  .controls > li:hover{
+  }
+  .controls > .image_button, .controls > .image_select{
+    background: var(--listItemBG);
+  }
+  .controls > .image_button:hover, .controls > .image_select:hover{
+    background: var(--listItemBG_Hover);
+  }
+  .controls > .image_button{
+    cursor: pointer;
+    width: calc( var(--sF) * 4rem );
+    height: calc( var(--sF) * 4rem );
+    border: solid var(--i1);
+    border-radius: 25%;
+    margin: auto;
+  }
+  .controls > .image_button:nth-child( even ){
+    float: left;
+    clear: left;
+    margin-left: calc( var(--sF) * 0.5rem );
+  }
+  .controls > .image_button:nth-child( odd ){
+    float: right;
+    clear: right;
+    margin-right: calc( var(--sF) * 0.5rem );
+  }
+  .controls > .image_button label{
+    white-space: nowrap;
+    position: relative;
+    bottom: calc( var(--sF) * 1rem );
+    opacity: 0;
+    transition: opacity 0.5s .2s;
+  }
+  .controls > .image_button:hover label{
+    opacity: 1;
+  }
+  .controls > .image_select{
+    background: var(--listItemBG);
+    margin-bottom: calc( var(--sF) * 1rem );
+  }
+  .controls > .image_select:hover{
+    background: var(--listItemBG_Hover);
+  }
+  .controls > .image_select > img{
+    grid-area: icon;
+    height: calc( var(--sF) * 2rem );
+  }
+  .controls > .image_select > select{
+    grid-area: list;
+    background: transparent;
+    color: var(--y2);
+    width: 100%;
+    border: solid 1px;
+    font-size: calc( var(--sF) * 0.75rem );
+    grid-area: list;
+    cursor: pointer;
+  }
+  .controls > .image_select > label{
+    grid-area: label;
+    color: var(--o2);
+    font-size: calc( var(--sF) * 1rem );
+  }
 }

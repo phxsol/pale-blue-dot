@@ -1,10 +1,11 @@
 import { SceneTransformation } from '../bin/ScreenDirector.js';
 import { AudioEngineWorker } from '../imp/workers/AudioEngine.ts';
+import * as d3 from '../lib/d3.js';
+import * as Plot from '../lib/plot.js';
 import React from 'react';
 import { useState, useEffect, useRef, Fragment } from 'react';
 // Support Library Reference
 import * as THREE from 'three';
-import * as d3 from "d3";
 import { WebVoiceProcessor } from '@picovoice/web-voice-processor';
 import GUI from 'lil-gui';
 import jsQR from "jsqr";
@@ -545,34 +546,202 @@ function GlyphScanner( props ){
   )
   }
 function ShareContact( props ) {
-  const panel = useRef();
   const screenplay =  props.screenplay;
-
-  useEffect( ()=>{
-    return cleanup;
-  }, []);
-
-  function handleAckClick( event ){
-    event.stopPropagation();
-  }
+  const [enter, setEnter] = useState( false );
+  const [exit, setExit] = useState( false );
+  const panel = useRef();
+  const reset_button = useRef();
+  const [phase, setPhase] = useState( 0 );
 
   function cleanup(){
 
   }
+  function init(){
+    const entrance_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = entrance_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in 60 frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.frame = 0;
+        screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+      },
+      post: ( )=>{
+        let cache = entrance_transition.cache;
+        screenplay.updatables.delete( 'ShareContact_entrance_transition' );
+        panel.current.style.transform = `scale(1)`;
+      }
+    });
+    setEnter( entrance_transition );
+    const exit_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = exit_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = 1 - cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in this many frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        exit_transition.cache.duration = 15;
+        exit_transition.cache.frame = 0;
+        screenplay.updatables.set( 'ShareContact_exit_transition', exit_transition );
+      },
+      post: ( )=>{
+        let cache = exit_transition.cache;
+        screenplay.updatables.delete( 'ShareContact_exit_transition' );
+        panel.current.style.transform = `scale(0)`;
+        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      }
+    });
+    setExit( exit_transition );
+    screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+
+    return cleanup;
+  }
+  useEffect( init , []);
+
+  function onPhaseChange(){
+    switch( phase ){
+      case 0:
+        reset_button.current.disabled = true;
+    }
+  }
+  useEffect( onPhaseChange, [phase] );
 
   return(
+      <>
+      <style>{`
+
+        `}</style>
       <div id="ShareContact" ref={panel} className="pip_gui pip_post">
-        <button name="ack_ShareContact" className="pip_accept" type="button" onClick={props.toggle}>OK</button>
+        <div className="head">
+          <h1 className="pip_title">Snap Pix</h1>
+        </div>
+        <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
+          <li className="image_select">
+            <img src=".\both_mic.png" alt="Select from this list" />
+            <select name="listName"></select>
+            <br />
+            <label htmlFor="listName">.image_select</label>
+          </li>
+
+          <li className="image_button">
+            <input  type="image" name="clickme" src=".\both_capture-photo.png" alt="Do Something" />
+            <br />
+            <label htmlFor="clickme" className="pip_text" >.image_button</label>
+          </li>
+        </ul>
+        <div className="body">
+
+        </div>
+        <ul className="status"></ul>
+        <ul className="foot">
+          <li>
+            <button name="exit" className="pip_cancel" type="button" onClick={props.toggle}>Exit</button>
+          </li>
+          <li>
+            <button ref={reset_button} name="reset" className="pip_continue" type="button" onClick={()=>{setPhase( 0 )}}>Back</button>
+          </li>
+        </ul>
       </div>
+      </>
   )
 }
 function DropPin( props ) {
-  const [onDisplay, setOnDisplay] = useState(false);
-  const panel = useRef();
   const screenplay =  props.screenplay;
+  const [enter, setEnter] = useState( false );
+  const [exit, setExit] = useState( false );
+  const panel = useRef();
+  const timeline = useRef();
+  const reset_button = useRef();
+  const [phase, setPhase] = useState( 0 );
 
-  function cleanup(){}
-  useEffect( ()=>{
+  function cleanup(){
+
+  }
+  function init(){
+    const entrance_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = entrance_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in 60 frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.frame = 0;
+        screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+      },
+      post: ( )=>{
+        let cache = entrance_transition.cache;
+        screenplay.updatables.delete( 'ShareContact_entrance_transition' );
+        panel.current.style.transform = `scale(1)`;
+      }
+    });
+    setEnter( entrance_transition );
+    const exit_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = exit_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = 1 - cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in this many frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        exit_transition.cache.duration = 15;
+        exit_transition.cache.frame = 0;
+        screenplay.updatables.set( 'ShareContact_exit_transition', exit_transition );
+      },
+      post: ( )=>{
+        let cache = exit_transition.cache;
+        screenplay.updatables.delete( 'ShareContact_exit_transition' );
+        panel.current.style.transform = `scale(0)`;
+        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      }
+    });
+    setExit( exit_transition );
+    screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
 
     // Declare the chart dimensions and margins.
     const width = 928;
@@ -581,6 +750,8 @@ function DropPin( props ) {
     const marginRight = 30;
     const marginBottom = 30;
     const marginLeft = 40;
+
+    const driving = [{"side":"left","year":1956,"miles":3683.6965,"gas":2.3829},{"side":"right","year":1957,"miles":3722.7648,"gas":2.4026},{"side":"bottom","year":1958,"miles":3776.8595,"gas":2.2539},{"side":"top","year":1959,"miles":3912.0962,"gas":2.3079},{"side":"right","year":1960,"miles":3942.1488,"gas":2.2658},{"side":"bottom","year":1961,"miles":3984.2224,"gas":2.2526},{"side":"right","year":1962,"miles":4089.4064,"gas":2.2158},{"side":"bottom","year":1963,"miles":4230.6536,"gas":2.1237},{"side":"bottom","year":1964,"miles":4383.9219,"gas":2.1039},{"side":"bottom","year":1965,"miles":4546.2059,"gas":2.1368},{"side":"top","year":1966,"miles":4681.4425,"gas":2.1421},{"side":"bottom","year":1967,"miles":4837.716,"gas":2.1408},{"side":"right","year":1968,"miles":5048.0841,"gas":2.1263},{"side":"right","year":1969,"miles":5216.3787,"gas":2.0737},{"side":"right","year":1970,"miles":5384.6732,"gas":2.0118},{"side":"bottom","year":1971,"miles":5652.1412,"gas":1.9316},{"side":"bottom","year":1972,"miles":5979.7145,"gas":1.8737},{"side":"right","year":1973,"miles":6160.0301,"gas":1.9026},{"side":"left","year":1974,"miles":5946.6566,"gas":2.3447},{"side":"bottom","year":1975,"miles":6117.9564,"gas":2.3079},{"side":"bottom","year":1976,"miles":6400.4508,"gas":2.3237},{"side":"right","year":1977,"miles":6634.861,"gas":2.3592},{"side":"bottom","year":1978,"miles":6890.308,"gas":2.2288},{"side":"left","year":1979,"miles":6755.0714,"gas":2.6829},{"side":"left","year":1980,"miles":6670.9241,"gas":3.2974},{"side":"right","year":1981,"miles":6743.0503,"gas":3.2961},{"side":"right","year":1982,"miles":6836.2134,"gas":2.9197},{"side":"right","year":1983,"miles":6938.3921,"gas":2.6566},{"side":"right","year":1984,"miles":7127.7235,"gas":2.475},{"side":"right","year":1985,"miles":7326.0706,"gas":2.3618},{"side":"left","year":1986,"miles":7554.4703,"gas":1.7605},{"side":"top","year":1987,"miles":7776.8595,"gas":1.7553},{"side":"bottom","year":1988,"miles":8089.4064,"gas":1.6842},{"side":"left","year":1989,"miles":8395.9428,"gas":1.7473},{"side":"top","year":1990,"miles":8537.1901,"gas":1.8763},{"side":"right","year":1991,"miles":8528.1743,"gas":1.7776},{"side":"right","year":1992,"miles":8675.432,"gas":1.6855},{"side":"left","year":1993,"miles":8843.7265,"gas":1.5974},{"side":"bottom","year":1994,"miles":8906.837,"gas":1.5842},{"side":"bottom","year":1995,"miles":9144.2524,"gas":1.5987},{"side":"top","year":1996,"miles":9183.3208,"gas":1.6737},{"side":"right","year":1997,"miles":9405.71,"gas":1.6461},{"side":"bottom","year":1998,"miles":9577.0098,"gas":1.3881},{"side":"right","year":1999,"miles":9688.2044,"gas":1.4987},{"side":"top","year":2000,"miles":9706.2359,"gas":1.8947},{"side":"left","year":2001,"miles":9685.1991,"gas":1.7658},{"side":"bottom","year":2002,"miles":9802.4042,"gas":1.6381},{"side":"right","year":2003,"miles":9853.4936,"gas":1.8592},{"side":"left","year":2004,"miles":9991.7355,"gas":2.1421},{"side":"left","year":2005,"miles":10054.846,"gas":2.5329},{"side":"right","year":2006,"miles":10030.8039,"gas":2.7934},{"side":"right","year":2007,"miles":10012.7724,"gas":2.9487},{"side":"left","year":2008,"miles":9871.5252,"gas":3.3066},{"side":"bottom","year":2009,"miles":9652.1412,"gas":2.3776},{"side":"left","year":2010,"miles":9592.0361,"gas":2.6066}];
 
     // Declare the positional encodings.
     const x = d3.scaleLinear()
@@ -596,12 +767,13 @@ function DropPin( props ) {
         .x(d => x(d.miles))
         .y(d => y(d.gas));
 
-    const svg = d3.create("svg")
+    const svg = d3.select("#timeline")
         .attr("width", width)
         .attr("height", height)
         .attr("viewBox", [0, 0, width, height])
-        .attr("style", "max-width: 100%; height: auto;");
+        .attr("style", "max-width: 100%; height: auto; background: var(--panelBG); color: white;");
 
+    length = (path)=> d3.create("svg:path").attr("d", path).node().getTotalLength();
     const l = length(line(driving));
 
     svg.append("g")
@@ -615,6 +787,7 @@ function DropPin( props ) {
             .attr("x", width - 4)
             .attr("y", -4)
             .attr("font-weight", "bold")
+            .attr("font-size", "2rem")
             .attr("text-anchor", "end")
             .attr("fill", "currentColor")
             .text("Miles per person per year"));
@@ -630,12 +803,13 @@ function DropPin( props ) {
           .attr("x", 4)
           .attr("text-anchor", "start")
           .attr("font-weight", "bold")
+          .attr("font-size", "2rem")
           .text("Cost per gallon"));
 
     svg.append("path")
         .datum(driving)
         .attr("fill", "none")
-        .attr("stroke", "black")
+        .attr("stroke", "white")
         .attr("stroke-width", 2.5)
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
@@ -666,8 +840,9 @@ function DropPin( props ) {
         .attr("transform", d => `translate(${x(d.miles)},${y(d.gas)})`)
         .attr("fill-opacity", 0)
         .text(d => d.year)
-          .attr("stroke", "white")
+          .attr("stroke", "black")
           .attr("paint-order", "stroke")
+          .attr("font-size", "1.5rem")
           .attr("fill", "currentColor")
           .each(function(d) {
             const t = d3.select(this);
@@ -683,26 +858,55 @@ function DropPin( props ) {
         .delay((d, i) => length(line(driving.slice(0, i + 1))) / l * (5000 - 125))
         .attr("fill-opacity", 1);
 
-
-    return cleanup();
-
-  }, []);
-
-  function handleAckClick( event ){
-    event.stopPropagation();
-
+    return cleanup;
   }
+  useEffect( init , []);
+
+  function onPhaseChange(){
+    switch( phase ){
+      case 0:
+        reset_button.current.disabled = true;
+    }
+  }
+  useEffect( onPhaseChange, [phase] );
+
   return(
-    <>
-    <div id="DropPin" ref={panel} className="pip_gui pip_post" >
+      <>
+      <style>{`
 
-      <div ref={timeline}></div>
-      <div ref={map}></div>
+        `}</style>
+      <div id="DropPin" ref={panel} className="pip_gui pip_post">
+        <div className="head">
+          <h1 className="pip_title">Snap Pix</h1>
+        </div>
+        <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
+          <li className="image_select">
+            <img src=".\both_mic.png" alt="Select from this list" />
+            <select name="listName"></select>
+            <br />
+            <label htmlFor="listName">.image_select</label>
+          </li>
 
-
-      <input name="exit_DropPin" className="pip_cancel" type="button" onClick={props.toggle} value="Exit" />
-    </div>
-    </>
+          <li className="image_button">
+            <input  type="image" name="clickme" src=".\both_capture-photo.png" alt="Do Something" />
+            <br />
+            <label htmlFor="clickme" className="pip_text" >.image_button</label>
+          </li>
+        </ul>
+        <div className="body">
+          <svg id="timeline" ref={timeline} style={{ background: 'white' }}></svg>
+        </div>
+        <ul className="status"></ul>
+        <ul className="foot">
+          <li>
+            <button name="exit" className="pip_cancel" type="button" onClick={props.toggle}>Exit</button>
+          </li>
+          <li>
+            <button ref={reset_button} name="reset" className="pip_continue" type="button" onClick={()=>{setPhase( 0 )}}>Back</button>
+          </li>
+        </ul>
+      </div>
+      </>
   )
 }
 function SnapPix( props ) {
@@ -711,25 +915,42 @@ function SnapPix( props ) {
   const [exit, setExit] = useState( false );
   const [initialized, setInitialized] = useState( false );
   const [phase_description, setPhaseDescription] = useState();
-  const [phase, setPhase] = useState( '2a' );
+  const [phase, setPhase] = useState( 3 );
   const [camera_type, setCameraType] = useState( 'user' );
   const [dId, setDId] = useState( -1 );
   const [file_list, setFileList] = useState( [] );
   const [streaming, setStreaming] = useState( false );
 
+  const dbOpenRequest = useRef( false );
+  const db = useRef( false );
+  const mediaRecorder = useRef( false );
+
   const panel = useRef();
-  const reset = useRef();
-  const camera_list = useRef();
-  const video = useRef();
-  const canvas = useRef();
-  const snapped_photos = useRef();
-  const photos = useRef([]);
-  const snap_photo_button = useRef();
-
+  const recVid_button = useRef();
+  const snappedPhotos = useRef();
+  const foot = useRef();
+  const videoElement = useRef();
+  const audioInputSelect = useRef();
+  const audioOutputSelect = useRef();
+  const videoSelect = useRef();
+  const selectors = useRef();
   const fileinput = useRef();
+  const loc = useRef( false );
+  const recordedChunks = useRef( [] );
 
-  function cleanup(){}
-  useEffect( ()=>{
+  function cleanup(){
+    navigator.mediaDevices.getUserMedia({video: true, audio: true})
+      .then(mediaStream => {
+        const stream = mediaStream;
+        const tracks = stream.getTracks();
+        for( const track of tracks ){
+          track.stop;
+        }
+      });
+  }
+  function initialize(){
+    'use strict';
+
     const entrance_transition = new SceneTransformation({
       update: ( delta )=>{
         let cache = entrance_transition.cache;
@@ -789,348 +1010,630 @@ function SnapPix( props ) {
       }
     });
     setExit( exit_transition );
-
     screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
-    return cleanup;
-  }, []);
 
-  useEffect( ()=>{
-    let async_f = async ()=>{
-      switch( phase ){
-        case 0:
-          setPhaseDescription( 'Would you like to take a picture now or upload one from earlier?' );
-          reset.current.disabled = false
-          break;
+    // Load SnapPix Database
+    dbOpenRequest.current = window.indexedDB.open( 'SnapPix', 1 );
+    dbOpenRequest.current.onerror = (event) => {};
+    dbOpenRequest.current.onsuccess = (event) => {
+      // Store the result of opening the database in the db variable. This is used a lot below
+      db.current = dbOpenRequest.current.result;
+      // Run the loadSnappedPix() function to populate the SnapPix display with working pix yet to be saved.
+      loadSnappedPix();
+    };
+    dbOpenRequest.current.onupgradeneeded = (event) => {
+      db.current = event.target.result;
+      db.current.onerror = (event) => {
+        note.current.appendChild(createListItem('Error loading database.'));
+      };
+      // Create an objectStore for this database
+      let objectStore = db.current.createObjectStore('SnapPix', { keyPath: 't' });
+      // Define what data items the objectStore will contain
+      objectStore.createIndex('blob', 'blob', { unique: false });
+      objectStore.createIndex('loc', 'loc', { unique: false });
+    };
 
-        case 1:
-          setPhaseDescription( 'Where is this image located?' );
-          reset.current.disabled = false;
-          break;
-
-        case 2:
-          setPhaseDescription( 'Select which camera to use.' );
-          reset.current.disabled = true;
-
-          break;
-        // User Camera
-        case '2a':
-          setPhaseDescription( 'Framing the USER camera.' );
-          setCameraType( 'user' );
-          reset.current.disabled = false
-          /*navigator.mediaDevices
-            .getUserMedia({ video: true, audio: false, facingMode: "user", width: { ideal: 4096 }, height: { ideal: 2160 }} )
-              .then((stream) => {
-                let settings = stream.getVideoTracks()[0].getSettings();
-                video.current.srcObject = stream;
-                video.current.play();
-                canvas.current.setAttribute( 'width', settings.width );
-                canvas.current.setAttribute( 'height', settings.height );
-                debugger;
-            })
-            .catch((err) => {
-              console.error(`An error occurred: ${err}`);
-            });*/
-          break;
-        // Environment Camera
-        case '2b':
-          setPhaseDescription( 'Framing the ENVIRONMENT camera.' );
-          reset.current.disabled = false
-          navigator.mediaDevices
-            .getUserMedia({ video: true, audio: false, facingMode: "environment", width: { ideal: 4096 }, height: { ideal: 2160 }} )
-              .then((stream) => {
-                let settings = stream.getVideoTracks()[0].getSettings();
-                video.current.srcObject = stream;
-                video.current.play();
-                canvas.current.setAttribute( 'width', settings.width );
-                canvas.current.setAttribute( 'height', settings.height );
-            })
-            .catch((err) => {
-              console.error(`An error occurred: ${err}`);
-            });
-          break;
-        // Left Camera
-        case '2c':
-          setPhaseDescription( 'Framing the LEFT camera.' );
-          reset.current.disabled = false
-          navigator.mediaDevices
-            .getUserMedia({ video: true, audio: false, facingMode: "left", width: { ideal: 4096 }, height: { ideal: 2160 }} )
-              .then((stream) => {
-                video.current.srcObject = stream;
-                video.current.play();
-                canvas.current.setAttribute( 'width', settings.width );
-                canvas.current.setAttribute( 'height', settings.height );
-            })
-            .catch((err) => {
-              console.error(`An error occurred: ${err}`);
-            });
-          break;
-        // Right Camera
-        case '2d':
-          setPhaseDescription( 'Framing the RIGHT camera.' );
-          reset.current.disabled = false
-          navigator.mediaDevices
-            .getUserMedia({ video: true, audio: false, facingMode: "right", width: { ideal: 4096 }, height: { ideal: 2160 }} )
-              .then((stream) => {
-                video.current.srcObject = stream;
-                video.current.play();
-                canvas.current.setAttribute( 'width', settings.width );
-                canvas.current.setAttribute( 'height', settings.height );
-            })
-            .catch((err) => {
-              console.error(`An error occurred: ${err}`);
-            });
-          break;
-
-
+    // Initialize the user's Camera Interface
+    selectors.current = [audioInputSelect.current, audioOutputSelect.current, videoSelect.current];
+    audioInputSelect.current.disabled = !('sinkId' in HTMLMediaElement.prototype);
+    function gotDevices(deviceInfos) {
+      // Handles being called several times to update labels. Preserve values.
+      const values = selectors.current.map(select => select.value);
+      selectors.current.forEach(select => {
+        while (select.firstChild) {
+          select.removeChild(select.firstChild);
+        }
+      });
+      for (let i = 0; i !== deviceInfos.length; ++i) {
+        const deviceInfo = deviceInfos[i];
+        const option = document.createElement('option');
+        option.value = deviceInfo.deviceId;
+        if (deviceInfo.kind === 'audioinput') {
+          option.text = deviceInfo.label || `microphone ${audioInputSelect.current.length + 1}`;
+          audioInputSelect.current.appendChild(option);
+        } else if (deviceInfo.kind === 'audiooutput') {
+          option.text = deviceInfo.label || `speaker ${audioInputSelect.current.length + 1}`;
+          audioInputSelect.current.appendChild(option);
+        } else if (deviceInfo.kind === 'videoinput') {
+          option.text = deviceInfo.label || `camera ${videoSelect.current.length + 1}`;
+          videoSelect.current.appendChild(option);
+        } else {
+          console.log('Some other kind of source/device: ', deviceInfo);
+        }
       }
+      selectors.current.forEach((select, selectorIndex) => {
+        if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+          select.value = values[selectorIndex];
+        }
+      });
     }
-    async_f();
-    setDId( -1 );
-  },[phase]);
+    navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+    audioInputSelect.current.onchange = start;
+    audioOutputSelect.current.onchange = changeAudioDestination;
+    videoSelect.current.onchange = start;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition( (pos)=>{
+        loc.current = pos;
+      });
+    }
+    start();
+    return cleanup;
+  }
+  useEffect( initialize, [] );
+  async function loadSnappedPix(){
+    snappedPhotos.current.replaceChildren();
 
+    const objectStore = db.current.transaction( 'SnapPix' ).objectStore( 'SnapPix' );
+    objectStore.openCursor().onsuccess = ( event )=>{
+      const cursor = event.target.result;
+      // Check if there are no (more) cursor items to iterate through
+      if (!cursor) {
+        return;
+      }
+      const { blob, t, loc } = cursor.value;
+      displaySnap( blob, t, loc );
+
+
+      // continue on to the next item in the cursor
+      cursor.continue();
+    }
+  }
+  async function displaySnap( blob, t, loc ) {
+
+    const urlCreator = window.URL || window.webkitURL;
+    const url = urlCreator.createObjectURL( await blob );
+    let li = document.createElement( 'li' );
+    switch( blob.type ){
+      case 'image/png':
+        let img = document.createElement( 'img' );
+        img.setAttribute( 'src', url );
+        img.setAttribute( 'id', t );
+        li.appendChild( img );
+        li.classList.add( 'snap' );
+        snappedPhotos.current.appendChild( li );
+        break;
+      case 'video/webm':
+        let vid = document.createElement( 'video' );
+        vid.setAttribute( 'src', url );
+        vid.setAttribute( 'id', t );
+        li.appendChild( vid );
+        li.classList.add( 'vid' );
+        snappedPhotos.current.appendChild( li );
+        break;
+      default:
+        debugger;
+    }
+
+  };
+  // File Upload Routines
   function processFiles( e ){
     e.preventDefault();
 
     debugger;
   }
+  // Image Capture Routines
+  // Attach audio output device to video element using device/sink ID.
+  function start() {
+    if (window.stream) {
+      window.stream.getTracks().forEach(track => {
+        track.stop();
+      });
+    }
+    const audioSource = audioInputSelect.current.value;
+    const videoSource = videoSelect.current.value;
+    const constraints = {
+      audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
+      video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+    };
+    navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
+  }
+  function attachSinkId(element, sinkId) {
+    if (typeof element.sinkId !== 'undefined') {
+      element.setSinkId(sinkId)
+          .then(() => {
+            console.log(`Success, audio output device attached: ${sinkId}`);
+          })
+          .catch(error => {
+            let errorMessage = error;
+            if (error.name === 'SecurityError') {
+              errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
+            }
+            console.error(errorMessage);
+            // Jump back to first output device in the list as it's the default.
+            audioInputSelect.current.selectedIndex = 0;
+          });
+    } else {
+      console.warn('Browser does not support output device selection.');
+    }
+  }
+  function changeAudioDestination() {
+    const audioDestination = audioInputSelect.current.value;
+    attachSinkId(videoElement.current, audioDestination);
+  }
+  function gotStream(stream) {
+    window.stream = stream; // make stream available to console
+    videoElement.current.srcObject = stream;
 
-  function snapPix( e ){
-    e.preventDefault();
+    function handleDataAvailable( event ) {
+      console.log( "data-available" );
+      if ( event.data.size > 0 ) {
+        recordedChunks.current.push( event.data );
+        download();
+      } else {
+        // …
+      }
+    }
+    async function download() {
+      const blob = new Blob( recordedChunks.current, {
+        type: "video/webm",
+      } );
+      const timestamp = Date.now();
+      // Display the photo
+      displaySnap( blob, timestamp, loc.current.coords );
+      // Store Snap in SnapPix db
+      addSnap( { t: timestamp, blob: await blob, loc: JSON.stringify( loc.current.coords ) } );
 
-    const rapid_fire = new SceneTransformation({
-      update: ()=>{
-        const context = canvas.current.getContext("2d");
-        context.drawImage(video.current, 0, 0, video.current.videoWidth, video.current.videoHeight);
-        const data = canvas.current.toDataURL("image/png");
-        photos.current.push( { d: data, t: Date.now() } );
+    }
+
+    mediaRecorder.current = new MediaRecorder(stream);
+    console.log( mediaRecorder.current.mimeType );
+    mediaRecorder.current.ondataavailable = handleDataAvailable;
+
+    // Refresh button list in case labels have become available
+    return navigator.mediaDevices.enumerateDevices();
+  }
+  function gotDevices(deviceInfos) {
+    // Handles being called several times to update labels. Preserve values.
+    const values = selectors.current.map( select => select.value);
+    selectors.current.forEach(select => {
+      while (select.firstChild) {
+        select.removeChild(select.firstChild);
       }
     });
-    screenplay.updatables.set( 'SnapPix_rapid_fire', rapid_fire );
+    for (let i = 0; i !== deviceInfos.length; ++i) {
+      const deviceInfo = deviceInfos[i];
+      const option = document.createElement('option');
+      option.value = deviceInfo.deviceId;
+      if (deviceInfo.kind === 'audioinput') {
+        option.text = deviceInfo.label || `microphone ${audioInputSelect.current.length + 1}`;
+        audioInputSelect.current.appendChild(option);
+      } else if (deviceInfo.kind === 'audiooutput') {
+        option.text = deviceInfo.label || `speaker ${audioOutputSelect.current.length + 1}`;
+        audioOutputSelect.current.appendChild(option);
+      } else if (deviceInfo.kind === 'videoinput') {
+        option.text = deviceInfo.label || `camera ${videoSelect.current.length + 1}`;
+        videoSelect.current.appendChild(option);
+      } else {
+        console.log('Some other kind of source/device: ', deviceInfo);
+      }
+    }
+    selectors.current.forEach((select, selectorIndex) => {
+      if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+        select.value = values[selectorIndex];
+      }
+    });
+  }
+  function handleError(error) {
+    console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+  }
+  async function snapPic( e ){
+    e.preventDefault();
+
+    const photo_canvas = new OffscreenCanvas( videoElement.current.videoWidth, videoElement.current.videoHeight );
+    const photo_context = photo_canvas.getContext( '2d', { alpha: false } );
+    photo_context.drawImage( videoElement.current, 0, 0 );
+    const timestamp = Date.now();
+    const blob = await photo_canvas.convertToBlob();
+
+    // Display the photo
+    displaySnap( blob, timestamp, loc.current.coords );
+    // Store Snap in SnapPix db
+    addSnap( { t: timestamp, blob: await blob, loc: JSON.stringify( loc.current.coords ) } )
 
   }
+  async function recVid( e ){
+    switch( mediaRecorder.current.state ){
+      case 'recording':
+        mediaRecorder.current.stop();
+        recVid_button.current.src = ".\\both_rec-vid.png";
+        break;
 
-  function stopPix( e ){
-    screenplay.updatables.delete( 'SnapPix_rapid_fire' );
-    e.preventDefault();
-    snapped_photos.current.replaceChildren();
-    for( const photo of photos.current ){
-      const li = document.createElement( "li" );
-      const photo_image = document.createElement( "image" );
-      photo_image.setAttribute( 'src', photo.d );
-      photo_image.setAttribute( 'alt', photo.t );
-      li.appendChild( photo_image );
-      snapped_photos.current.appendChild( li );
+      case 'inactive':
+        recordedChunks.current = [];
+        mediaRecorder.current.start();
+        recVid_button.current.src = ".\\both_stop-gesture.png";
+        break;
+
+      case 'paused':
+        mediaRecorder.current.start();
+        recVid_button.current.src = ".\\both_stop-gesture.png";
+        break;
     }
-    debugger;
+
+
+
+  }
+  function addSnap( snap ){
+    const transaction = db.current.transaction(['SnapPix'], 'readwrite');
+    transaction.oncomplete = () => {
+      // TODO: Verify that the image is in there?
+    };
+    transaction.onerror = () => {};
+    let objectStore = transaction.objectStore( 'SnapPix' );
+    const addSnapReq = objectStore.add( snap );
+    addSnapReq.onsuccess = ( event )=>{}
   }
 
   return(
     <>
     <style>{`
-      #SnapPix video, #SnapPix canvas, #SnapPix .phase_description, #SnapPix_Photos{
-        grid-area: body;
+
+
+      #SnapPix .status{
+        display: grid;
+        grid-auto-rows: 1fr;
+        grid-template-columns: repeat(5, 1fr);
+        grid-gap: calc( var(--sF) * 1rem );
+        background: var(--panelBG);
       }
-      #SnapPix .phase_description{
-        font-size: 3rem;
-        text-align: left;
-      }
-      #SnapPix .description{
-        grid-area: status;
-        position: relative;
-      }
-      #SnapPix .description > label, #SnapPix .description > span{
-        position: absolute;
-      }
-      #SnapPix input[type="image"]{
-        width: fit-content;
-        height: fit-content;
-        place-self: center;
-        border-radius: 25%;
+      #SnapPix .status li{
+        height: 7rem;
         cursor: pointer;
       }
-      #SnapPix .upload_image_button{
-        background: radial-gradient( var(--v3), var(--v2));
-        grid-area: form;
+      #SnapPix .status img, #SnapPix status video{
+        height: 100%;
       }
-      #SnapPix .upload_image_button:hover{
-        background: radial-gradient( var(--v2), var(--v2));
+
+      #snapPic_button:active{
+        background: white;
       }
-      #SnapPix .camera_button{
-        grid-area: form;
-        background: radial-gradient( var(--g3), var(--g2));
+
+      #exit_SnapPix{
+        grid-column: 1;
       }
-      #SnapPix .camera_button:hover{
-        background: radial-gradient( var(--g2), var(--g2));
+      #reset_SnapPix{
+        grid-column: 2;
       }
-      #SnapPix .selfie_camera{
-        grid-area: form;
-        grid-row: 2;
+
+      #SnapPix video{
         margin: auto;
-        text-align: center;
+        max-width: 100%;
+        max-height: 100%;
       }
-      #SnapPix .selfie_camera input{
-        background: radial-gradient( var(--g3), var(--g2));
-      }
-      #SnapPix .selfie_camera input:hover{
-        background: radial-gradient( var(--g2), var(--g2));
-      }
-      #SnapPix .environment_camera{
-        grid-area: form;
-        grid-row: 3;
-        margin: auto;
-        text-align: center;
-      }
-      #SnapPix .environment_camera input{
-        background: radial-gradient( var(--v3), var(--v2));
-      }
-      #SnapPix .environment_camera input:hover{
-        background: radial-gradient( var(--v2), var(--v2));
-      }
-      #SnapPix .snap_photo{
-        grid-area: form;
-        grid-row: 2;
-        margin: auto;
-        text-align: center;
-      }
-      #SnapPix .snap_photo input{
-        background: radial-gradient( var(--g3), var(--g2));
-      }
-      #SnapPix .snap_photo input:hover{
-        background: radial-gradient( var(--g2), var(--g2));
-      }
-      #SnapPix .switch_camera{
-        grid-area: form;
-        grid-row: 3;
-        margin: auto;
-        text-align: center;
-      }
-      #SnapPix .switch_camera input{
-        background: radial-gradient( var(--v3), var(--v2));
-      }
-      #SnapPix .switch_camera input:hover{
-        background: radial-gradient( var(--v2), var(--v2));
-      }
-      #SnapPix .pip_cancel, #SnapPix .pip_continue, #SnapPix .pip_accept{
-        grid-area: foot;
-      }
-      #SnapPix .exit_SnapPix{
-        grid-column: 5;
-      }
-      #SnapPix .reset_SnapPix{
-        grid-column: 4;
-      }
+
       `}</style>
     <div id="SnapPix" ref={panel} className="pip_gui pip_post">
-      <h1 className="pip_title">Snap Pix
-      </h1>
-      <span className="pip_text phase_description">{phase_description}</span>
-      <video ref={video}>Video has not finished loading.</video>
-      <canvas ref={canvas}></canvas>
-      <ul id="SnapPix_Photos" ref={snapped_photos}>
+      <div className="head">
+        <h1 className="pip_title">Snap Pix</h1>
+      </div>
+      <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
+        <li className="image_select">
+          <img src=".\both_mic.png" alt="Select audio input source" />
+          <select ref={audioInputSelect} name="audioSource"></select>
+          <br />
+          <label htmlFor="audioSource">Audio Input</label>
+        </li>
 
+        <li className="image_select">
+          <img src=".\both_sound.png" alt="Select audio output source" />
+          <select ref={audioOutputSelect} name="audioOutput"></select>
+          <br />
+          <label htmlFor="audioOutput">Audio Output</label>
+        </li>
+        <li><hr /></li>
+        <li className="image_select">
+          <img src=".\both_camera.png" alt="Select video source" />
+          <select ref={videoSelect} name="videoSource"></select>
+          <br />
+          <label htmlFor="videoSource">Camera</label>
+        </li>
+        <li id="snapPic_button" className="image_button">
+          <input  type="image" name="snap" onClick={snapPic} src=".\both_capture-photo.png" onMouseOver={()=>{setDId( 3 )}} alt="Snap Photo" />
+          <br />
+          <label htmlFor="snap" className="pip_text" >Snap Pix</label>
+        </li>
+        <li className="image_button">
+          <input type="image" name="record" ref={recVid_button} onClick={recVid} src=".\both_rec-vid.png" onMouseOver={()=>{setDId( 3 )}} alt="Record Video" />
+          <br />
+          <label htmlFor="record" className="pip_text">Record Vid</label>
+        </li>
       </ul>
-      {phase === 0 ? <>
-        <input name="upload_image_button" src=".\both_upload-image.png" type="image" className="upload_image_button" onMouseOver={()=>{setDId( 0 )}} onClick={()=>{setPhase( 1 )}}></input>
-        <br />
-        <label htmlFor="upload_image_button" className="pip_text" style={{ gridArea: 'form' }} >Upload Image</label>
-        <input name="camera_button" type="image" src=".\both_camera.png" className="camera_button" onMouseOver={()=>{setDId( 1 )}} onClick={()=>{setPhase( 2 )}}></input>
-        <br />
-        <label htmlFor="camera_button" className="pip_text" style={{ gridArea: 'form' }} >Snap a Photo</label>
-        </> : <></>}
-      {phase === 1 ? <>
-        <form onSubmit={processFiles}>
-          <input ref={fileinput} type="file" name="filename" accept="image/*" multiple onMouseOver={()=>{setDId( 2 )}} ></input>
-          <br />
-          <label htmlFor="filename" className="pip_text" style={{ gridArea: 'form' }} >Selfie Camera</label>
-          <ul>
-            {file_list}
-          </ul>
-          <input type="submit"></input>
-          </form>
-          </> : <></>}
-      {phase === 2 ? <>
-        <ul ref={camera_list} className="camera_list">
-
-        </ul>
-
-        <div className="selfie_camera" >
-          <input type="image" name="selfie" src=".\both_selfie.png" onMouseOver={()=>{setDId( 3 )}} onClick={()=>{setPhase( '2a' )}} alt="Selfie Camera" />
-          <br />
-          <label htmlFor="selfie" className="pip_text" style={{ gridArea: 'form' }} >Selfie Camera</label>
-        </div>
-        <div className="environment_camera" >
-          <input type="image" name="picture" src=".\both_take-a-photo.png" onMouseOver={()=>{setDId( 4 )}} onClick={()=>{setPhase( '2b' )}} alt="Environment Camera" />
-          <br />
-          <label htmlFor="picture" className="pip_text" >Environment Camera</label>
-        </div>
-
-        </> : <></>}
-
-      {phase === '2a' || phase === '2b' || phase === '2c' || phase === '2d' ? <>
-        <div className="snap_photo">
-          <input type="file" name="snap" accept="image/*" capture={camera_type} />
-          <br />
-          <label htmlFor="snap" className="pip_text" style={{ gridArea: 'form' }} >Take Photo</label>
-        </div>
-        <div className="switch_camera" >
-          <input type="image" name="switch_camera" src=".\both_switch-camera.png" onMouseOver={()=>{setDId( 6 )}} onClick={()=>{setPhase( 2 )}} alt="Switch Camera" />
-          <br />
-          <label htmlFor="switch_camera" className="pip_text" >User Camera</label>
-        </div>
-        </> : <></>}
-      <span className="description">
-        {( dId === 0 ) ? <span className="pip_text">Upload an image from local storage, or from a publicly accessible url.</span> : <></> }
-        {( dId === 1 ) ? <span className="pip_text">Use your camera to add new images to your collections.</span> : <></> }
-        {( dId === 2 ) ? <span className="pip_text">Import as many images as you like into your collection.</span> : <></> }
-        {( dId === 3 ) ? <span className="pip_text">Take a picture of your face<br/>"Don't for get to smile!" - Mona Lisa</span> : <></> }
-        {( dId === 4 ) ? <span className="pip_text">Take a picture using back-facing camera<br />"I count to 5... that's when things get real." - Demetri Martin perhaps?</span> : <></> }
-        {( dId === 5 ) ? <span className="pip_text">Click to snap a photo.  Hold it down for rapid-fire mode!</span> : <></> }
-        {( dId === 6 ) ? <span className="pip_text">Switch to another camera...  How very Bourgeoise!</span> : <></> }
-      </span>
-      <button name="exit_SnapPix" className="pip_cancel exit_SnapPix" type="button" onClick={props.toggle}>Exit</button>
-      <button ref={reset} name="reset_SnapPix" className="pip_continue reset_SnapPix" type="button" onClick={()=>{setPhase( 2 )}}>Back</button>
+      <div className="body">
+        <video ref={videoElement} playsInline autoPlay></video>
+      </div>
+      <ul className="status" ref={snappedPhotos}></ul>
+      <ul id="SnapPix_Foot" className="foot" ref={foot}>
+        <li>
+          <button id="exit_SnapPix" name="exit_SnapPix" className="pip_cancel exit_SnapPix" type="button" onClick={props.toggle}>Exit</button>
+        </li>
+      </ul>
     </div>
     </>
   )
 }
 function RecordNote( props ) {
+  const screenplay =  props.screenplay;
   const [worker, setWorker] = useState(false);
   const [engine, setEngine] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const panel = useRef();
-  const screenplay =  props.screenplay;
+  const [enter, setEnter] = useState( false );
+  const [exit, setExit] = useState( false );
+  const [phase_description, setPhaseDescription] = useState();
+  const [phase, setPhase] = useState( 0 );
+  const [dId, setDId] = useState( -1 );
+  const [mic_type, setMicType] = useState( 'user' );
+  const [file_list, setFileList] = useState( [] );
 
-  async function cleanup(){
-    await WebVoiceProcessor.unsubscribe([engine, worker]);
+  const panel = useRef();
+  const reset = useRef();
+
+  function cleanup(){
+    let async_f = async ()=>{
+      //await WebVoiceProcessor.unsubscribe([engine, worker]);
+    }
+    async_f();
   };
   useEffect( ()=>{
-    setWorker( new Worker('../lib/workers/AudioEngine.js') );
+    //setWorker( new Worker('../lib/workers/AudioEngine.ts') );
     setEngine( {
       onmessage: function(e) {
         /// ... handle inputFrame
       }
     });
     setInitialized( true );
+    const entrance_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = entrance_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = cache.frame / cache.duration;
+          panel.current.style.scale = progress;
 
-    return cleanup();
+        } else {
+          entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in 60 frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.frame = 0;
+        screenplay.updatables.set( 'RecordNote_entrance_transition', entrance_transition );
+      },
+      post: ( )=>{
+        let cache = entrance_transition.cache;
+        screenplay.updatables.delete( 'RecordNote_entrance_transition' );
+        panel.current.style.transform = `scale(1)`;
+      }
+    });
+    setEnter( entrance_transition );
+    const exit_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = exit_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = 1 - cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in this many frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        exit_transition.cache.duration = 15;
+        exit_transition.cache.frame = 0;
+        screenplay.updatables.set( 'RecordNote_exit_transition', exit_transition );
+      },
+      post: ( )=>{
+        let cache = exit_transition.cache;
+        screenplay.updatables.delete( 'RecordNote_exit_transition' );
+        panel.current.style.transform = `scale(0)`;
+        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      }
+    });
+    setExit( exit_transition );
+
+    screenplay.updatables.set( 'RecordNote_entrance_transition', entrance_transition );
+
+    return cleanup;
   }, []);
 
-  useEffect( async ()=>{
+  useEffect( ()=>{
     if (initialized){
-      await WebVoiceProcessor.subscribe([engine, worker]);
+      let async_f = async ()=>{
+        //await WebVoiceProcessor.subscribe([engine, worker]);
+      }
+      async_f();
     }
   }, [initialized]);
 
+  useEffect( ()=>{
+    let async_f = async ()=>{
+      switch( phase ){
+        case 0:
+          setPhaseDescription( 'Upload audio files or Record a new one?' );
+          reset.current.disabled = true;
+          break;
+
+        case 1:
+          setPhaseDescription( 'Select one or more audio files to add to your collection.' );
+          reset.current.disabled = false;
+          break;
+
+        case '2a':
+        case '2b':
+        case '2c':
+        case '2d':
+          setPhaseDescription( 'Record an audio note.' );
+          reset.current.disabled = false;
+          break;
+      }
+    }
+    async_f();
+    setDId( -1 );
+  },[phase]);
+
   function startRecording( event ){
-    event.stopPropagation();
+    debugger;
+    event.preventDefault();
   }
 
   return(
     <>
-    <div id="RecordNote" ref={panel} className="pip_gui pip_post">
+    <style>{`
+      #RecordNote video, #RecordNote canvas, #RecordNote .phase_description, #RecordNote_Photos{
+        grid-area: body;
+      }
+      #RecordNote .phase_description{
+        font-size: 3rem;
+        text-align: left;
+      }
+      #RecordNote .description{
+        grid-area: status;
+        position: relative;
+      }
+      #RecordNote .description > label, #RecordNote .description > span{
+        position: absolute;
+      }
+      #RecordNote input[type="image"]{
+        width: fit-content;
+        height: fit-content;
+        place-self: center;
+        border-radius: 25%;
+        cursor: pointer;
+      }
+      #RecordNote .upload_audio_button{
+        background: radial-gradient( var(--v3), var(--v2));
+        grid-area: ctrl;
+      }
+      #RecordNote .upload_audio_button:hover{
+        background: radial-gradient( var(--v2), var(--v2));
+      }
+      #RecordNote .camera_button{
+        grid-area: ctrl;
+        background: radial-gradient( var(--g3), var(--g2));
+      }
+      #RecordNote .camera_button:hover{
+        background: radial-gradient( var(--g2), var(--g2));
+      }
+      #RecordNote .selfie_camera{
+        grid-area: ctrl;
+        grid-row: 2;
+        margin: auto;
+        text-align: center;
+      }
+      #RecordNote .selfie_camera input{
+        background: radial-gradient( var(--g3), var(--g2));
+      }
+      #RecordNote .selfie_camera input:hover{
+        background: radial-gradient( var(--g2), var(--g2));
+      }
+      #RecordNote .environment_camera{
+        grid-area: ctrl;
+        grid-row: 3;
+        margin: auto;
+        text-align: center;
+      }
+      #RecordNote .environment_camera input{
+        background: radial-gradient( var(--v3), var(--v2));
+      }
+      #RecordNote .environment_camera input:hover{
+        background: radial-gradient( var(--v2), var(--v2));
+      }
+      #RecordNote .snap_photo{
+        grid-area: ctrl;
+        grid-row: 2;
+        margin: auto;
+        text-align: center;
+      }
+      #RecordNote .snap_photo input{
+        background: radial-gradient( var(--g3), var(--g2));
+      }
+      #RecordNote .snap_photo input:hover{
+        background: radial-gradient( var(--g2), var(--g2));
+      }
+      #RecordNote .switch_camera{
+        grid-area: ctrl;
+        grid-row: 3;
+        margin: auto;
+        text-align: center;
+      }
+      #RecordNote .switch_camera input{
+        background: radial-gradient( var(--v3), var(--v2));
+      }
+      #RecordNote .switch_camera input:hover{
+        background: radial-gradient( var(--v2), var(--v2));
+      }
+      #RecordNote .pip_cancel, #RecordNote .pip_continue, #RecordNote .pip_accept{
 
-      <input name="start_recording" className="pip_accept" type="button" onClick={startRecording} value="Start" />
-      <input name="exit_RecordNote" className="pip_cancel" type="button" onClick={props.toggle} value="Exit" />
+      }
+      #RecordNote .exit_RecordNote{
+        grid-area: foot;
+        grid-column: 5;
+      }
+      #RecordNote .reset_RecordNote{
+        grid-area: foot;
+        grid-column: 4;
+      }
+      `}</style>
+    <div id="RecordNote" ref={panel} className="pip_gui pip_post">
+      <h1 className="pip_title">Record Audio Notes
+      </h1>
+      <span className="pip_text phase_description">{phase_description}</span>
+      {phase === 0 ? <>
+        <input name="upload_audio_button" src=".\both_upload-image.png" type="image" className="upload_audio_button" onMouseOver={()=>{setDId( 0 )}} onClick={()=>{setPhase( 1 )}}></input>
+        <br />
+        <label htmlFor="upload_audio_button" className="pip_text" >Upload Audio</label>
+        <input name="microphone_button" type="image" src=".\both_camera.png" className="camera_button" onMouseOver={()=>{setDId( 1 )}} onClick={()=>{setPhase( '2a' )}}></input>
+        <br />
+        <label htmlFor="microphone_button" className="pip_text" >Record a Note</label>
+        </> : <></>}
+      {phase === '2a' || phase === '2b' || phase === '2c' || phase === '2d' ? <>
+        <div className="snap_photo">
+          <input type="file" name="record" accept="audio/*" capture={mic_type} onMouseOver={()=>{setDId( 1 )}} onClick={startRecording}/>
+          <br />
+          <label htmlFor="record" className="pip_text" >Start Recording</label>
+        </div>
+        </> : <></>}
+      <span className="description">
+        {( dId === 0 ) ? <span className="pip_text">Upload an audio file from local storage, or from a publicly accessible url.</span> : <></> }
+        {( dId === 1 ) ? <span className="pip_text">Use your microphone to add a new note to your collection.</span> : <></> }
+        {( dId === 2 ) ? <span className="pip_text">Import as many audio files as you like into your collection.</span> : <></> }
+        {( dId === 3 ) ? <span className="pip_text">Take a picture of your face<br/>"Don't for get to smile!" - Mona Lisa</span> : <></> }
+        {( dId === 4 ) ? <span className="pip_text">Take a picture using back-facing camera<br />"I count to 5... that's when things get real." - Demetri Martin perhaps?</span> : <></> }
+        {( dId === 5 ) ? <span className="pip_text">Click to snap a photo.  Hold it down for rapid-fire mode!</span> : <></> }
+        {( dId === 6 ) ? <span className="pip_text">Switch to another camera...  How very Bourgeoise!</span> : <></> }
+      </span>
+      <button name="exit_RecordNote" className="pip_cancel exit_RecordNote" type="button" onClick={props.toggle}>Exit</button>
+      <button ref={reset} name="reset_RecordNote" className="pip_continue reset_RecordNote" type="button" onClick={()=>{setPhase( 0 )}}>Back</button>
     </div>
     </>
   )
@@ -3001,6 +3504,9 @@ function InformationPanel( props ){
           <a target="_blank" href="https://icons8.com/icon/IeqVzLO7hTAe/take-a-photo">Take A Photo</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
           <a target="_blank" href="https://icons8.com/icon/YP2lOU31pp9S/affinity-photo">Affinity Photo</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
           <a target="_blank" href="https://icons8.com/icon/46861/switch-camera">Switch Camera</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+          <a target="_blank" href="https://icons8.com/icon/108790/sound">Sound</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+          <a target="_blank" href="https://icons8.com/icon/RC42DqVAI9ju/record-video">Record Video</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+          <a target="_blank" href="https://icons8.com/icon/KLyXgIpg7AdE/stop-gesture">Stop Gesture</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
         </span>
 
         <div id="color_test" className="info_card">
@@ -4270,7 +4776,7 @@ function ViewScreenDisplay( props ){
   );
 }
 
-// Unattached ( at the moment ) Support Functionality
+// Sub-Routines
 async function ActivateOrbitControls( screenplay ){
 
   screenplay.user_cam = screenplay.active_cam.clone( true );
@@ -4297,7 +4803,6 @@ async function DeactivateOrbitControls( screenplay ){
   screenplay.updatables.delete( 'controls' );
   screenplay.user_cam.user_control = false;
 }
-
 async function ActivateFirstPersonControls( screenplay ){
   if( !screenplay.controls.first_person_controls ) {
     screenplay.controls.first_person_controls = new FirstPersonControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
@@ -4331,7 +4836,6 @@ async function DeactivateFirstPersonControls( screenplay ){
   screenplay.updatables.delete( 'controls' );
   screenplay.user_cam.user_control = false;
 }
-
 async function ActivateFlyControls( screenplay ){
   if( !screenplay.controls.fly_controls ) {
     screenplay.controls.fly_controls = new FlyControls( screenplay.active_cam, screenplay.ui_renderer.domElement );
@@ -4366,7 +4870,6 @@ async function DeactivateFlyControls( screenplay ){
   screenplay.updatables.delete( 'controls' );
   screenplay.user_cam.user_control = false;
 }
-
 async function ResetControls( screenplay ){
   screenplay.controls.orbit_controls.reset();
 }
