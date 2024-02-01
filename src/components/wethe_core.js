@@ -1,15 +1,15 @@
 import { SceneTransformation } from '../bin/ScreenDirector.js';
 import { AudioEngineWorker } from '../imp/workers/AudioEngine.ts';
-import * as d3 from '../lib/d3.js';
-import * as Plot from '../lib/plot.js';
 import React from 'react';
 import { useState, useEffect, useRef, Fragment } from 'react';
 // Support Library Reference
 import * as THREE from 'three';
+import * as d3 from 'd3';
 import { WebVoiceProcessor } from '@picovoice/web-voice-processor';
 import GUI from 'lil-gui';
 import jsQR from "jsqr";
 import QRCode from 'qrcode';
+import * as Plot from '../lib/plot.js';
 import { OrbitControls } from '../lib/OrbitControls.js';
 import { FirstPersonControls } from '../lib/FirstPersonControls.js';
 import { FlyControls } from '../lib/FlyControls.js';
