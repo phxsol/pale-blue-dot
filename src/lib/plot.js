@@ -1,7 +1,7 @@
 // @observablehq/plot v0.6.13 Copyright 2020-2023 Observable, Inc.
 (function (global, factory) {
-typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('./d3.js')) :
-typeof define === 'function' && define.amd ? define(['exports', './d3.js'], factory) :
+typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3@7.8.5/dist/d3.min.js')) :
+typeof define === 'function' && define.amd ? define(['exports', 'd3@7.8.5/dist/d3.min.js'], factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Plot = global.Plot || {}, global.d3));
 })(this, (function (exports, d3) { 'use strict';
 
@@ -13430,7 +13430,7 @@ function rebuild(node, intervals) {
 function rebuildWithInterval(node, interval) {
   var intervals = node.intervals([]);
   intervals.push(interval);
-  rebuild(node, intervals);
+  rebuild(node, intervals);    
 }
 
 function rebuildWithoutInterval(node, interval) {
@@ -13683,7 +13683,7 @@ function createIntervalTree(intervals) {
   leftPoints.sort(compareBegin);
   rightPoints.sort(compareEnd);
 
-  return new IntervalTreeNode(mid,
+  return new IntervalTreeNode(mid, 
     createIntervalTree(leftIntervals),
     createIntervalTree(rightIntervals),
     leftPoints,
