@@ -9,7 +9,7 @@ import { WebVoiceProcessor } from '@picovoice/web-voice-processor';
 import GUI from 'lil-gui';
 import jsQR from "jsqr";
 import QRCode from 'qrcode';
-import * as Plot from '../lib/plot.js';
+import * as Plot from "@observablehq/plot";
 import { OrbitControls } from '../lib/OrbitControls.js';
 import { FirstPersonControls } from '../lib/FirstPersonControls.js';
 import { FlyControls } from '../lib/FlyControls.js';

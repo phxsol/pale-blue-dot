@@ -3,6 +3,7 @@
   "version": "0.99.9",
   "description": "The Solar System on display, the ship is yours Captain.",
   "dependencies": {
+    "@observablehq/plot": "^0.6.13",
     "@picovoice/web-voice-processor": "^4.0.8",
     "d3": "^7.8.5",
     "events": "^3.3.0",
