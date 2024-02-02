@@ -698,14 +698,14 @@
     display: grid;
     grid-template-areas:
       "label label"
-      "icon list";
+      "icon ctrl";
   }
   .controls > li:hover{
   }
-  .controls > .image_button, .controls > .image_select{
+  .controls > .image_button, .controls > .image_select, .controls > .image_text{
     background: var(--listItemBG);
   }
-  .controls > .image_button:hover, .controls > .image_select:hover{
+  .controls > .image_button:hover, .controls > .image_select:hover, .controls > .image_text:hover{
     background: var(--listItemBG_Hover);
   }
   .controls > .image_button{
@@ -748,16 +748,44 @@
     height: calc( var(--sF) * 2rem );
   }
   .controls > .image_select > select{
-    grid-area: list;
+    grid-area: ctrl;
     background: transparent;
     color: var(--y2);
     width: 100%;
     border: solid 1px;
     font-size: calc( var(--sF) * 0.75rem );
-    grid-area: list;
+    grid-area: ctrl;
     cursor: pointer;
   }
   .controls > .image_select > label{
+    grid-area: label;
+    color: var(--o2);
+    font-size: calc( var(--sF) * 1rem );
+  }
+
+
+  .controls > .image_text{
+    background: var(--listItemBG);
+    margin-bottom: calc( var(--sF) * 1rem );
+  }
+  .controls > .image_text:hover{
+    background: var(--listItemBG_Hover);
+  }
+  .controls > .image_text > img{
+    grid-area: icon;
+    height: calc( var(--sF) * 2rem );
+  }
+  .controls > .image_text > input{
+    grid-area: ctrl;
+    background: transparent;
+    color: var(--y2);
+    width: 100%;
+    border: solid 1px;
+    font-size: calc( var(--sF) * 0.75rem );
+    grid-area: ctrl;
+    cursor: pointer;
+  }
+  .controls > .image_text > label{
     grid-area: label;
     color: var(--o2);
     font-size: calc( var(--sF) * 1rem );

@@ -1202,6 +1202,9 @@ function SnapPix( props ) {
   const dbOpenRequest = useRef( false );
   const db = useRef( false );
   const mediaRecorder = useRef( false );
+  const selectors = useRef();
+  const loc = useRef( false );
+  const recordedChunks = useRef( [] );
 
   const panel = useRef();
   const recVid_button = useRef();
@@ -1211,10 +1214,6 @@ function SnapPix( props ) {
   const audioInputSelect = useRef();
   const audioOutputSelect = useRef();
   const videoSelect = useRef();
-  const selectors = useRef();
-  const fileinput = useRef();
-  const loc = useRef( false );
-  const recordedChunks = useRef( [] );
 
   function cleanup(){
     navigator.mediaDevices.getUserMedia({video: true, audio: true})
@@ -1302,7 +1301,6 @@ function SnapPix( props ) {
     dbOpenRequest.current.onupgradeneeded = (event) => {
       db.current = event.target.result;
       db.current.onerror = (event) => {
-        note.current.appendChild(createListItem('Error loading database.'));
       };
       // Create an objectStore for this database
       let objectStore = db.current.createObjectStore('SnapPix', { keyPath: 't' });
@@ -1905,7 +1903,7 @@ function RecordNote( props ) {
     </>
   )
 }
-function RemindMe( props ) {
+function RemindMe1( props ) {
     const [initialized, setInitialized] = useState( false );
     const db = useRef(false);
     const DBOpenRequest = useRef( false );
@@ -1944,7 +1942,7 @@ function RemindMe( props ) {
 
         note.current.appendChild(createListItem('App initialised.'));
         // Let us open our database
-        DBOpenRequest.current = window.indexedDB.open('toDoList', 1);
+        DBOpenRequest.current = window.indexedDB.open('RemindMe', 1);
 
         // Register two event handlers to act on the database being opened successfully, or not
         DBOpenRequest.current.onerror = (event) => {
@@ -1974,7 +1972,7 @@ function RemindMe( props ) {
 
 
           // Create an objectStore for this database
-          objectStore.current = db.current.createObjectStore('toDoList', { keyPath: 'taskTitle' });
+          objectStore.current = db.current.createObjectStore('RemindMe', { keyPath: 'taskTitle' });
 
           // Define what data items the objectStore will contain
           objectStore.current.createIndex('hours', 'hours', { unique: false });
@@ -2008,7 +2006,7 @@ function RemindMe( props ) {
       ];
 
       // Open a read/write DB transaction, ready for adding the data
-      const transaction = db.current.transaction(['toDoList'], 'readwrite');
+      const transaction = db.current.transaction(['RemindMe'], 'readwrite');
 
       // Report on the success of the transaction completing, when everything is done
       transaction.oncomplete = () => {
@@ -2024,7 +2022,7 @@ function RemindMe( props ) {
       };
 
       // Call an object store that's already been added to the database
-      objectStore.current = transaction.objectStore('toDoList');
+      objectStore.current = transaction.objectStore('RemindMe');
       console.log(objectStore.current.indexNames);
       console.log(objectStore.current.keyPath);
       console.log(objectStore.current.name);
@@ -2062,9 +2060,9 @@ function RemindMe( props ) {
 
         // Set the button to shown or hidden, depending on what the user answers
         if (Notification.permission === 'denied' || Notification.permission === 'default') {
-          notificationBtn.current.style.display = 'block';
+          notificationBtn.current.classList.remove( 'allowed' );
         } else {
-          notificationBtn.current.style.display = 'none';
+          notificationBtn.current.classList.add( 'allowed' );
         }
       };
 
@@ -2101,7 +2099,7 @@ function RemindMe( props ) {
       const yearCheck = now.getFullYear(); // Do not use getYear() that is deprecated.
 
       // Open a new transaction
-      objectStore.current = db.current.transaction(['toDoList'], 'readwrite').objectStore('toDoList');
+      objectStore.current = db.current.transaction(['RemindMe'], 'readwrite').objectStore('RemindMe');
 
       // Open a cursor to iterate through all the data items in the IndexedDB
       objectStore.current.openCursor().onsuccess = (event) => {
@@ -2170,7 +2168,7 @@ function RemindMe( props ) {
       // notification won't be set off on it again
 
       // First open up a transaction
-      objectStore.current = db.current.transaction(['toDoList'], 'readwrite').objectStore('toDoList');
+      objectStore.current = db.current.transaction(['RemindMe'], 'readwrite').objectStore('RemindMe');
 
       // Get the to-do list object that has this title as its title
       const objectStoreTitleRequest = objectStore.current.get(new_title);
@@ -2199,8 +2197,8 @@ function RemindMe( props ) {
       const dataTask = event.target.getAttribute('data-task');
 
       // Open a database transaction and delete the task, finding it by the name we retrieved above
-      const transaction = db.current.transaction(['toDoList'], 'readwrite');
-      transaction.objectStore('toDoList').delete(dataTask);
+      const transaction = db.current.transaction(['RemindMe'], 'readwrite');
+      transaction.objectStore('RemindMe').delete(dataTask);
 
       // Report that the data item has been deleted
       transaction.oncomplete = () => {
@@ -2219,7 +2217,7 @@ function RemindMe( props ) {
       }
 
       // Open our object store and then get a cursor list of all the different data items in the IDB to iterate through
-      objectStore.current = db.current.transaction('toDoList').objectStore('toDoList');
+      objectStore.current = db.current.transaction('RemindMe').objectStore('RemindMe');
       objectStore.current.openCursor().onsuccess = (event) => {
         const cursor = event.target.result;
         // Check if there are no (more) cursor items to iterate through
@@ -2501,7 +2499,10 @@ function RemindMe( props ) {
           <h2 className="pip_title">Add new to-do item.</h2>
 
           <form id="task-form" ref={taskForm} onSubmit={addData}>
-            <div className="full-width"><label htmlFor="title" className="pip_text">Task title:</label><input type="text" id="title" ref={title} required /></div>
+            <div className="full-width">
+              <label htmlFor="title" className="pip_text">Task title:</label>
+              <input type="text" id="title" ref={title} required />
+            </div>
             <div className="half-width"><label htmlFor="deadline-hours" className="pip_text">Hours (hh):</label><input type="number" id="deadline-hours" ref={hours} required /></div>
             <div className="half-width"><label htmlFor="deadline-minutes" className="pip_text">Mins (mm):</label><input type="number" id="deadline-minutes" ref={minutes} required /></div>
             <div className="third-width"><label htmlFor="deadline-day" className="pip_text">Day:</label>
@@ -2592,6 +2593,511 @@ function RemindMe( props ) {
       </>
     )
   }
+function RemindMe( props ) {
+  const screenplay =  props.screenplay;
+  const [enter, setEnter] = useState( false );
+  const [exit, setExit] = useState( false );
+  const [phase, setPhase] = useState( 0 );
+
+  const dbOpenRequest = useRef( false );
+  const db = useRef( false );
+
+  // UI Element Reference
+  const panel = useRef();
+  const reset_button = useRef();
+  const taskForm = useRef();
+  const title = useRef();
+  const hours = useRef();
+  const minutes = useRef();
+  const day = useRef();
+  const month = useRef();
+  const year = useRef();
+  const submit = useRef();
+  const notifications = useRef();
+  const notificationBtn = useRef();
+
+  function cleanup(){
+
+  }
+  function init(){
+    const entrance_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = entrance_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in 60 frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.frame = 0;
+        screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+      },
+      post: ( )=>{
+        let cache = entrance_transition.cache;
+        screenplay.updatables.delete( 'ShareContact_entrance_transition' );
+        panel.current.style.transform = `scale(1)`;
+      }
+    });
+    setEnter( entrance_transition );
+    const exit_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = exit_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = 1 - cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in this many frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        exit_transition.cache.duration = 15;
+        exit_transition.cache.frame = 0;
+        screenplay.updatables.set( 'ShareContact_exit_transition', exit_transition );
+      },
+      post: ( )=>{
+        let cache = exit_transition.cache;
+        screenplay.updatables.delete( 'ShareContact_exit_transition' );
+        panel.current.style.transform = `scale(0)`;
+        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      }
+    });
+    setExit( exit_transition );
+    screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    if (Notification.permission === 'denied' || Notification.permission === 'default') {
+      notificationBtn.current.classList.remove( 'allowed' );
+    } else {
+      notificationBtn.current.classList.add( 'allowed' );
+    }
+    dbOpenRequest.current = window.indexedDB.open('RemindMe', 1);
+    dbOpenRequest.current.onerror = (event) => {
+    };
+    dbOpenRequest.current.onsuccess = (event) => {
+      db.current = dbOpenRequest.current.result;
+      displayData();
+    };
+    dbOpenRequest.current.onupgradeneeded = (event) => {
+      db.current = event.target.result;
+      db.current.onerror = (event) => {
+      };
+      let objectStore = db.current.createObjectStore('RemindMe', { keyPath: 'taskTitle' });
+      objectStore.createIndex('hours', 'hours', { unique: false });
+      objectStore.createIndex('minutes', 'minutes', { unique: false });
+      objectStore.createIndex('day', 'day', { unique: false });
+      objectStore.createIndex('month', 'month', { unique: false });
+      objectStore.createIndex('year', 'year', { unique: false });
+      objectStore.createIndex('notified', 'notified', { unique: false });
+    };
+
+    return cleanup;
+  }
+  useEffect( init , []);
+
+  function onPhaseChange(){
+    switch( phase ){
+      case 0:
+        reset_button.current.disabled = true;
+    }
+  }
+  useEffect( onPhaseChange, [phase] );
+
+  function addData(e) {
+    // Prevent default, as we don't want the form to submit in the conventional way
+    e.preventDefault();
+
+    // Stop the form submitting if any values are left empty.
+    // This should never happen as there is the required attribute
+    if (title.current.value === '' || hours.current.value === null || minutes.current.value === null || day.current.value === '' || month.current.value === '' || year.current.value === null) {
+      return;
+    }
+
+    // Grab the values entered into the form fields and store them in an object ready for being inserted into the IndexedDB
+    const newItem = [
+      { taskTitle: title.current.value, hours: hours.current.value, minutes: minutes.current.value, day: day.current.value, month: month.current.value, year: year.current.value, notified: 'no' },
+    ];
+
+    // Open a read/write DB transaction, ready for adding the data
+    const transaction = db.current.transaction(['RemindMe'], 'readwrite');
+
+    // Report on the success of the transaction completing, when everything is done
+    transaction.oncomplete = () => {
+
+      // Update the display of data to show the newly added item, by running displayData() again.
+      displayData();
+    };
+
+    // Handler for any unexpected error
+    transaction.onerror = () => {
+    };
+
+    // Call an object store that's already been added to the database
+    let objectStore = transaction.objectStore('RemindMe');
+    console.log(objectStore.indexNames);
+    console.log(objectStore.keyPath);
+    console.log(objectStore.name);
+    console.log(objectStore.transaction);
+    console.log(objectStore.autoIncrement);
+
+    // Make a request to add our newItem object to the object store
+    const objectStoreRequest = objectStore.add(newItem[0]);
+    objectStoreRequest.onsuccess = (event) => {
+
+      // Report the success of our request
+      // (to detect whether it has been succesfully
+      // added to the database, you'd look at transaction.oncomplete)
+
+      // Clear the form, ready for adding the next entry
+      title.current.value = '';
+      hours.current.value = null;
+      minutes.current.value = null;
+      day.current.value = 1;
+      month.current.value = 'January';
+      year.current.value = 2020;
+    };
+  };
+  // Ask for permission when the 'Enable notifications' button is clicked
+  function askNotificationPermission() {
+
+    // Function to actually ask the permissions
+    function handlePermission(permission) {
+      // Whatever the user answers, we make sure Chrome stores the information
+      if (!Reflect.has(Notification, 'permission')) {
+        Notification.permission = permission;
+      }
+
+      // Set the button to shown or hidden, depending on what the user answers
+      if (Notification.permission === 'denied' || Notification.permission === 'default') {
+        notificationBtn.current.classList.remove( 'allowed' );
+      } else {
+        notificationBtn.current.classList.add( 'allowed' );
+      }
+    };
+
+    // Check whether browser supports the promise version of requestPermission()
+    // Safari only supports the old callback-based version
+    function checkNotificationPromise() {
+
+      try {
+        Notification.requestPermission().then();
+      } catch(e) {
+        return false;
+      }
+
+      return true;
+    };
+
+    // Check if the browser supports notifications
+    if (!Reflect.has(window, 'Notification')) {
+      console.log('This browser does not support notifications.');
+    } else {
+      if (checkNotificationPromise()) {
+        Notification.requestPermission().then(handlePermission);
+      } else {
+        Notification.requestPermission(handlePermission);
+      }
+    }
+  };
+  // Check whether the deadline for each task is up or not, and responds appropriately
+  function checkDeadlines() {
+
+    // First of all check whether notifications are enabled or denied
+    if (Notification.permission === 'denied' || Notification.permission === 'default') {
+      notificationBtn.current.classList.remove( 'allowed' );
+    } else {
+      notificationBtn.current.classList.add( 'allowed' );
+    }
+
+    // Grab the current time and date
+    const now = new Date();
+
+    // From the now variable, store the current minutes, hours, day of the month, month, year and seconds
+    const minuteCheck = now.getMinutes();
+    const hourCheck = now.getHours();
+    const dayCheck = now.getDate(); // Do not use getDay() that returns the day of the week, 1 to 7
+    const monthCheck = now.getMonth();
+    const yearCheck = now.getFullYear(); // Do not use getYear() that is deprecated.
+
+    // Open a new transaction
+    let objectStore = db.current.transaction(['RemindMe'], 'readwrite').objectStore('RemindMe');
+
+    // Open a cursor to iterate through all the data items in the IndexedDB
+    objectStore.openCursor().onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (!cursor) return;
+      const { hours, minutes, day, month, year, notified, taskTitle } = cursor.value;
+
+      // convert the month names we have installed in the IDB into a month number that JavaScript will understand.
+      // The JavaScript date object creates month values as a number between 0 and 11.
+      const monthNumber = MONTHS.indexOf(month);
+      if (monthNumber === -1) throw new Error('Incorrect month entered in database.');
+
+      // Check if the current hours, minutes, day, month and year values match the stored values for each task.
+      // The parseInt() function transforms the value from a string to a number for comparison
+      // (taking care of leading zeros, and removing spaces and underscores from the string).
+      let matched = parseInt(hours) === hourCheck;
+      matched &&= parseInt(minutes) === minuteCheck;
+      matched &&= parseInt(day) === dayCheck;
+      matched &&= parseInt(monthNumber) === monthCheck;
+      matched &&= parseInt(year) === yearCheck;
+      if (matched && notified === 'no') {
+        // If the numbers all do match, run the createNotification() function to create a system notification
+        // but only if the permission is set
+        if (Notification.permission === 'granted') {
+          createNotification(taskTitle);
+        }
+      }
+
+      // Move on to the next cursor item
+      cursor.continue();
+    };
+  };
+  function createListItem(contents) {
+    const listItem = document.createElement('li');
+    listItem.classList.add( "pip_text" );
+    listItem.textContent = contents;
+    return listItem;
+  };
+  // Create a notification with the given title
+  function createNotification(new_title) {
+    // Create and show the notification
+    const img = '/to-do-notifications/img/icon-128.png';
+    const text = `HEY! Your task "${new_title}" is now overdue.`;
+    const notification = new Notification('To do list', { body: new_title, icon: img });
+
+    // We need to update the value of notified to 'yes' in this particular data object, so the
+    // notification won't be set off on it again
+
+    // First open up a transaction
+    let objectStore = db.current.transaction(['RemindMe'], 'readwrite').objectStore('RemindMe');
+
+    // Get the to-do list object that has this title as its title
+    const objectStoreTitleRequest = objectStore.get(new_title);
+
+    objectStoreTitleRequest.onsuccess = () => {
+      // Grab the data object returned as the result
+      const data = objectStoreTitleRequest.result;
+
+      // Update the notified value in the object to 'yes'
+      data.notified = 'yes';
+
+      // Create another request that inserts the item back into the database
+      const updateTitleRequest = objectStore.put(data);
+
+      // When this new request succeeds, run the displayData() function again to update the display
+      updateTitleRequest.onsuccess = () => {
+
+        displayData();
+      };
+    };
+  };
+  function deleteItem(event) {
+
+    // Retrieve the name of the task we want to delete
+    const dataTask = event.target.getAttribute('data-task');
+
+    // Open a database transaction and delete the task, finding it by the name we retrieved above
+    const transaction = db.current.transaction(['RemindMe'], 'readwrite');
+    transaction.objectStore('RemindMe').delete(dataTask);
+
+    // Report that the data item has been deleted
+    transaction.oncomplete = () => {
+      // Delete the parent of the button, which is the list item, so it is no longer displayed
+      event.target.parentNode.parentNode.removeChild(event.target.parentNode);
+    };
+  };
+  function displayData() {
+
+    // First clear the content of the task list so that you don't get a huge long list of duplicate stuff each time
+    // the display is updated.
+    while (notifications.current.firstChild) {
+      notifications.current.removeChild(notifications.current.lastChild);
+    }
+
+    // Open our object store and then get a cursor list of all the different data items in the IDB to iterate through
+    let objectStore = db.current.transaction('RemindMe').objectStore('RemindMe');
+    objectStore.openCursor().onsuccess = (event) => {
+      const cursor = event.target.result;
+      // Check if there are no (more) cursor items to iterate through
+      if (!cursor) {
+        // No more items to iterate through, we quit.
+        return;
+      }
+
+      // Check which suffix the deadline day of the month needs
+      const { hours, minutes, day, month, year, notified, taskTitle } = cursor.value;
+      const ordDay = ordinal(day);
+
+      // Build the to-do list entry and put it into the list item.
+      const toDoText = `${taskTitle} — ${hours}:${minutes}, ${month} ${ordDay} ${year}.`;
+      const listItem = createListItem(toDoText);
+
+      if (notified === 'yes') {
+        listItem.style.textDecoration = 'line-through';
+        listItem.style.color = 'rgba(255, 0, 0, 0.5)';
+      }
+
+      // Put the item item inside the task list
+      notifications.current.appendChild(listItem);
+
+      // Create a delete button inside each list item,
+      const deleteButton = document.createElement('button');
+      listItem.appendChild(deleteButton);
+      deleteButton.textContent = 'X';
+
+      // Set a data attribute on our delete button to associate the task it relates to.
+      deleteButton.setAttribute('data-task', taskTitle);
+
+      // Associate action (deletion) when clicked
+      deleteButton.onclick = (event) => {
+        deleteItem(event);
+      };
+
+      // continue on to the next item in the cursor
+      cursor.continue();
+    };
+  };
+  function ordinal(day) {
+    const n = day.toString();
+    const last = n.slice(-1);
+    if (last === '1' && n !== '11') return `${n}st`;
+    if (last === '2' && n !== '12') return `${n}nd`;
+    if (last === '3' && n !== '13') return `${n}rd`;
+    return `${n}th`;
+  };
+  return(
+      <>
+      <style>{`
+
+        `}</style>
+      <div id="RemindMe" ref={panel} className="pip_gui pip_post">
+        <div className="head">
+          <h1 className="pip_title">Remind Me!</h1>
+        </div>
+        <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
+          <li className="image_select">
+            <img src=".\both_mic.png" alt="Select from this list" />
+            <select name="listName"></select>
+            <br />
+            <label htmlFor="listName">.image_select</label>
+          </li>
+
+          <li className="image_button">
+            <input id="enable" ref={notificationBtn} name="allow_notifications" type="image" src=".\both_capture-photo.png" alt="Allow Notifications to alert you on this device?" onClick={askNotificationPermission} />
+            <br />
+            <label htmlFor="allow_notifications" className="pip_text" >Allow Notifications?<br />on this device?</label>
+          </li>
+        </ul>
+        <div className="body">
+          <form id="task-form" ref={taskForm} onSubmit={addData}>
+            <div>
+              <label htmlFor="title" className="pip_text">Task title:</label>
+              <input type="text" id="title" ref={title} required />
+            </div>
+            <div><label htmlFor="deadline-hours" className="pip_text">Hours (hh):</label><input type="number" id="deadline-hours" ref={hours} required /></div>
+            <div><label htmlFor="deadline-minutes" className="pip_text">Mins (mm):</label><input type="number" id="deadline-minutes" ref={minutes} required /></div>
+            <div><label htmlFor="deadline-day" className="pip_text">Day:</label>
+              <select id="deadline-day" ref={day} required>
+                <option value="01">01</option>
+                <option value="02">02</option>
+                <option value="03">03</option>
+                <option value="04">04</option>
+                <option value="05">05</option>
+                <option value="06">06</option>
+                <option value="07">07</option>
+                <option value="08">08</option>
+                <option value="09">09</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+                <option value="25">25</option>
+                <option value="26">26</option>
+                <option value="27">27</option>
+                <option value="28">28</option>
+                <option value="29">29</option>
+                <option value="30">30</option>
+                <option value="31">31</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="deadline-month" className="pip_text">Month:</label>
+              <select id="deadline-month" ref={month} required>
+               <option value="January">January</option>
+               <option value="February">February</option>
+               <option value="March">March</option>
+               <option value="April">April</option>
+               <option value="May">May</option>
+               <option value="June">June</option>
+               <option value="July">July</option>
+               <option value="August">August</option>
+               <option value="September">September</option>
+               <option value="October">October</option>
+               <option value="November">November</option>
+               <option value="December">December</option>
+              </select>
+           </div>
+
+            <div>
+              <label htmlFor="deadline-year" className="pip_text">Year:</label>
+              <select id="deadline-year" ref={year} required>
+               <option value="2025">2025</option>
+               <option value="2024">2024</option>
+               <option value="2023">2023</option>
+               <option value="2022">2022</option>
+               <option value="2021">2021</option>
+               <option value="2020">2020</option>
+               <option value="2019">2019</option>
+               <option value="2018">2018</option>
+               </select>
+           </div>
+
+            <div><input className="pip_accept" type="submit" id="submit" ref={submit} value="Add Task"/></div>
+            <div></div>
+          </form>
+        </div>
+        <ul id="notifications" ref={notifications} className="status"></ul>
+        <ul className="foot">
+          <li>
+            <button name="exit" className="pip_cancel" type="button" onClick={props.toggle}>Exit</button>
+          </li>
+          <li>
+            <button ref={reset_button} name="reset" className="pip_continue" type="button" onClick={()=>{setPhase( 0 )}}>Back</button>
+          </li>
+        </ul>
+      </div>
+      </>
+  )
+}
 function Search( props ) {
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
@@ -3774,6 +4280,7 @@ function InformationPanel( props ){
           <a target="_blank" href="https://icons8.com/icon/108790/sound">Sound</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
           <a target="_blank" href="https://icons8.com/icon/RC42DqVAI9ju/record-video">Record Video</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
           <a target="_blank" href="https://icons8.com/icon/KLyXgIpg7AdE/stop-gesture">Stop Gesture</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+          <a target="_blank" href="https://icons8.com/icon/42355/tick-box">Tick Box</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
         </span>
 
         <div id="color_test" className="info_card">
