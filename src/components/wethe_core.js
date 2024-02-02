@@ -1,13 +1,11 @@
 import { SceneTransformation } from '../bin/ScreenDirector.js';
-import { AudioEngineWorker } from '../imp/workers/AudioEngine.ts';
 import React from 'react';
 import { useState, useEffect, useRef, Fragment } from 'react';
 // Support Library Reference
 import * as THREE from 'three';
+import jsQR from 'jsqr';
 import * as d3 from 'd3';
-import { WebVoiceProcessor } from '@picovoice/web-voice-processor';
 import GUI from 'lil-gui';
-import jsQR from "jsqr";
 import QRCode from 'qrcode';
 import * as Plot from "@observablehq/plot";
 import { OrbitControls } from '../lib/OrbitControls.js';
@@ -367,184 +365,464 @@ function WeTheMenu( props ){
 }
 // Menu Content
 function GlyphScanner( props ){
-  const panel = useRef();
+  const screenplay =  props.screenplay;
 
-  const [outputMessage, setOutputMessage] = useState();
-  const [initialized, setInitialized] = useState( false );
+  const [phase, setPhase] = useState( 0 );
+  const [enter, setEnter] = useState( false );
+  const [exit, setExit] = useState( false );
+  const dbOpenRequest = useRef( false );
+  const db = useRef( false );
+  const loc = useRef( false );
   const processing = useRef( false );
   const stop = useRef( false );
+  const selectors = useRef();
   const [code_found, setCodeFound] = useState( false );
-  const stream = useRef( false );
-  const video = useRef();
-  const canvas = useRef();
-  const context = useRef();
-  const output = useRef();
-  const outputData = useRef();
-  const scanButton = useRef();
-  const stopButton = useRef();
-  const screenplay = props.screenplay;
 
-  function drawLine(begin, end, color) {
-    context.current.beginPath();
-    context.current.moveTo(begin.x, begin.y);
-    context.current.lineTo(end.x, end.y);
-    context.current.lineWidth = 4;
-    context.current.strokeStyle = color;
-    context.current.stroke();
-  }
+  const [outputMessage, setOutputMessage] = useState();
 
-  // TODO: Force a much lower FPS rate for this update function... ~ 6fps.
-  function update() {
-
-    if ( video.current && video.current.readyState === video.current.HAVE_ENOUGH_DATA ) {
-      if( !processing.current && !code_found ){
-        processing.current = true;
-        canvas.current.height = video.current.videoHeight;
-        canvas.current.width = video.current.videoWidth;
-        context.current.drawImage(video.current, 0, 0, canvas.current.width, canvas.current.height);
-        let imageData = context.current.getImageData(0, 0, canvas.current.width, canvas.current.height);
-
-        let code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "dontInvert",
-        });
-        if (code) {
-          drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
-          drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
-          drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
-          drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
-          setCodeFound( true );
-          setOutputMessage( code.data );
-          processCode( code );
-        }
-        processing.current = false;
-      }
-    }
-    if( !stop.current && !processing.current && !code_found && video.current ) requestAnimationFrame(update);
-  }
-
-  function toggleScanner( event ){
-    event.stopPropagation();
-    code_found || !initialized ? initializeComponent() : deInitComponent();
-
-  }
-
-  function closeScanner( event ){
-    deInitComponent();
-  }
-
-  async function processCode( code ){
-
-    deInitComponent();
-  }
-
-  async function deInitComponent(){
-    stop.current = true;
-    // Stop the video stream, but keep it spooled up while the component is live.
-    if( video.current ) {
-      video.current.pause();
-      delete video.current.srcObject;
-    }
-    stream.current.getTracks().forEach(function(track) {
-      track.stop();
-    });
-    stream.current = false;
-    setInitialized( false );
-    stopButton.current.disabled = true;
-    scanButton.current.disabled = false;
-  }
-
-  async function initializeComponent(){
-    // Use facingMode: environment to attemt to get the front camera on phones
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 4096 }, height: { ideal: 2160 }  } }).then(function(_stream) {
-      stream.current = _stream;
-      video.current.srcObject = stream.current;
-      video.current.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
-      video.current.play();
-      context.current = canvas.current.getContext("2d");
-      setCodeFound( false );
-      setInitialized( true );
-      setOutputMessage( "⌛ Scanning video..." );
-      requestAnimationFrame(update);
-      stopButton.current.disabled = false;
-      scanButton.current.disabled = true;
-    });
-  }
-
-  useEffect(()=>{
-    if(!initialized){
-      initializeComponent();
-    }
-
-    return cleanup;
-  },[]);
+  const panel = useRef();
+  const videoElement = useRef();
+  const videoSelect = useRef();
+  const scan_button = useRef();
+  const scannedGlyphs = useRef();
 
   function cleanup(){
     deInitComponent();
   }
+  function init(){
+    const entrance_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = entrance_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in 60 frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.frame = 0;
+        screenplay.updatables.set( 'panel_entrance_transition', entrance_transition );
+      },
+      post: ( )=>{
+        let cache = entrance_transition.cache;
+        screenplay.updatables.delete( 'panel_entrance_transition' );
+        panel.current.style.transform = `scale(1)`;
+      }
+    });
+    setEnter( entrance_transition );
+    const exit_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = exit_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = 1 - cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in this many frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        exit_transition.cache.duration = 15;
+        exit_transition.cache.frame = 0;
+        screenplay.updatables.set( 'panel_exit_transition', exit_transition );
+      },
+      post: ( )=>{
+        let cache = exit_transition.cache;
+        screenplay.updatables.delete( 'panel_exit_transition' );
+        panel.current.style.transform = `scale(0)`;
+        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      }
+    });
+    setExit( exit_transition );
+    screenplay.updatables.set( 'panel_entrance_transition', entrance_transition );
+
+    // Load GlyphScanner Database
+    dbOpenRequest.current = window.indexedDB.open( 'GlyphScanner', 1 );
+    dbOpenRequest.current.onerror = (event) => {};
+    dbOpenRequest.current.onsuccess = (event) => {
+      // Store the result of opening the database in the db variable. This is used a lot below
+      db.current = dbOpenRequest.current.result;
+      // Run the loadScannedGlyphs() function to populate the SnapPix display with working pix yet to be saved.
+      loadScannedGlyphs();
+    };
+    dbOpenRequest.current.onupgradeneeded = (event) => {
+      db.current = event.target.result;
+      db.current.onerror = (event) => {
+        //outputMessage.current.appendChild(createListItem('Error loading database.'));
+      };
+      // Create an objectStore for this database
+      let objectStore = db.current.createObjectStore('GlyphScanner', { keyPath: 't' });
+      // Define what data items the objectStore will contain
+      objectStore.createIndex('code', 'code', { unique: false });
+      objectStore.createIndex('crop', 'crop', { unique: false });
+      objectStore.createIndex('results', 'results', { unique: false });
+      objectStore.createIndex('loc', 'loc', { unique: false });
+    };
+
+    // Initialize the user's Camera Interface
+    selectors.current = [videoSelect.current];
+    function updateDevices(deviceInfos) {
+      // Handles being called several times to update labels. Preserve values.
+      const values = selectors.current.map(select => select.value);
+      selectors.current.forEach(select => {
+        while (select.firstChild) {
+          select.removeChild(select.firstChild);
+        }
+      });
+      for (let i = 0; i !== deviceInfos.length; ++i) {
+        const deviceInfo = deviceInfos[i];
+        const option = document.createElement('option');
+        option.value = deviceInfo.deviceId;
+        if (deviceInfo.kind === 'videoinput') {
+          option.text = deviceInfo.label || `camera ${videoSelect.current.length + 1}`;
+          videoSelect.current.appendChild(option);
+        }
+      }
+      selectors.current.forEach((select, selectorIndex) => {
+        if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+          select.value = values[selectorIndex];
+        }
+      });
+    }
+    navigator.mediaDevices.enumerateDevices().then(updateDevices).catch(handleMediaDeviceError);
+    videoSelect.current.onchange = start;
+    start();
+
+    return cleanup;
+  }
+  useEffect( init , []);
+  async function loadScannedGlyphs(){
+    scannedGlyphs.current.replaceChildren();
+
+    const objectStore = db.current.transaction( 'GlyphScanner' ).objectStore( 'GlyphScanner' );
+    objectStore.openCursor().onsuccess = ( event )=>{
+      const cursor = event.target.result;
+      // Check if there are no (more) cursor items to iterate through
+      if (!cursor) {
+        return;
+      }
+      const glyph = cursor.value;
+      displayGlyph( glyph );
+
+      // continue on to the next item in the cursor
+      cursor.continue();
+    }
+  }
+  async function displayGlyph( glyph ) {
+    const urlCreator = window.URL || window.webkitURL;
+    const url = urlCreator.createObjectURL( await glyph.crop );
+    let li = document.createElement( 'li' );
+    let img = document.createElement( 'img' );
+    img.setAttribute( 'src', url );
+    img.setAttribute( 'id', glyph.t );
+    li.appendChild( img );
+    li.classList.add( 'glyph' );
+    scannedGlyphs.current.appendChild( li );
+
+  };
+  function updateDevices(deviceInfos) {
+    // Handles being called several times to update labels. Preserve values.
+    const values = selectors.current.map( select => select.value);
+    selectors.current.forEach(select => {
+      while (select.firstChild) {
+        select.removeChild(select.firstChild);
+      }
+    });
+    for (let i = 0; i !== deviceInfos.length; ++i) {
+      const deviceInfo = deviceInfos[i];
+      const option = document.createElement('option');
+      option.value = deviceInfo.deviceId;
+      if (deviceInfo.kind === 'videoinput') {
+        option.text = deviceInfo.label || `camera ${videoSelect.current.length + 1}`;
+        videoSelect.current.appendChild(option);
+      }
+    }
+    selectors.current.forEach((select, selectorIndex) => {
+      if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+        select.value = values[selectorIndex];
+      }
+    });
+  }
+  function handleMediaDeviceError(error){
+    console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+  }
+  function start() {
+    if (window.stream) {
+      window.stream.getTracks().forEach(track => {
+        track.stop();
+      });
+    }
+    if ( navigator.geolocation ) {
+      navigator.geolocation.getCurrentPosition( (pos)=>{
+        loc.current = pos;
+      });
+    }
+    const videoSource = videoSelect.current.value;
+    const constraints = {
+      video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+    };
+    navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(updateDevices).catch(handleMediaDeviceError);
+  }
+  function gotStream(stream) {
+    window.stream = stream; // make stream available to console
+    videoElement.current.srcObject = stream;
+    requestAnimationFrame( update );
+    // Refresh button list in case labels have become available
+    return navigator.mediaDevices.enumerateDevices();
+  }
+  // TODO: Force a much lower FPS rate for this update function... ~ 6fps.
+  // Currently is settles for not scanning while scanning already.
+  async function update() {
+    if ( videoElement.current && videoElement.current.readyState === videoElement.current.HAVE_ENOUGH_DATA ) {
+      if( !processing.current && !code_found ){
+        processing.current = true;
+
+        let width = videoElement.current.videoWidth;
+        let height = videoElement.current.videoHeight;
+        const photo_canvas = new OffscreenCanvas( width, height );
+        const photo_context = photo_canvas.getContext( '2d', { alpha: false } );
+        photo_context.drawImage( videoElement.current, 0, 0 );
+        let imageData = photo_context.getImageData(0, 0, width, height);
+        let code = await jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+        if ( await code ) {
+          function drawLine( context, begin, end, color ) {
+            context.beginPath();
+            context.moveTo(begin.x, begin.y);
+            context.lineTo(end.x, end.y);
+            context.lineWidth = 4;
+            context.strokeStyle = color;
+            context.stroke();
+          }
+          async function cropCode( photo_context, top_left, top_right, bottom_left, bottom_right ){
+            drawLine(photo_context, code.location.topLeftCorner, code.location.topRightCorner, "#88CC88");
+            drawLine(photo_context, code.location.topRightCorner, code.location.bottomRightCorner, "#88CC88");
+            drawLine(photo_context, code.location.bottomRightCorner, code.location.bottomLeftCorner, "#88CC88");
+            drawLine(photo_context, code.location.bottomLeftCorner, code.location.topLeftCorner, "#88CC88");
+            let x_min = Math.min( code.location.topLeftCorner.x, code.location.bottomLeftCorner.x, code.location.topRightCorner.x, code.location.bottomRightCorner.x );
+            let x_max = Math.max( code.location.topLeftCorner.x, code.location.bottomLeftCorner.x, code.location.topRightCorner.x, code.location.bottomRightCorner.x );
+            let y_min = Math.min( code.location.topLeftCorner.y, code.location.bottomLeftCorner.y, code.location.topRightCorner.y, code.location.bottomRightCorner.y );
+            let y_max = Math.max( code.location.topLeftCorner.y, code.location.bottomLeftCorner.y, code.location.topRightCorner.y, code.location.bottomRightCorner.y );
+            let crop_width = x_max-x_min;
+            let crop_height = y_max-y_min;
+            let cropped_glyph = photo_context.getImageData( x_min, y_min, crop_width, crop_height );
+            const glyph_canvas = new OffscreenCanvas( crop_width, crop_height );
+            const glyph_context = glyph_canvas.getContext( '2d', {alpha: false } );
+            glyph_context.putImageData( cropped_glyph, 0, 0 );
+            return await glyph_canvas.convertToBlob( {type:'image/png', quality: 1} );
+          }
+          async function processCode( code ){
+            if( !code.chunks || code.chunks.length == 0 ) return false;
+            let results = {};
+            let raw_type = code.chunks[0].text;
+            let type = raw_type.slice( 0, raw_type.indexOf( ':' ) );
+            switch( raw_type ){
+              default:
+              results.text = true;
+              break;
+              case 'mailto':
+              results.mail = true;
+              break;
+              case 'tel':
+              results.tel = true;
+              break;
+              case 'MECARD':
+              results.contact = true;
+              break;
+              case 'BIZCARD':
+              results.contact = true;
+              break;
+              case 'BEGIN':
+                results.begin = true;
+                let begin_what = raw_type.slice( raw_type.indexOf( ':' ), 5 ).toLowerCase();
+                switch( begin_what ){
+                  case 'veven':
+                    results.event = true;
+                    break;
+                  case 'vcard':
+                    results.contact = true;
+                    break;
+                }
+                break;
+              case 'sms':
+              results.sms = true;
+              break;
+              case 'facetime':
+              results.facetime = true;
+              break;
+              case 'facetime-audio':
+              results.facetime = true;
+              break;
+              case 'geo':
+              results.location = true;
+              break;
+              case 'WIFI':
+              results.wifi = true;
+              break;
+              case 'market':
+              results.applink = true;
+              break;
+              case 'https':
+              results.https = true;
+              case 'http':
+              results.link = true;
+              break;
+              case 'ftps':
+              results.ftps = true;
+              case 'ftp':
+              results.link = true;
+              break;
+            }
+            return results;
+          }
+          setCodeFound( true );
+          // Stop the Scanner
+          deInitComponent();
+
+          let codeImage = await cropCode( photo_context, code.location.topLeftCorner, code.location.topRightCorner, code.location.bottomLeftCorner, code.location.bottomRightCorner );
+          let codeResults = await processCode( code );
+
+          // Save the scanned glyph
+          let glyph = {
+            code: code,
+            crop: codeImage,
+            results: codeResults,
+            loc: JSON.stringify( loc.current.coords ),
+            t: Date.now()
+          }
+          addScan( glyph );
+          displayGlyph( glyph );
+        }
+        processing.current = false;
+      }
+    }
+    if( !stop.current && !processing.current && !code_found && videoElement.current ) requestAnimationFrame(update);
+  }
+
+  function addScan( scan ){
+    const transaction = db.current.transaction(['GlyphScanner'], 'readwrite');
+    transaction.oncomplete = ( a ) => {
+    };
+    transaction.onerror = ( e ) => { alert( e )};
+    let objectStore = transaction.objectStore( 'GlyphScanner' );
+    const addScanReq = objectStore.add( scan );
+    addScanReq.onsuccess = ( event )=>{}
+  }
+  async function deInitComponent(){
+    stop.current = true;
+    // Stop the video stream, but keep it spooled up while the component is live.
+    if( videoElement.current ) {
+      videoElement.current.pause();
+      delete videoElement.current.srcObject;
+    }
+    window.stream.getTracks().forEach(function(track) {
+      track.stop();
+    });
+    window.stream = false;
+  }
+  function toggleScanner( event ){
+    event.stopPropagation();
+    switch( code_found ){
+      case true:
+        scan_button.current.src = ".\\both_stop-gesture.png";
+        start();
+        break;
+
+      case false:
+        scan_button.current.src = ".\\both_glyphscanner.png";
+        deInitComponent();
+        break;
+    }
+  }
+  function closeScanner( event ){
+    deInitComponent();
+  }
+
+  // Workflow phase controls... set to be available if necessary.
+  function onPhaseChange(){
+    switch( phase ){
+      default:
+    }
+  }
+  useEffect( onPhaseChange, [phase] );
 
   return(
-    <>
+      <>
       <style>{`
-      #GlyphScanner {
+        #GlyphScanner .status{
+          display: grid;
+          grid-auto-rows: 1fr;
+          grid-template-columns: repeat(5, 1fr);
+          grid-gap: calc( var(--sF) * 1rem );
+          background: var(--panelBG);
+        }
+        #GlyphScanner .status li{
+          height: 7rem;
+          cursor: pointer;
+        }
+        #GlyphScanner .status img, #SnapPix status video{
+          height: 100%;
+        }
 
-      }
+        #startScan_button:active{
+          background: white;
+        }
 
-      #GlyphScanner h1 {
-        grid-row: 1;
-        grid-column: 1 / -1;
-        text-align: right;
-        margin: 0;
-        background: linear-gradient( 90deg, var(--b2), #fff1 );
-      }
+        #exit{
+          grid-column: 1;
+        }
 
-      #GlyphScanner .loadingMessage {
-        text-align: center;
-      }
-
-      #GlyphScanner .video{
-        display: none;
-      }
-
-      #GlyphScanner .canvas {
-        grid-row: 2 / 5;
-        grid-column: 1 / 3;
-        width: 100%;
-      }
-
-      #GlyphScanner .output {
-        grid-row: 2 / 5;
-        grid-column: 3 / 5;
-        background: #33333333;
-      }
-
-      #GlyphScanner .output div {
-        word-wrap: break-word;
-      }
-
-      #GlyphScanner button{
-        grid-row: 5;
-      }
-
-      #noQRFound {
-        text-align: center;
-      }
-      `}</style>
-      <div id="GlyphScanner" ref={panel} className="pip_gui pip_post" position="0" >
-        <h1 className="pip_title">Glyph Scanner</h1>
-        <video ref={video} className="video"></video>
-        <canvas className="canvas" ref={canvas} ></canvas>
-        <div className="output">
-          {outputMessage}
+        #GlyphScanner video{
+          margin: auto;
+          max-width: 100%;
+          max-height: 100%;
+        }
+        `}</style>
+      <div id="GlyphScanner" ref={panel} className="pip_gui pip_post">
+        <div className="head">
+          <h1 className="pip_title">Glyph Scanner</h1>
         </div>
-        <button ref={scanButton} name="scan_button" className="pip_accept" type="button" onClick={toggleScanner}>Scan</button>
-        <button ref={stopButton} name="stop_button" className="pip_cancel" type="button" onClick={toggleScanner}>Stop</button>
-
-
-        <button name="exit_scanner" className="pip_cancel" type="button" onClick={closeScanner}>Exit</button>
+        <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
+          <li><hr /></li>
+          <li className="image_select">
+            <img src=".\both_camera.png" alt="Select video source" />
+            <select ref={videoSelect} name="videoSource"></select>
+            <br />
+            <label htmlFor="videoSource">Camera</label>
+          </li>
+          <li id="startScan_button" className="image_button">
+            <input ref={scan_button} type="image" name="scan" onClick={toggleScanner} src=".\both_capture-photo.png" alt="Snap Photo" />
+            <br />
+            <label htmlFor="scan" className="pip_text" >Start Scanner</label>
+          </li>
+        </ul>
+        <div className="body">
+          <video ref={videoElement} className="video" playsInline autoPlay></video>
+        </div>
+        <ul className="status" ref={scannedGlyphs}></ul>
+        <ul className="foot">
+          <li>
+            <button id="exit" name="exit" className="pip_cancel" type="button" onClick={props.toggle}>Exit</button>
+          </li>
+        </ul>
       </div>
-    </>
+      </>
   )
-  }
+}
 function ShareContact( props ) {
   const screenplay =  props.screenplay;
   const [enter, setEnter] = useState( false );
@@ -944,7 +1222,7 @@ function SnapPix( props ) {
         const stream = mediaStream;
         const tracks = stream.getTracks();
         for( const track of tracks ){
-          track.stop;
+          track.stop();
         }
       });
   }
@@ -1120,17 +1398,9 @@ function SnapPix( props ) {
         li.classList.add( 'vid' );
         snappedPhotos.current.appendChild( li );
         break;
-      default:
-        debugger;
     }
 
   };
-  // File Upload Routines
-  function processFiles( e ){
-    e.preventDefault();
-
-    debugger;
-  }
   // Image Capture Routines
   // Attach audio output device to video element using device/sink ID.
   function start() {
@@ -1243,7 +1513,7 @@ function SnapPix( props ) {
     const photo_context = photo_canvas.getContext( '2d', { alpha: false } );
     photo_context.drawImage( videoElement.current, 0, 0 );
     const timestamp = Date.now();
-    const blob = await photo_canvas.convertToBlob();
+    const blob = await photo_canvas.convertToBlob( {type:'image/png', quality: 1} );
 
     // Display the photo
     displaySnap( blob, timestamp, loc.current.coords );
@@ -1269,9 +1539,6 @@ function SnapPix( props ) {
         recVid_button.current.src = ".\\both_stop-gesture.png";
         break;
     }
-
-
-
   }
   function addSnap( snap ){
     const transaction = db.current.transaction(['SnapPix'], 'readwrite');
@@ -1389,7 +1656,7 @@ function RecordNote( props ) {
 
   function cleanup(){
     let async_f = async ()=>{
-      //await WebVoiceProcessor.unsubscribe([engine, worker]);
+
     }
     async_f();
   };
@@ -1469,7 +1736,7 @@ function RecordNote( props ) {
   useEffect( ()=>{
     if (initialized){
       let async_f = async ()=>{
-        //await WebVoiceProcessor.subscribe([engine, worker]);
+
       }
       async_f();
     }
