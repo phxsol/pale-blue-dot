@@ -370,7 +370,7 @@ function GlyphScanner( props ){
   const [phase, setPhase] = useState( 0 );
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
-  const dbOpenRequest = useRef( false );
+  const glyphScannerDBRequest = useRef( false );
   const db = useRef( false );
   const loc = useRef( false );
   const processing = useRef( false );
@@ -452,15 +452,23 @@ function GlyphScanner( props ){
     screenplay.updatables.set( 'panel_entrance_transition', entrance_transition );
 
     // Load GlyphScanner Database
-    dbOpenRequest.current = window.indexedDB.open( 'GlyphScanner', 1 );
-    dbOpenRequest.current.onerror = (event) => {};
-    dbOpenRequest.current.onsuccess = (event) => {
+    function onError( event ){ /* TODO: Show the failed attempt to the user */ };
+    function onSuccess( event ){
+      db.current = event.target.result;
+      loadScannedGlyphs();
+    }
+    OpenIndexedDBRequest( 'GlyphScanner', 1, onError, onSuccess );
+
+/*
+    glyphScannerDBRequest.current = window.indexedDB.open( 'GlyphScanner', 1 );
+    glyphScannerDBRequest.current.onerror = (event) => {};
+    glyphScannerDBRequest.current.onsuccess = (event) => {
       // Store the result of opening the database in the db variable. This is used a lot below
-      db.current = dbOpenRequest.current.result;
+      db.current = glyphScannerDBRequest.current.result;
       // Run the loadScannedGlyphs() function to populate the SnapPix display with working pix yet to be saved.
       loadScannedGlyphs();
     };
-    dbOpenRequest.current.onupgradeneeded = (event) => {
+    glyphScannerDBRequest.current.onupgradeneeded = (event) => {
       db.current = event.target.result;
       db.current.onerror = (event) => {
         //outputMessage.current.appendChild(createListItem('Error loading database.'));
@@ -473,7 +481,7 @@ function GlyphScanner( props ){
       objectStore.createIndex('results', 'results', { unique: false });
       objectStore.createIndex('loc', 'loc', { unique: false });
     };
-
+*/
     // Initialize the user's Camera Interface
     selectors.current = [videoSelect.current];
     function updateDevices(deviceInfos) {
@@ -917,7 +925,7 @@ function ShareContact( props ) {
         <div className="head">
           <h1 className="pip_title">Snap Pix</h1>
         </div>
-        <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
+        <ul className="controls" style={{ padding: 0, margin: 0 }}>
           <li className="image_select">
             <img src=".\both_mic.png" alt="Select from this list" />
             <select name="listName"></select>
@@ -1157,7 +1165,7 @@ function DropPin( props ) {
         <div className="head">
           <h1 className="pip_title">Snap Pix</h1>
         </div>
-        <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
+        <ul className="controls" style={{ padding: 0, margin: 0 }}>
           <li className="image_select">
             <img src=".\both_mic.png" alt="Select from this list" />
             <select name="listName"></select>
@@ -1191,15 +1199,14 @@ function SnapPix( props ) {
   const screenplay =  props.screenplay;
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
-  const [initialized, setInitialized] = useState( false );
   const [phase_description, setPhaseDescription] = useState();
   const [phase, setPhase] = useState( 3 );
-  const [camera_type, setCameraType] = useState( 'user' );
   const [dId, setDId] = useState( -1 );
+  const [camera_type, setCameraType] = useState( 'user' );
   const [file_list, setFileList] = useState( [] );
   const [streaming, setStreaming] = useState( false );
 
-  const dbOpenRequest = useRef( false );
+  const snapPixDBRequest = useRef( false );
   const db = useRef( false );
   const mediaRecorder = useRef( false );
   const selectors = useRef();
@@ -1290,15 +1297,23 @@ function SnapPix( props ) {
     screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
 
     // Load SnapPix Database
-    dbOpenRequest.current = window.indexedDB.open( 'SnapPix', 1 );
-    dbOpenRequest.current.onerror = (event) => {};
-    dbOpenRequest.current.onsuccess = (event) => {
+    function onError( event ){ /* TODO: Show the failed attempt to the user */ };
+    function onSuccess( event ){
+      db.current = event.target.result;
+      loadSnappedPix();
+    }
+    OpenIndexedDBRequest( 'SnapPix', 1, onError, onSuccess );
+
+    /*
+    snapPixDBRequest.current = window.indexedDB.open( 'SnapPix', 1 );
+    snapPixDBRequest.current.onerror = (event) => {};
+    snapPixDBRequest.current.onsuccess = (event) => {
       // Store the result of opening the database in the db variable. This is used a lot below
-      db.current = dbOpenRequest.current.result;
+      db.current = snapPixDBRequest.current.result;
       // Run the loadSnappedPix() function to populate the SnapPix display with working pix yet to be saved.
       loadSnappedPix();
     };
-    dbOpenRequest.current.onupgradeneeded = (event) => {
+    snapPixDBRequest.current.onupgradeneeded = (event) => {
       db.current = event.target.result;
       db.current.onerror = (event) => {
       };
@@ -1308,6 +1323,7 @@ function SnapPix( props ) {
       objectStore.createIndex('blob', 'blob', { unique: false });
       objectStore.createIndex('loc', 'loc', { unique: false });
     };
+    */
 
     // Initialize the user's Camera Interface
     selectors.current = [audioInputSelect.current, audioOutputSelect.current, videoSelect.current];
@@ -1591,7 +1607,7 @@ function SnapPix( props ) {
       <div className="head">
         <h1 className="pip_title">Snap Pix</h1>
       </div>
-      <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
+      <ul className="controls" style={{ padding: 0, margin: 0 }}>
         <li className="image_select">
           <img src=".\both_mic.png" alt="Select audio input source" />
           <select ref={audioInputSelect} name="audioSource"></select>
@@ -1638,34 +1654,44 @@ function SnapPix( props ) {
 }
 function RecordNote( props ) {
   const screenplay =  props.screenplay;
-  const [worker, setWorker] = useState(false);
-  const [engine, setEngine] = useState(false);
-  const [initialized, setInitialized] = useState(false);
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
   const [phase_description, setPhaseDescription] = useState();
-  const [phase, setPhase] = useState( 0 );
+  const [phase, setPhase] = useState( 3 );
+  const [camera_type, setCameraType] = useState( 'user' );
   const [dId, setDId] = useState( -1 );
-  const [mic_type, setMicType] = useState( 'user' );
   const [file_list, setFileList] = useState( [] );
+  const [streaming, setStreaming] = useState( false );
+
+  const recordNoteDBRequest = useRef( false );
+  const db = useRef( false );
+  const mediaRecorder = useRef( false );
+  const selectors = useRef();
+  const loc = useRef( false );
+  const recordedChunks = useRef( [] );
 
   const panel = useRef();
-  const reset = useRef();
+  const recVid_button = useRef();
+  const recordedNotes = useRef();
+  const foot = useRef();
+  const videoElement = useRef();
+  const audioInputSelect = useRef();
+  const audioOutputSelect = useRef();
+  const videoSelect = useRef();
 
   function cleanup(){
-    let async_f = async ()=>{
+    navigator.mediaDevices.getUserMedia({video: true, audio: true})
+      .then(mediaStream => {
+        const stream = mediaStream;
+        const tracks = stream.getTracks();
+        for( const track of tracks ){
+          track.stop();
+        }
+      });
+  }
+  function initialize(){
+    'use strict';
 
-    }
-    async_f();
-  };
-  useEffect( ()=>{
-    //setWorker( new Worker('../lib/workers/AudioEngine.ts') );
-    setEngine( {
-      onmessage: function(e) {
-        /// ... handle inputFrame
-      }
-    });
-    setInitialized( true );
     const entrance_transition = new SceneTransformation({
       update: ( delta )=>{
         let cache = entrance_transition.cache;
@@ -1686,11 +1712,11 @@ function RecordNote( props ) {
       reset: ()=>{
         entrance_transition.cache.duration = 15;
         entrance_transition.cache.frame = 0;
-        screenplay.updatables.set( 'RecordNote_entrance_transition', entrance_transition );
+        screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
       },
       post: ( )=>{
         let cache = entrance_transition.cache;
-        screenplay.updatables.delete( 'RecordNote_entrance_transition' );
+        screenplay.updatables.delete( 'SnapPix_entrance_transition' );
         panel.current.style.transform = `scale(1)`;
       }
     });
@@ -1715,891 +1741,368 @@ function RecordNote( props ) {
       reset: ()=>{
         exit_transition.cache.duration = 15;
         exit_transition.cache.frame = 0;
-        screenplay.updatables.set( 'RecordNote_exit_transition', exit_transition );
+        screenplay.updatables.set( 'SnapPix_exit_transition', exit_transition );
       },
       post: ( )=>{
         let cache = exit_transition.cache;
-        screenplay.updatables.delete( 'RecordNote_exit_transition' );
+        screenplay.updatables.delete( 'SnapPix_exit_transition' );
         panel.current.style.transform = `scale(0)`;
         director.emit( `${dictum_name}_progress`, dictum_name, ndx );
       }
     });
     setExit( exit_transition );
+    screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
 
-    screenplay.updatables.set( 'RecordNote_entrance_transition', entrance_transition );
+    // Load SnapPix Database
+    function onError( event ){ /* TODO: Show the failed attempt to the user */ };
+    function onSuccess( event ){
+      db.current = event.target.result;
+      loadRecordedNotes();
+    }
+    OpenIndexedDBRequest( 'RecordNote', 1, onError, onSuccess );
+    /*
+    recordNoteDBRequest.current = window.indexedDB.open( 'RecordNote', 1 );
+    recordNoteDBRequest.current.onerror = (event) => {};
+    recordNoteDBRequest.current.onsuccess = (event) => {
+      // Store the result of opening the database in the db variable. This is used a lot below
+      db.current = recordNoteDBRequest.current.result;
+      // Run the loadRecordedNotes() function to populate the RecordNote display with working pix yet to be saved.
+      loadRecordedNotes();
+    };
+    recordNoteDBRequest.current.onupgradeneeded = (event) => {
+      db.current = event.target.result;
+      db.current.onerror = (event) => {
+      };
+      // Create an objectStore for this database
+      let objectStore = db.current.createObjectStore('RecordNote', { keyPath: 't' });
+      // Define what data items the objectStore will contain
+      objectStore.createIndex('blob', 'blob', { unique: false });
+      objectStore.createIndex('loc', 'loc', { unique: false });
+    };
+    */
 
+    // Initialize the user's Camera Interface
+    selectors.current = [audioInputSelect.current];
+    audioInputSelect.current.disabled = !('sinkId' in HTMLMediaElement.prototype);
+    function gotDevices(deviceInfos) {
+      // Handles being called several times to update labels. Preserve values.
+      const values = selectors.current.map(select => select.value);
+      selectors.current.forEach(select => {
+        while (select.firstChild) {
+          select.removeChild(select.firstChild);
+        }
+      });
+      for (let i = 0; i !== deviceInfos.length; ++i) {
+        const deviceInfo = deviceInfos[i];
+        const option = document.createElement('option');
+        option.value = deviceInfo.deviceId;
+        if (deviceInfo.kind === 'audioinput') {
+          option.text = deviceInfo.label || `microphone ${audioInputSelect.current.length + 1}`;
+          audioInputSelect.current.appendChild(option);
+        }
+      }
+      selectors.current.forEach((select, selectorIndex) => {
+        if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+          select.value = values[selectorIndex];
+        }
+      });
+    }
+    navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+    audioInputSelect.current.onchange = start;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition( (pos)=>{
+        loc.current = pos;
+      });
+    }
+    start();
     return cleanup;
-  }, []);
+  }
+  useEffect( initialize, [] );
+  async function loadRecordedNotes(){
+    recordedNotes.current.replaceChildren();
 
-  useEffect( ()=>{
-    if (initialized){
-      let async_f = async ()=>{
-
+    const objectStore = db.current.transaction( 'RecordNote' ).objectStore( 'RecordNote' );
+    objectStore.openCursor().onsuccess = ( event )=>{
+      const cursor = event.target.result;
+      // Check if there are no (more) cursor items to iterate through
+      if (!cursor) {
+        return;
       }
-      async_f();
+      const { blob, t, loc } = cursor.value;
+      displayRecording( blob, t, loc );
+
+
+      // continue on to the next item in the cursor
+      cursor.continue();
     }
-  }, [initialized]);
+  }
+  async function displayRecording( blob, t, loc ) {
 
-  useEffect( ()=>{
-    let async_f = async ()=>{
-      switch( phase ){
-        case 0:
-          setPhaseDescription( 'Upload audio files or Record a new one?' );
-          reset.current.disabled = true;
-          break;
+    const urlCreator = window.URL || window.webkitURL;
+    const url = urlCreator.createObjectURL( await blob );
+    let li = document.createElement( 'li' );
+    switch( blob.type ){
+      case 'image/png':
+        let img = document.createElement( 'img' );
+        img.setAttribute( 'src', url );
+        img.setAttribute( 'id', t );
+        li.appendChild( img );
+        li.classList.add( 'snap' );
+        recordedNotes.current.appendChild( li );
+        break;
+      case 'video/webm':
+        let vid = document.createElement( 'video' );
+        vid.setAttribute( 'src', url );
+        vid.setAttribute( 'id', t );
+        li.appendChild( vid );
+        li.classList.add( 'vid' );
+        recordedNotes.current.appendChild( li );
+        break;
+    }
 
-        case 1:
-          setPhaseDescription( 'Select one or more audio files to add to your collection.' );
-          reset.current.disabled = false;
-          break;
+  };
+  // Image Capture Routines
+  // Attach audio output device to video element using device/sink ID.
+  function start() {
+    if (window.stream) {
+      window.stream.getTracks().forEach(track => {
+        track.stop();
+      });
+    }
+    const audioSource = audioInputSelect.current.value;
+    const constraints = {
+      audio: {deviceId: audioSource ? {exact: audioSource} : undefined}
+    };
+    navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
+  }
+  function attachSinkId(element, sinkId) {
+    if (typeof element.sinkId !== 'undefined') {
+      element.setSinkId(sinkId)
+          .then(() => {
+            console.log(`Success, audio output device attached: ${sinkId}`);
+          })
+          .catch(error => {
+            let errorMessage = error;
+            if (error.name === 'SecurityError') {
+              errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
+            }
+            console.error(errorMessage);
+            // Jump back to first output device in the list as it's the default.
+            audioInputSelect.current.selectedIndex = 0;
+          });
+    } else {
+      console.warn('Browser does not support output device selection.');
+    }
+  }
+  function changeAudioDestination() {
+    const audioDestination = audioInputSelect.current.value;
+    attachSinkId(videoElement.current, audioDestination);
+  }
+  function gotStream(stream) {
+    window.stream = stream; // make stream available to console
+    videoElement.current.srcObject = stream;
 
-        case '2a':
-        case '2b':
-        case '2c':
-        case '2d':
-          setPhaseDescription( 'Record an audio note.' );
-          reset.current.disabled = false;
-          break;
+    function handleDataAvailable( event ) {
+      console.log( "data-available" );
+      if ( event.data.size > 0 ) {
+        recordedChunks.current.push( event.data );
+        download();
+      } else {
+        // …
       }
     }
-    async_f();
-    setDId( -1 );
-  },[phase]);
+    async function download() {
+      const blob = new Blob( recordedChunks.current, {
+        type: "video/webm",
+      } );
+      const timestamp = Date.now();
+      // Display the photo
+      displayRecording( blob, timestamp, loc.current.coords );
+      // Store Snap in RecordNote db
+      addSnap( { t: timestamp, blob: await blob, loc: JSON.stringify( loc.current.coords ) } );
 
-  function startRecording( event ){
-    debugger;
-    event.preventDefault();
+    }
+
+    mediaRecorder.current = new MediaRecorder(stream);
+    console.log( mediaRecorder.current.mimeType );
+    mediaRecorder.current.ondataavailable = handleDataAvailable;
+
+    // Refresh button list in case labels have become available
+    return navigator.mediaDevices.enumerateDevices();
+  }
+  function gotDevices(deviceInfos) {
+    // Handles being called several times to update labels. Preserve values.
+    const values = selectors.current.map( select => select.value);
+    selectors.current.forEach(select => {
+      while (select.firstChild) {
+        select.removeChild(select.firstChild);
+      }
+    });
+    for (let i = 0; i !== deviceInfos.length; ++i) {
+      const deviceInfo = deviceInfos[i];
+      const option = document.createElement('option');
+      option.value = deviceInfo.deviceId;
+      if (deviceInfo.kind === 'audioinput') {
+        option.text = deviceInfo.label || `microphone ${audioInputSelect.current.length + 1}`;
+        audioInputSelect.current.appendChild(option);
+      } else if (deviceInfo.kind === 'audiooutput') {
+        option.text = deviceInfo.label || `speaker ${audioOutputSelect.current.length + 1}`;
+        audioOutputSelect.current.appendChild(option);
+      } else if (deviceInfo.kind === 'videoinput') {
+        option.text = deviceInfo.label || `camera ${videoSelect.current.length + 1}`;
+        videoSelect.current.appendChild(option);
+      } else {
+        console.log('Some other kind of source/device: ', deviceInfo);
+      }
+    }
+    selectors.current.forEach((select, selectorIndex) => {
+      if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+        select.value = values[selectorIndex];
+      }
+    });
+  }
+  function handleError(error) {
+    console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+  }
+  async function snapPic( e ){
+    e.preventDefault();
+
+    const photo_canvas = new OffscreenCanvas( videoElement.current.videoWidth, videoElement.current.videoHeight );
+    const photo_context = photo_canvas.getContext( '2d', { alpha: false } );
+    photo_context.drawImage( videoElement.current, 0, 0 );
+    const timestamp = Date.now();
+    const blob = await photo_canvas.convertToBlob( {type:'image/png', quality: 1} );
+
+    // Display the photo
+    displayRecording( blob, timestamp, loc.current.coords );
+    // Store Snap in RecordNote db
+    addSnap( { t: timestamp, blob: await blob, loc: JSON.stringify( loc.current.coords ) } )
+
+  }
+  async function recVid( e ){
+    switch( mediaRecorder.current.state ){
+      case 'recording':
+        mediaRecorder.current.stop();
+        recVid_button.current.src = ".\\both_rec-vid.png";
+        break;
+
+      case 'inactive':
+        recordedChunks.current = [];
+        mediaRecorder.current.start();
+        recVid_button.current.src = ".\\both_stop-gesture.png";
+        break;
+
+      case 'paused':
+        mediaRecorder.current.start();
+        recVid_button.current.src = ".\\both_stop-gesture.png";
+        break;
+    }
+  }
+  function addSnap( snap ){
+    const transaction = db.current.transaction(['RecordNote'], 'readwrite');
+    transaction.oncomplete = () => {
+      // TODO: Verify that the image is in there?
+    };
+    transaction.onerror = () => {};
+    let objectStore = transaction.objectStore( 'RecordNote' );
+    const addSnapReq = objectStore.add( snap );
+    addSnapReq.onsuccess = ( event )=>{}
   }
 
   return(
     <>
     <style>{`
-      #RecordNote video, #RecordNote canvas, #RecordNote .phase_description, #RecordNote_Photos{
-        grid-area: body;
+
+
+      #RecordNote .status{
+        display: grid;
+        grid-auto-rows: 1fr;
+        grid-template-columns: repeat(5, 1fr);
+        grid-gap: calc( var(--sF) * 1rem );
+        background: var(--panelBG);
       }
-      #RecordNote .phase_description{
-        font-size: 3rem;
-        text-align: left;
-      }
-      #RecordNote .description{
-        grid-area: status;
-        position: relative;
-      }
-      #RecordNote .description > label, #RecordNote .description > span{
-        position: absolute;
-      }
-      #RecordNote input[type="image"]{
-        width: fit-content;
-        height: fit-content;
-        place-self: center;
-        border-radius: 25%;
+      #RecordNote .status li{
+        height: 7rem;
         cursor: pointer;
       }
-      #RecordNote .upload_audio_button{
-        background: radial-gradient( var(--v3), var(--v2));
-        grid-area: ctrl;
+      #RecordNote .status img, #RecordNote status video{
+        height: 100%;
       }
-      #RecordNote .upload_audio_button:hover{
-        background: radial-gradient( var(--v2), var(--v2));
-      }
-      #RecordNote .camera_button{
-        grid-area: ctrl;
-        background: radial-gradient( var(--g3), var(--g2));
-      }
-      #RecordNote .camera_button:hover{
-        background: radial-gradient( var(--g2), var(--g2));
-      }
-      #RecordNote .selfie_camera{
-        grid-area: ctrl;
-        grid-row: 2;
-        margin: auto;
-        text-align: center;
-      }
-      #RecordNote .selfie_camera input{
-        background: radial-gradient( var(--g3), var(--g2));
-      }
-      #RecordNote .selfie_camera input:hover{
-        background: radial-gradient( var(--g2), var(--g2));
-      }
-      #RecordNote .environment_camera{
-        grid-area: ctrl;
-        grid-row: 3;
-        margin: auto;
-        text-align: center;
-      }
-      #RecordNote .environment_camera input{
-        background: radial-gradient( var(--v3), var(--v2));
-      }
-      #RecordNote .environment_camera input:hover{
-        background: radial-gradient( var(--v2), var(--v2));
-      }
-      #RecordNote .snap_photo{
-        grid-area: ctrl;
-        grid-row: 2;
-        margin: auto;
-        text-align: center;
-      }
-      #RecordNote .snap_photo input{
-        background: radial-gradient( var(--g3), var(--g2));
-      }
-      #RecordNote .snap_photo input:hover{
-        background: radial-gradient( var(--g2), var(--g2));
-      }
-      #RecordNote .switch_camera{
-        grid-area: ctrl;
-        grid-row: 3;
-        margin: auto;
-        text-align: center;
-      }
-      #RecordNote .switch_camera input{
-        background: radial-gradient( var(--v3), var(--v2));
-      }
-      #RecordNote .switch_camera input:hover{
-        background: radial-gradient( var(--v2), var(--v2));
-      }
-      #RecordNote .pip_cancel, #RecordNote .pip_continue, #RecordNote .pip_accept{
 
+      #snapPic_button:active{
+        background: white;
       }
-      #RecordNote .exit_RecordNote{
-        grid-area: foot;
-        grid-column: 5;
+
+      #exit_RecordNote{
+        grid-column: 1;
       }
-      #RecordNote .reset_RecordNote{
-        grid-area: foot;
-        grid-column: 4;
+      #reset_RecordNote{
+        grid-column: 2;
       }
+
+      #RecordNote video{
+        margin: auto;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
       `}</style>
     <div id="RecordNote" ref={panel} className="pip_gui pip_post">
-      <h1 className="pip_title">Record Audio Notes
-      </h1>
-      <span className="pip_text phase_description">{phase_description}</span>
-      {phase === 0 ? <>
-        <input name="upload_audio_button" src=".\both_upload-image.png" type="image" className="upload_audio_button" onMouseOver={()=>{setDId( 0 )}} onClick={()=>{setPhase( 1 )}}></input>
-        <br />
-        <label htmlFor="upload_audio_button" className="pip_text" >Upload Audio</label>
-        <input name="microphone_button" type="image" src=".\both_camera.png" className="camera_button" onMouseOver={()=>{setDId( 1 )}} onClick={()=>{setPhase( '2a' )}}></input>
-        <br />
-        <label htmlFor="microphone_button" className="pip_text" >Record a Note</label>
-        </> : <></>}
-      {phase === '2a' || phase === '2b' || phase === '2c' || phase === '2d' ? <>
-        <div className="snap_photo">
-          <input type="file" name="record" accept="audio/*" capture={mic_type} onMouseOver={()=>{setDId( 1 )}} onClick={startRecording}/>
+      <div className="head">
+        <h1 className="pip_title">Snap Pix</h1>
+      </div>
+      <ul className="controls" style={{ padding: 0, margin: 0 }}>
+        <li className="image_select">
+          <img src=".\both_mic.png" alt="Select audio input source" />
+          <select ref={audioInputSelect} name="audioSource"></select>
           <br />
-          <label htmlFor="record" className="pip_text" >Start Recording</label>
-        </div>
-        </> : <></>}
-      <span className="description">
-        {( dId === 0 ) ? <span className="pip_text">Upload an audio file from local storage, or from a publicly accessible url.</span> : <></> }
-        {( dId === 1 ) ? <span className="pip_text">Use your microphone to add a new note to your collection.</span> : <></> }
-        {( dId === 2 ) ? <span className="pip_text">Import as many audio files as you like into your collection.</span> : <></> }
-        {( dId === 3 ) ? <span className="pip_text">Take a picture of your face<br/>"Don't for get to smile!" - Mona Lisa</span> : <></> }
-        {( dId === 4 ) ? <span className="pip_text">Take a picture using back-facing camera<br />"I count to 5... that's when things get real." - Demetri Martin perhaps?</span> : <></> }
-        {( dId === 5 ) ? <span className="pip_text">Click to snap a photo.  Hold it down for rapid-fire mode!</span> : <></> }
-        {( dId === 6 ) ? <span className="pip_text">Switch to another camera...  How very Bourgeoise!</span> : <></> }
-      </span>
-      <button name="exit_RecordNote" className="pip_cancel exit_RecordNote" type="button" onClick={props.toggle}>Exit</button>
-      <button ref={reset} name="reset_RecordNote" className="pip_continue reset_RecordNote" type="button" onClick={()=>{setPhase( 0 )}}>Back</button>
+          <label htmlFor="audioSource">Audio Input</label>
+        </li>
+
+        <li className="image_select">
+          <img src=".\both_sound.png" alt="Select audio output source" />
+          <select ref={audioOutputSelect} name="audioOutput"></select>
+          <br />
+          <label htmlFor="audioOutput">Audio Output</label>
+        </li>
+        <li><hr /></li>
+        <li className="image_select">
+          <img src=".\both_camera.png" alt="Select video source" />
+          <select ref={videoSelect} name="videoSource"></select>
+          <br />
+          <label htmlFor="videoSource">Camera</label>
+        </li>
+        <li id="snapPic_button" className="image_button">
+          <input  type="image" name="snap" onClick={snapPic} src=".\both_capture-photo.png" onMouseOver={()=>{setDId( 3 )}} alt="Snap Photo" />
+          <br />
+          <label htmlFor="snap" className="pip_text" >Snap Pix</label>
+        </li>
+        <li className="image_button">
+          <input type="image" name="record" ref={recVid_button} onClick={recVid} src=".\both_rec-vid.png" onMouseOver={()=>{setDId( 3 )}} alt="Record Video" />
+          <br />
+          <label htmlFor="record" className="pip_text">Record Vid</label>
+        </li>
+      </ul>
+      <div className="body">
+        <video ref={videoElement} playsInline autoPlay></video>
+      </div>
+      <ul className="status" ref={recordedNotes}></ul>
+      <ul id="RecordNote_Foot" className="foot" ref={foot}>
+        <li>
+          <button id="exit_RecordNote" name="exit_RecordNote" className="pip_cancel exit_RecordNote" type="button" onClick={props.toggle}>Exit</button>
+        </li>
+      </ul>
     </div>
     </>
   )
 }
-function RemindMe1( props ) {
-    const [initialized, setInitialized] = useState( false );
-    const db = useRef(false);
-    const DBOpenRequest = useRef( false );
-    const objectStore = useRef( false );
-    const screenplay =  props.screenplay;
-
-    // UI Element Reference
-    const panel = useRef();
-    const taskList = useRef();
-    const taskForm = useRef();
-    const title = useRef();
-    const hours = useRef();
-    const minutes = useRef();
-    const day = useRef();
-    const month = useRef();
-    const year = useRef();
-    const submit = useRef();
-    const note = useRef();
-    const notificationBtn = useRef();
-
-    useEffect( ()=>{
-      if(!initialized){
-
-        const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-        // Create a reference to the notifications list in the bottom of the app; we will write database messages into this list by
-        // appending list items as children of this element
-
-
-        // Do an initial check to see what the notification permission state is
-        if (Notification.permission === 'denied' || Notification.permission === 'default') {
-          notificationBtn.current.style.display = 'block';
-        } else {
-          notificationBtn.current.style.display = 'none';
-        }
-
-        note.current.appendChild(createListItem('App initialised.'));
-        // Let us open our database
-        DBOpenRequest.current = window.indexedDB.open('RemindMe', 1);
-
-        // Register two event handlers to act on the database being opened successfully, or not
-        DBOpenRequest.current.onerror = (event) => {
-          note.current.appendChild(createListItem('Error loading database.'));
-        };
-
-        DBOpenRequest.current.onsuccess = (event) => {
-          note.current.appendChild(createListItem('Database initialised.'));
-
-          // Store the result of opening the database in the db variable. This is used a lot below
-          db.current = DBOpenRequest.current.result;
-
-          // Run the displayData() function to populate the task list with all the to-do list data already in the IndexedDB
-          displayData();
-        };
-
-        // This event handles the event whereby a new version of the database needs to be created
-        // Either one has not been created before, or a new version number has been submitted via the
-        // window.indexedDB.open line above
-        // it is only implemented in recent browsers
-        DBOpenRequest.current.onupgradeneeded = (event) => {
-          db.current = event.target.result;
-
-          db.current.onerror = (event) => {
-            note.current.appendChild(createListItem('Error loading database.'));
-          };
-
-
-          // Create an objectStore for this database
-          objectStore.current = db.current.createObjectStore('RemindMe', { keyPath: 'taskTitle' });
-
-          // Define what data items the objectStore will contain
-          objectStore.current.createIndex('hours', 'hours', { unique: false });
-          objectStore.current.createIndex('minutes', 'minutes', { unique: false });
-          objectStore.current.createIndex('day', 'day', { unique: false });
-          objectStore.current.createIndex('month', 'month', { unique: false });
-          objectStore.current.createIndex('year', 'year', { unique: false });
-
-          objectStore.current.createIndex('notified', 'notified', { unique: false });
-
-          note.current.appendChild(createListItem('Object store created.'));
-        };
-        setInitialized( true );
-      }
-    }, [initialized]);
-
-    function addData(e) {
-      // Prevent default, as we don't want the form to submit in the conventional way
-      e.preventDefault();
-
-      // Stop the form submitting if any values are left empty.
-      // This should never happen as there is the required attribute
-      if (title.current.value === '' || hours.current.value === null || minutes.current.value === null || day.current.value === '' || month.current.value === '' || year.current.value === null) {
-        note.current.appendChild(createListItem('Data not submitted — form incomplete.'));
-        return;
-      }
-
-      // Grab the values entered into the form fields and store them in an object ready for being inserted into the IndexedDB
-      const newItem = [
-        { taskTitle: title.current.value, hours: hours.current.value, minutes: minutes.current.value, day: day.current.value, month: month.current.value, year: year.current.value, notified: 'no' },
-      ];
-
-      // Open a read/write DB transaction, ready for adding the data
-      const transaction = db.current.transaction(['RemindMe'], 'readwrite');
-
-      // Report on the success of the transaction completing, when everything is done
-      transaction.oncomplete = () => {
-        note.current.appendChild(createListItem('Transaction completed: database modification finished.'));
-
-        // Update the display of data to show the newly added item, by running displayData() again.
-        displayData();
-      };
-
-      // Handler for any unexpected error
-      transaction.onerror = () => {
-        note.current.appendChild(createListItem(`Transaction not opened due to error: ${transaction.error}`));
-      };
-
-      // Call an object store that's already been added to the database
-      objectStore.current = transaction.objectStore('RemindMe');
-      console.log(objectStore.current.indexNames);
-      console.log(objectStore.current.keyPath);
-      console.log(objectStore.current.name);
-      console.log(objectStore.current.transaction);
-      console.log(objectStore.current.autoIncrement);
-
-      // Make a request to add our newItem object to the object store
-      const objectStoreRequest = objectStore.current.add(newItem[0]);
-      objectStoreRequest.onsuccess = (event) => {
-
-        // Report the success of our request
-        // (to detect whether it has been succesfully
-        // added to the database, you'd look at transaction.oncomplete)
-        note.current.appendChild(createListItem('Request successful.'));
-
-        // Clear the form, ready for adding the next entry
-        title.current.value = '';
-        hours.current.value = null;
-        minutes.current.value = null;
-        day.current.value = 1;
-        month.current.value = 'January';
-        year.current.value = 2020;
-      };
-    };
-
-    // Ask for permission when the 'Enable notifications' button is clicked
-    function askNotificationPermission() {
-
-      // Function to actually ask the permissions
-      function handlePermission(permission) {
-        // Whatever the user answers, we make sure Chrome stores the information
-        if (!Reflect.has(Notification, 'permission')) {
-          Notification.permission = permission;
-        }
-
-        // Set the button to shown or hidden, depending on what the user answers
-        if (Notification.permission === 'denied' || Notification.permission === 'default') {
-          notificationBtn.current.classList.remove( 'allowed' );
-        } else {
-          notificationBtn.current.classList.add( 'allowed' );
-        }
-      };
-
-      // Check if the browser supports notifications
-      if (!Reflect.has(window, 'Notification')) {
-        console.log('This browser does not support notifications.');
-      } else {
-        if (checkNotificationPromise()) {
-          Notification.requestPermission().then(handlePermission);
-        } else {
-          Notification.requestPermission(handlePermission);
-        }
-      }
-    };
-
-    // Check whether the deadline for each task is up or not, and responds appropriately
-    function checkDeadlines() {
-
-      // First of all check whether notifications are enabled or denied
-      if (Notification.permission === 'denied' || Notification.permission === 'default') {
-        notificationBtn.current.style.display = 'block';
-      } else {
-        notificationBtn.current.style.display = 'none';
-      }
-
-      // Grab the current time and date
-      const now = new Date();
-
-      // From the now variable, store the current minutes, hours, day of the month, month, year and seconds
-      const minuteCheck = now.getMinutes();
-      const hourCheck = now.getHours();
-      const dayCheck = now.getDate(); // Do not use getDay() that returns the day of the week, 1 to 7
-      const monthCheck = now.getMonth();
-      const yearCheck = now.getFullYear(); // Do not use getYear() that is deprecated.
-
-      // Open a new transaction
-      objectStore.current = db.current.transaction(['RemindMe'], 'readwrite').objectStore('RemindMe');
-
-      // Open a cursor to iterate through all the data items in the IndexedDB
-      objectStore.current.openCursor().onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (!cursor) return;
-        const { hours, minutes, day, month, year, notified, taskTitle } = cursor.value;
-
-        // convert the month names we have installed in the IDB into a month number that JavaScript will understand.
-        // The JavaScript date object creates month values as a number between 0 and 11.
-        const monthNumber = MONTHS.indexOf(month);
-        if (monthNumber === -1) throw new Error('Incorrect month entered in database.');
-
-        // Check if the current hours, minutes, day, month and year values match the stored values for each task.
-        // The parseInt() function transforms the value from a string to a number for comparison
-        // (taking care of leading zeros, and removing spaces and underscores from the string).
-        let matched = parseInt(hours) === hourCheck;
-        matched &&= parseInt(minutes) === minuteCheck;
-        matched &&= parseInt(day) === dayCheck;
-        matched &&= parseInt(monthNumber) === monthCheck;
-        matched &&= parseInt(year) === yearCheck;
-        if (matched && notified === 'no') {
-          // If the numbers all do match, run the createNotification() function to create a system notification
-          // but only if the permission is set
-          if (Notification.permission === 'granted') {
-            createNotification(taskTitle);
-          }
-        }
-
-        // Move on to the next cursor item
-        cursor.continue();
-      };
-    };
-
-    // Check whether browser supports the promise version of requestPermission()
-    // Safari only supports the old callback-based version
-    function checkNotificationPromise() {
-
-      try {
-        Notification.requestPermission().then();
-      } catch(e) {
-        return false;
-      }
-
-      return true;
-    };
-
-    function cleanup(){
-
-    }
-
-    function createListItem(contents) {
-      const listItem = document.createElement('li');
-      listItem.classList.add( "pip_text" );
-      listItem.textContent = contents;
-      return listItem;
-    };
-
-    // Create a notification with the given title
-    function createNotification(new_title) {
-      // Create and show the notification
-      const img = '/to-do-notifications/img/icon-128.png';
-      const text = `HEY! Your task "${new_title}" is now overdue.`;
-      const notification = new Notification('To do list', { body: new_title, icon: img });
-
-      // We need to update the value of notified to 'yes' in this particular data object, so the
-      // notification won't be set off on it again
-
-      // First open up a transaction
-      objectStore.current = db.current.transaction(['RemindMe'], 'readwrite').objectStore('RemindMe');
-
-      // Get the to-do list object that has this title as its title
-      const objectStoreTitleRequest = objectStore.current.get(new_title);
-
-      objectStoreTitleRequest.onsuccess = () => {
-        // Grab the data object returned as the result
-        const data = objectStoreTitleRequest.result;
-
-        // Update the notified value in the object to 'yes'
-        data.notified = 'yes';
-
-        // Create another request that inserts the item back into the database
-        const updateTitleRequest = objectStore.current.put(data);
-
-        // When this new request succeeds, run the displayData() function again to update the display
-        updateTitleRequest.onsuccess = () => {
-
-          displayData();
-        };
-      };
-    };
-
-    function deleteItem(event) {
-
-      // Retrieve the name of the task we want to delete
-      const dataTask = event.target.getAttribute('data-task');
-
-      // Open a database transaction and delete the task, finding it by the name we retrieved above
-      const transaction = db.current.transaction(['RemindMe'], 'readwrite');
-      transaction.objectStore('RemindMe').delete(dataTask);
-
-      // Report that the data item has been deleted
-      transaction.oncomplete = () => {
-        // Delete the parent of the button, which is the list item, so it is no longer displayed
-        event.target.parentNode.parentNode.removeChild(event.target.parentNode);
-        note.current.appendChild(createListItem(`Task "${dataTask}" deleted.`));
-      };
-    };
-
-    function displayData() {
-
-      // First clear the content of the task list so that you don't get a huge long list of duplicate stuff each time
-      // the display is updated.
-      while (taskList.current.firstChild) {
-        taskList.current.removeChild(taskList.current.lastChild);
-      }
-
-      // Open our object store and then get a cursor list of all the different data items in the IDB to iterate through
-      objectStore.current = db.current.transaction('RemindMe').objectStore('RemindMe');
-      objectStore.current.openCursor().onsuccess = (event) => {
-        const cursor = event.target.result;
-        // Check if there are no (more) cursor items to iterate through
-        if (!cursor) {
-          // No more items to iterate through, we quit.
-          note.current.appendChild(createListItem('Entries all displayed.'));
-          return;
-        }
-
-        // Check which suffix the deadline day of the month needs
-        const { hours, minutes, day, month, year, notified, taskTitle } = cursor.value;
-        const ordDay = ordinal(day);
-
-        // Build the to-do list entry and put it into the list item.
-        const toDoText = `${taskTitle} — ${hours}:${minutes}, ${month} ${ordDay} ${year}.`;
-        const listItem = createListItem(toDoText);
-
-        if (notified === 'yes') {
-          listItem.style.textDecoration = 'line-through';
-          listItem.style.color = 'rgba(255, 0, 0, 0.5)';
-        }
-
-        // Put the item item inside the task list
-        taskList.current.appendChild(listItem);
-
-        // Create a delete button inside each list item,
-        const deleteButton = document.createElement('button');
-        listItem.appendChild(deleteButton);
-        deleteButton.textContent = 'X';
-
-        // Set a data attribute on our delete button to associate the task it relates to.
-        deleteButton.setAttribute('data-task', taskTitle);
-
-        // Associate action (deletion) when clicked
-        deleteButton.onclick = (event) => {
-          deleteItem(event);
-        };
-
-        // continue on to the next item in the cursor
-        cursor.continue();
-      };
-    };
-
-    function exit_RemindMe( event ){
-      event.stopPropagation();
-
-    }
-
-    function ordinal(day) {
-      const n = day.toString();
-      const last = n.slice(-1);
-      if (last === '1' && n !== '11') return `${n}st`;
-      if (last === '2' && n !== '12') return `${n}nd`;
-      if (last === '3' && n !== '13') return `${n}rd`;
-      return `${n}th`;
-    };
-
-    return(
-      <>
-      <style>{`
-        #RemindMe h1, #RemindMe h2 {
-          text-align: center;
-          background: #d88;
-          font-family: Arial, Helvetica, sans-serif;
-        }
-
-        #RemindMe h1 {
-          margin: 0;
-          background: #d66;
-        }
-
-        #RemindMe h2 {
-        }
-
-        /* Bottom toolbar styling  */
-
-        #RemindMe #toolbar {
-          position: relative;
-          height: 6rem;
-          width: 100%;
-          background: #d66;
-          border-top: 2px solid #d33;
-          border-bottom: 2px solid #d33;
-        }
-
-        #RemindMe #enable,
-        #RemindMe input[type="submit"] {
-          line-height: 1.8;
-          border-radius: 5px;
-          border: 1px solid black;
-          text-shadow: 1px 1px 1px black;
-          border: 1px solid rgba(0, 0, 0, 0.1);
-          box-shadow: inset 0px 5px 3px rgba(255, 255, 255, 0.2),
-            inset 0px -5px 3px rgba(0, 0, 0, 0.2);
-        }
-
-        #RemindMe #enable {
-          position: absolute;
-          bottom: 0.3rem;
-          right: 0.3rem;
-        }
-
-        #RemindMe #notifications {
-          margin: 0;
-          position: relative;
-          background: #ddd;
-          position: absolute;
-          top: 0rem;
-          left: 0rem;
-          height: 5.4rem;
-          width: 50%;
-          overflow: auto;
-          line-height: 1.2;
-        }
-
-        #RemindMe #notifications li {
-          margin-left: 1.5rem;
-        }
-
-        /* New item form styling */
-
-        #RemindMe .form-box {
-          background: #d66;
-          width: 85%;
-          margin: 2rem auto;
-          box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-        }
-
-        #RemindMe form div {
-          margin-bottom: 1rem;
-        }
-
-        #RemindMe form .full-width {
-          margin: 1rem auto 2rem;
-          width: 100%;
-        }
-
-        #RemindMe form .half-width {
-          width: 50%;
-          float: left;
-        }
-
-        #RemindMe form .third-width {
-          width: 33%;
-          float: left;
-        }
-
-        #RemindMe form div label {
-          width: 10rem;
-          float: left;
-          line-height: 1.6;
-        }
-
-        #RemindMe form .full-width input {
-          width: 30rem;
-        }
-
-        #RemindMe form .half-width input {
-          width: 8.75rem;
-        }
-
-        #RemindMe form .third-width select {
-          width: 13.5rem;
-        }
-
-        #RemindMe form div input[type="submit"] {
-          clear: both;
-          width: 20rem;
-          display: block;
-          height: 3rem;
-          margin: 0 auto;
-          position: relative;
-          top: 0.5rem;
-        }
-
-        /* || tasks box */
-
-        #RemindMe .task-box {
-          width: 85%;
-          margin: 2rem auto;
-        }
-
-        #RemindMe .task-box ul {
-          margin: 0;
-        }
-
-        #RemindMe .task-box li {
-          list-style-type: none;
-          border-bottom: 2px solid #d33;
-        }
-
-        #RemindMe .task-box li:last-child {
-          border-bottom: none;
-        }
-
-        #RemindMe .task-box li:last-child {
-          margin-bottom: 0rem;
-        }
-
-        #RemindMe .task-box button {
-          margin-left: 2rem;
-          border: 1px solid #eee;
-          border-radius: 5px;
-          box-shadow: inset 0 -2px 5px rgba(0, 0, 0, 0.5) 1px 1px 1px black;
-        }
-
-        /* setting cursor for interactive controls */
-
-        #RemindMe button,
-        #RemindMe input[type="submit"],
-        #RemindMe select {
-          cursor: pointer;
-        }
-
-        /* media query for small screens */
-
-        @media (max-width: 32rem) {
-          #RemindMe body {
-            width: 100%;
-            border-left: none;
-            border-right: none;
-          }
-
-          #RemindMe form div {
-            clear: both;
-          }
-
-          #RemindMe form .full-width {
-            margin: 1rem auto;
-          }
-
-          #RemindMe form .half-width {
-            width: 100%;
-            float: none;
-          }
-
-          #RemindMe form .third-width {
-            width: 100%;
-            float: none;
-          }
-
-          #RemindMe form div label {
-            width: 36%;
-          }
-
-          #RemindMe form input,
-          #RemindMe form select,
-          #RemindMe form label {
-            line-height: 2.5rem;
-          }
-
-          #RemindMe form .full-width input {
-            width: 50%;
-          }
-
-          #RemindMe form .half-width input {
-            width: 50%;
-          }
-
-          #RemindMe form .third-width select {
-            width: 50%;
-          }
-
-          #RemindMe #enable {
-            right: 1rem;
-          }
-          `}
-      </style>
-      <div id="RemindMe" ref={panel} className="pip_gui pip_post">
-        <h1 className="pip_title">To-do list</h1>
-
-        <div className="task-box" ref={taskList}>
-          <ul id="task-list">
-
-          </ul>
-        </div>
-
-        <div className="form-box">
-          <h2 className="pip_title">Add new to-do item.</h2>
-
-          <form id="task-form" ref={taskForm} onSubmit={addData}>
-            <div className="full-width">
-              <label htmlFor="title" className="pip_text">Task title:</label>
-              <input type="text" id="title" ref={title} required />
-            </div>
-            <div className="half-width"><label htmlFor="deadline-hours" className="pip_text">Hours (hh):</label><input type="number" id="deadline-hours" ref={hours} required /></div>
-            <div className="half-width"><label htmlFor="deadline-minutes" className="pip_text">Mins (mm):</label><input type="number" id="deadline-minutes" ref={minutes} required /></div>
-            <div className="third-width"><label htmlFor="deadline-day" className="pip_text">Day:</label>
-              <select id="deadline-day" ref={day} required>
-                <option value="01">01</option>
-                <option value="02">02</option>
-                <option value="03">03</option>
-                <option value="04">04</option>
-                <option value="05">05</option>
-                <option value="06">06</option>
-                <option value="07">07</option>
-                <option value="08">08</option>
-                <option value="09">09</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-                <option value="13">13</option>
-                <option value="14">14</option>
-                <option value="15">15</option>
-                <option value="16">16</option>
-                <option value="17">17</option>
-                <option value="18">18</option>
-                <option value="19">19</option>
-                <option value="20">20</option>
-                <option value="21">21</option>
-                <option value="22">22</option>
-                <option value="23">23</option>
-                <option value="24">24</option>
-                <option value="25">25</option>
-                <option value="26">26</option>
-                <option value="27">27</option>
-                <option value="28">28</option>
-                <option value="29">29</option>
-                <option value="30">30</option>
-                <option value="31">31</option>
-              </select>
-            </div>
-
-            <div className="third-width">
-              <label htmlFor="deadline-month" className="pip_text">Month:</label>
-              <select id="deadline-month" ref={month} required>
-               <option value="January">January</option>
-               <option value="February">February</option>
-               <option value="March">March</option>
-               <option value="April">April</option>
-               <option value="May">May</option>
-               <option value="June">June</option>
-               <option value="July">July</option>
-               <option value="August">August</option>
-               <option value="September">September</option>
-               <option value="October">October</option>
-               <option value="November">November</option>
-               <option value="December">December</option>
-              </select>
-           </div>
-
-            <div className="third-width">
-              <label htmlFor="deadline-year" className="pip_text">Year:</label>
-              <select id="deadline-year" ref={year} required>
-               <option value="2025">2025</option>
-               <option value="2024">2024</option>
-               <option value="2023">2023</option>
-               <option value="2022">2022</option>
-               <option value="2021">2021</option>
-               <option value="2020">2020</option>
-               <option value="2019">2019</option>
-               <option value="2018">2018</option>
-               </select>
-           </div>
-
-            <div><input className="pip_accept" type="submit" id="submit" ref={submit} value="Add Task"/></div>
-            <div></div>
-          </form>
-        </div>
-
-        <div id="toolbar">
-          <ul id="notifications" ref={note}>
-
-          </ul>
-
-          <button id="enable" ref={notificationBtn} onClick={askNotificationPermission}>
-            Enable notifications
-          </button>
-        </div>
-
-        <input name="exit_RemindMe" className="pip_continue" type="button" onClick={props.toggle} value="Exit"></input>
-      </div>
-      </>
-    )
-  }
 function RemindMe( props ) {
   const screenplay =  props.screenplay;
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
   const [phase, setPhase] = useState( 0 );
 
-  const dbOpenRequest = useRef( false );
+  const remindMeDBRequest = useRef( false );
   const db = useRef( false );
 
   // UI Element Reference
@@ -2687,14 +2190,23 @@ function RemindMe( props ) {
     } else {
       notificationBtn.current.classList.add( 'allowed' );
     }
-    dbOpenRequest.current = window.indexedDB.open('RemindMe', 1);
-    dbOpenRequest.current.onerror = (event) => {
+
+    // Load RemindMe Database
+    function onError( event ){ /* TODO: Show the failed attempt to the user */ };
+    function onSuccess( event ){
+      db.current = event.target.result;
+      displayData();
+    }
+    OpenIndexedDBRequest( 'RemindMe', 1, onError, onSuccess );
+/*
+    remindMeDBRequest.current = window.indexedDB.open('RemindMe', 1);
+    remindMeDBRequest.current.onerror = (event) => {
     };
-    dbOpenRequest.current.onsuccess = (event) => {
-      db.current = dbOpenRequest.current.result;
+    remindMeDBRequest.current.onsuccess = (event) => {
+      db.current = remindMeDBRequest.current.result;
       displayData();
     };
-    dbOpenRequest.current.onupgradeneeded = (event) => {
+    remindMeDBRequest.current.onupgradeneeded = (event) => {
       db.current = event.target.result;
       db.current.onerror = (event) => {
       };
@@ -2706,6 +2218,7 @@ function RemindMe( props ) {
       objectStore.createIndex('year', 'year', { unique: false });
       objectStore.createIndex('notified', 'notified', { unique: false });
     };
+*/
 
     return cleanup;
   }
@@ -2759,18 +2272,14 @@ function RemindMe( props ) {
     // Make a request to add our newItem object to the object store
     const objectStoreRequest = objectStore.add(newItem[0]);
     objectStoreRequest.onsuccess = (event) => {
-
-      // Report the success of our request
-      // (to detect whether it has been succesfully
-      // added to the database, you'd look at transaction.oncomplete)
-
       // Clear the form, ready for adding the next entry
-      title.current.value = '';
-      hours.current.value = null;
-      minutes.current.value = null;
-      day.current.value = 1;
+      title.current.value = 'Remember';
+      hours.current.value = 11;
+      minutes.current.value = 50;
+      day.current.value = 6;
       month.current.value = 'January';
-      year.current.value = 2020;
+      year.current.value = 2021;
+      https: '//en.wikipedia.org/wiki/Timeline_of_the_January_6_United_States_Capitol_attack#cite_ref-House_select_committee_on_the_January_6_attack_585_171-1'
     };
   };
   // Ask for permission when the 'Enable notifications' button is clicked
@@ -2991,18 +2500,30 @@ function RemindMe( props ) {
         <div className="head">
           <h1 className="pip_title">Remind Me!</h1>
         </div>
-        <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
-          <li className="image_select">
-            <img src=".\both_mic.png" alt="Select from this list" />
-            <select name="listName"></select>
+        <ul className="controls" style={{ padding: 0, margin: 0 }}>
+          <li className="image_toggle">
+            <img src=".\both_mic.png" alt="Notify Me!" />
+            <input id="NotifyMe" type="radio" name="reminder_type" value="NotifyMe" />
             <br />
-            <label htmlFor="listName">.image_select</label>
+            <label htmlFor="NotifyMe">Notify Me!</label>
           </li>
-
-          <li className="image_button">
-            <input id="enable" ref={notificationBtn} name="allow_notifications" type="image" src=".\both_capture-photo.png" alt="Allow Notifications to alert you on this device?" onClick={askNotificationPermission} />
+          <li className="image_toggle">
+            <img src=".\both_mic.png" alt="Prioritize This!" />
+            <input id="PrioritizeThis" type="radio" name="reminder_type" value="PrioritizeThis" />
             <br />
-            <label htmlFor="allow_notifications" className="pip_text" >Allow Notifications?<br />on this device?</label>
+            <label htmlFor="PrioritizeThis">Prioritize This!</label>
+          </li>
+          <li className="image_toggle">
+            <img src=".\both_mic.png" alt="Plan This!" />
+            <input id="PlanThis" type="radio" name="reminder_type" value="PlanThis" />
+            <br />
+            <label htmlFor="PlanThis">Plan This!</label>
+          </li>
+          <li className="image_checkbox">
+            <img src=".\both_mic.png" alt="Allow Browser Alerts?" />
+            <input ref={notificationBtn} type="checkbox" name="AllowAlerts" value="Allow" />
+            <br />
+            <label htmlFor="allow_alerts">Allow Browser Alerts?</label>
           </li>
         </ul>
         <div className="body">
@@ -3094,6 +2615,7 @@ function RemindMe( props ) {
             <button ref={reset_button} name="reset" className="pip_continue" type="button" onClick={()=>{setPhase( 0 )}}>Back</button>
           </li>
         </ul>
+        <a className="whatgoesaround hubris nemesis" href="https://en.wikipedia.org/wiki/Timeline_of_the_January_6_United_States_Capitol_attack#cite_ref-House_select_committee_on_the_January_6_attack_585_171-1">&Pi;</a>
       </div>
       </>
   )
@@ -3580,7 +3102,7 @@ function ContactsPanel( props ){
     <button className="pip_continue" onClick={props.toggleContacts}>close</button>
   </div> );
 }
-function CollectionsPanel( props ){
+function CollectionsPanel_WithCollisions( props ){
   const screenplay =  props.screenplay;
   const collections_panel = useRef();
   function cleanup(){}
@@ -3695,8 +3217,9 @@ function CollectionsPanel( props ){
     collections_panel.current.classList.remove('loading');
 
     // specify svg width and height;
-    const width = collections_panel.current.offsetWidth || 500, height = collections_panel.current.offsetHeight || 500;
-    const minorDim = Math.min(width, height);
+    const width = collections_panel.current.offsetWidth, height = collections_panel.current.offsetHeight;
+    const minorDim = Math.min( width, height );
+    const majorDim = Math.max( width, height );
     // create svg and g DOM elements;
     let panel = d3.select(collections_panel.current)
       .append('svg')
@@ -3707,7 +3230,7 @@ function CollectionsPanel( props ){
       .attr('transform', `scale(.05)`)
       .append('g')
       // move 0,0 to the center
-      .attr('transform', `translate(${30000 >>1}, ${30000>>1})`);
+      .attr('transform', `translate(${15000 >>1}, ${15000>>1})`);
 
     var images = [], maxImages = 100, maxWeight = 1920, minWeight = 420, padding=3;
     for(let i = 0; i< maxImages -1; i++){
@@ -3766,9 +3289,178 @@ function CollectionsPanel( props ){
 
     return cleanup;
   },[]);
-  return( <div ref={collections_panel} className="pip_gui pip_menu loading">
-    <button className="pip_continue" onClick={props.toggleCollections}>close</button>
-  </div> );
+  return(
+    <>
+    <style>{``}</style>
+    <div ref={collections_panel} className="pip_gui pip_menu loading">
+      <button className="pip_continue" onClick={props.toggleCollections}>close</button>
+    </div>
+    </>);
+}
+function CollectionsPanel( props ){
+  const screenplay =  props.screenplay;
+  const [phase_description, setPhaseDescription] = useState();
+  const [phase, setPhase] = useState( 3 );
+  const [dId, setDId] = useState( -1 );
+  const [enter, setEnter] = useState( false );
+  const [exit, setExit] = useState( false );
+
+  const collectionsDBRequest = useRef( false );
+  const collectionsDB = useRef( false );
+
+  const panel = useRef();
+
+  function cleanup(){
+
+  }
+  function init(){
+    const entrance_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = entrance_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in 60 frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.frame = 0;
+        screenplay.updatables.set( 'panel_entrance_transition', entrance_transition );
+      },
+      post: ( )=>{
+        let cache = entrance_transition.cache;
+        screenplay.updatables.delete( 'panel_entrance_transition' );
+        panel.current.style.transform = `scale(1)`;
+      }
+    });
+    setEnter( entrance_transition );
+    const exit_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = exit_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = 1 - cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: 15, /* do something in this many frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        exit_transition.cache.duration = 15;
+        exit_transition.cache.frame = 0;
+        screenplay.updatables.set( 'panel_exit_transition', exit_transition );
+      },
+      post: ( )=>{
+        let cache = exit_transition.cache;
+        screenplay.updatables.delete( 'panel_exit_transition' );
+        panel.current.style.transform = `scale(0)`;
+        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      }
+    });
+    setExit( exit_transition );
+    screenplay.updatables.set( 'panel_entrance_transition', entrance_transition );
+
+    // Load Collections Database
+    function onError( event ){ /* TODO: Show the failed attempt to the user */ };
+    function onSuccess( event ){
+      db.current = event.target.result;
+      loadCollections();
+    }
+    OpenIndexedDBRequest( 'Collections', 1, onError, onSuccess );
+
+    return cleanup;
+  }
+  useEffect( init , []);
+
+  async function loadCollections(){
+
+    const objectStore = collectionsDB.current.transaction( 'Collections' ).objectStore( 'Collections' );
+    objectStore.openCursor().onsuccess = ( event )=>{
+      const cursor = event.target.result;
+      // Check if there are no (more) cursor items to iterate through
+      if (!cursor) {
+        return;
+      }
+      const collection = cursor.value;
+      displayCollection( collection );
+
+      // continue on to the next item in the cursor
+      cursor.continue();
+    }
+  }
+  async function displayCollection( collection ) {
+    const urlCreator = window.URL || window.webkitURL;
+    const url = urlCreator.createObjectURL( await collection.icon );
+
+    // TODO: Display this collection on the board.
+
+  };
+
+
+  return(<>
+    <style>{`
+
+
+      #SnapPix .status{
+        display: grid;
+        grid-auto-rows: 1fr;
+        grid-template-columns: repeat(5, 1fr);
+        grid-gap: calc( var(--sF) * 1rem );
+        background: var(--panelBG);
+      }
+      #SnapPix .status li{
+        height: 7rem;
+        cursor: pointer;
+      }
+      #SnapPix .status img, #SnapPix status video{
+        height: 100%;
+      }
+
+      #snapPic_button:active{
+        background: white;
+      }
+
+      #exit_SnapPix{
+        grid-column: 1;
+      }
+      #reset_SnapPix{
+        grid-column: 2;
+      }
+
+      #SnapPix video{
+        margin: auto;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      `}</style>
+    <div ref={panel} className="pip_gui pip_menu">
+      <div className="head">
+        <h1 className="pip_title">Collections</h1>
+      </div>
+      <div className="body">
+      </div>
+      <div className="controls">
+
+      </div>
+      <button className="pip_cancel" onClick={props.toggleCollections}>Exit</button>
+    </div>
+  </>);
 }
 function DiscussionsPanel( props ){
   const screenplay =  props.screenplay;
@@ -5551,6 +5243,55 @@ function ViewScreenDisplay( props ){
 }
 
 // Sub-Routines
+async function OpenIndexedDBRequest( name, version, onError, onSuccess ){
+  let dbReq = window.indexedDB.open( name, version );
+  dbReq.onerror = onError;
+  dbReq.onsuccess = onSuccess;
+  dbReq.onupgradeneeded = (event) => {
+    db = event.target.result;
+    db.onerror = onError;
+    // Define the schemas here so that there is one location to update.
+    switch( name ){
+      case "GlyphScanner":
+          let gsObjectStore = db.createObjectStore('GlyphScanner', { keyPath: 't' });
+          gsObjectStore.createIndex('code', 'code', { unique: false });
+          gsObjectStore.createIndex('crop', 'crop', { unique: false });
+          gsObjectStore.createIndex('results', 'results', { unique: false });
+          gsObjectStore.createIndex('loc', 'loc', { unique: false });
+
+        break;
+      case "SnapPix":
+          let spObjectStore = db.createObjectStore('SnapPix', { keyPath: 't' });
+          spObjectStore.createIndex('blob', 'blob', { unique: false });
+          spObjectStore.createIndex('loc', 'loc', { unique: false });
+        break;
+      case "RecordNote":
+          let rnObjectStore = db.current.createObjectStore('RecordNote', { keyPath: 't' });
+          rnObjectStore.createIndex('blob', 'blob', { unique: false });
+          rnObjectStore.createIndex('loc', 'loc', { unique: false });
+        break;
+      case "RemindMe":
+          let rmObjectStore = db.current.createObjectStore('RemindMe', { keyPath: 'taskTitle' });
+          rmObjectStore.createIndex('hours', 'hours', { unique: false });
+          rmObjectStore.createIndex('minutes', 'minutes', { unique: false });
+          rmObjectStore.createIndex('day', 'day', { unique: false });
+          rmObjectStore.createIndex('month', 'month', { unique: false });
+          rmObjectStore.createIndex('year', 'year', { unique: false });
+          rmObjectStore.createIndex('notified', 'notified', { unique: false });
+        break;
+      case "Collections":
+          let coObjectStore = collectionsDB.current.createObjectStore('Collections', { keyPath: 'key' });
+          /*
+          coObjectStore.createIndex('hours', 'hours', { unique: false });
+          */
+        break;
+      default:
+        alert( "No DB schema setup for the " + name + " db");
+    }
+    onSuccess( event );
+  };
+
+}
 async function ActivateOrbitControls( screenplay ){
 
   screenplay.user_cam = screenplay.active_cam.clone( true );
