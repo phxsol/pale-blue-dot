@@ -30,6 +30,37 @@
   --v2: #8A2E62;
   --v3: #470028;
 
+  /* Red */
+  --r1: #FFA8A8;
+  --r2: #FF1818;
+  --r3: #CD0000;
+  --r3a: #CD000077;
+  /* Orange */
+  --o1: #FFE5B1;
+  --o2: #FFB218;
+  --o3: #B07500;
+  /* Yellow */
+  --y1: #FFFFA8;
+  --y2: #FFFF18;
+  --y3: #CDCD00;
+  /* Green */
+  --g1: #98E698;
+  --g2: #15DD15;
+  --g3: #00A400;
+  /* Blue */
+  --b1: #90A0C6;
+  --b2: #204AAB;
+  --b3: #052776;
+  --b3a: #05277677;
+  /* Indigo */
+  --i1: #A890C7;
+  --i2: #5B1DAD;
+  --i3: #350477;
+  /* Violet */
+  --v1: #C287C2;
+  --v2: #A60FA6;
+  --v3: #720072;
+
   --panelBG: linear-gradient( 11deg, var(--b3), black, var(--r3));
   --menuBG: radial-gradient( var( --r3a ), black, var( --b3a) );
   --listItemBG: linear-gradient( 11deg, var(--b3a), black, var(--r3));
@@ -352,8 +383,21 @@
     }
   }
 
+  .body{
+    grid-area: body;
+  }
   .controls{
+    grid-area: ctrl;
     min-width: calc( var(--sF) * 10rem );
+  }
+  .head{
+    grid-area: head;
+  }
+  .foot{
+    grid-area: foot;
+  }
+  .status{
+    grid-area: status;
   }
   .controls > li{
     display: grid;
@@ -411,7 +455,6 @@
     width: 100%;
     border: solid 1px;
     font-size: calc( var(--sF) * 0.75rem );
-    grid-area: ctrl;
     cursor: pointer;
   }
   .controls > .image_select > label{
@@ -433,7 +476,6 @@
     width: 100%;
     border: solid 1px;
     font-size: calc( var(--sF) * 0.75rem );
-    grid-area: ctrl;
     cursor: pointer;
   }
   .controls > .image_toggle > label{
@@ -455,7 +497,6 @@
     width: 100%;
     border: solid 1px;
     font-size: calc( var(--sF) * 0.75rem );
-    grid-area: ctrl;
     cursor: pointer;
   }
   .controls > .image_checkbox > label{
@@ -481,7 +522,6 @@
     width: 100%;
     border: solid 1px;
     font-size: calc( var(--sF) * 0.75rem );
-    grid-area: ctrl;
     cursor: pointer;
   }
   .controls > .image_text > label{
@@ -692,7 +732,13 @@
     --s: 42rem;
   }
   .pip_gui.pip_menu .pip_title{
-
+    background: linear-gradient( 90deg, #0007, var(--b3) );
+    margin: 0;
+    padding: 1rem;
+    text-align: right;
+  }
+  .pip_gui.pip_menu .controls{
+    background: linear-gradient( 0deg, #0007, var(--b3) calc( 100% - 5rem ) );
   }
   .pip_gui.pip_menu .pip_text{
     border: none;

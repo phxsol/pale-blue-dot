@@ -35,6 +35,7 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+// WeThe Menu
 function WeTheMenu( props ){
   const panel = useRef();
   const screenplay = props.screenplay;
@@ -363,7 +364,6 @@ function WeTheMenu( props ){
     {activePipGUID === 7 ? <Search toggle={toggleSearch} screenplay={screenplay} /> : <></>}
   </>);
 }
-// Menu Content
 function GlyphScanner( props ){
   const screenplay =  props.screenplay;
 
@@ -376,6 +376,7 @@ function GlyphScanner( props ){
   const processing = useRef( false );
   const stop = useRef( false );
   const selectors = useRef();
+  const object_urls = useRef( [] );
   const [code_found, setCodeFound] = useState( false );
 
   const [outputMessage, setOutputMessage] = useState();
@@ -388,6 +389,9 @@ function GlyphScanner( props ){
 
   function cleanup(){
     deInitComponent();
+    for( const objUrl of object_urls.current ){
+      URL.revokeObjectURL( objUrl );
+    }
   }
   function init(){
     const entrance_transition = new SceneTransformation({
@@ -402,7 +406,7 @@ function GlyphScanner( props ){
         }
       },
       cache: {
-        duration: 15, /* do something in 60 frames */
+        duration: 15, /* do something in 15 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
@@ -454,8 +458,10 @@ function GlyphScanner( props ){
     // Load GlyphScanner Database
     function onError( event ){ /* TODO: Show the failed attempt to the user */ };
     function onSuccess( event ){
-      db.current = event.target.result;
-      loadScannedGlyphs();
+      if( event.type !== "upgradeneeded" ){
+        db.current = event.target.result;
+        loadScannedGlyphs();
+      }
     }
     OpenIndexedDBRequest( 'GlyphScanner', 1, onError, onSuccess );
 
@@ -533,15 +539,17 @@ function GlyphScanner( props ){
   }
   async function displayGlyph( glyph ) {
     const urlCreator = window.URL || window.webkitURL;
-    const url = urlCreator.createObjectURL( await glyph.crop );
+    const url = urlCreator.createObjectURL( await glyph.blob );
+    object_urls.current.push( url );
     let li = document.createElement( 'li' );
     let img = document.createElement( 'img' );
     img.setAttribute( 'src', url );
-    img.setAttribute( 'id', glyph.t );
+    img.setAttribute( 'id', glyph.id );
+    img.setAttribute( 'data-time', glyph.stc.t );
+    img.setAttribute( 'data-loc', glyph.stc.loc );
     li.appendChild( img );
     li.classList.add( 'glyph' );
     scannedGlyphs.current.appendChild( li );
-
   };
   function updateDevices(deviceInfos) {
     // Handles being called several times to update labels. Preserve values.
@@ -638,7 +646,7 @@ function GlyphScanner( props ){
             let results = {};
             let raw_type = code.chunks[0].text;
             let type = raw_type.slice( 0, raw_type.indexOf( ':' ) );
-            switch( raw_type ){
+            switch( type ){
               default:
               results.text = true;
               break;
@@ -700,18 +708,20 @@ function GlyphScanner( props ){
           setCodeFound( true );
           // Stop the Scanner
           deInitComponent();
-
+          let cleaned_code = {
+            binaryData: code.binaryData,
+            chunks: code.chunks,
+            data: code.data
+          }
           let codeImage = await cropCode( photo_context, code.location.topLeftCorner, code.location.topRightCorner, code.location.bottomLeftCorner, code.location.bottomRightCorner );
           let codeResults = await processCode( code );
-
-          // Save the scanned glyph
-          let glyph = {
-            code: code,
-            crop: codeImage,
-            results: codeResults,
+          let stc = {
             loc: JSON.stringify( loc.current.coords ),
             t: Date.now()
           }
+
+          // Save the scanned glyph
+          let glyph = new Glyph( stc.t, stc.loc, cleaned_code, codeImage, codeResults );
           addScan( glyph );
           displayGlyph( glyph );
         }
@@ -959,13 +969,16 @@ function DropPin( props ) {
   const screenplay =  props.screenplay;
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
+  const [phase, setPhase] = useState( 0 );
   const panel = useRef();
   const timeline = useRef();
   const reset_button = useRef();
-  const [phase, setPhase] = useState( 0 );
+  const object_urls = useRef( [] );
 
   function cleanup(){
-
+    for( const objUrl of object_urls.current ){
+      URL.revokeObjectURL( objUrl );
+    }
   }
   function init(){
     const entrance_transition = new SceneTransformation({
@@ -1212,6 +1225,7 @@ function SnapPix( props ) {
   const selectors = useRef();
   const loc = useRef( false );
   const recordedChunks = useRef( [] );
+  const object_urls = useRef( [] );
 
   const panel = useRef();
   const recVid_button = useRef();
@@ -1224,13 +1238,16 @@ function SnapPix( props ) {
 
   function cleanup(){
     navigator.mediaDevices.getUserMedia({video: true, audio: true})
-      .then(mediaStream => {
+      .then( mediaStream => {
         const stream = mediaStream;
         const tracks = stream.getTracks();
         for( const track of tracks ){
           track.stop();
         }
-      });
+      } );
+    for( const objUrl of object_urls.current ){
+      URL.revokeObjectURL( objUrl );
+    }
   }
   function initialize(){
     'use strict';
@@ -1299,8 +1316,10 @@ function SnapPix( props ) {
     // Load SnapPix Database
     function onError( event ){ /* TODO: Show the failed attempt to the user */ };
     function onSuccess( event ){
-      db.current = event.target.result;
-      loadSnappedPix();
+      if( event.type !== "upgradeneeded" ){
+        db.current = event.target.result;
+        loadSnappedPix();
+      }
     }
     OpenIndexedDBRequest( 'SnapPix', 1, onError, onSuccess );
 
@@ -1376,45 +1395,19 @@ function SnapPix( props ) {
     snappedPhotos.current.replaceChildren();
 
     const objectStore = db.current.transaction( 'SnapPix' ).objectStore( 'SnapPix' );
-    objectStore.openCursor().onsuccess = ( event )=>{
+    objectStore.openCursor().onsuccess = async ( event )=>{
       const cursor = event.target.result;
       // Check if there are no (more) cursor items to iterate through
       if (!cursor) {
         return;
       }
-      const { blob, t, loc } = cursor.value;
-      displaySnap( blob, t, loc );
-
-
+      // Display the photo
+      displaySnap( cursor.value );
       // continue on to the next item in the cursor
       cursor.continue();
     }
   }
-  async function displaySnap( blob, t, loc ) {
 
-    const urlCreator = window.URL || window.webkitURL;
-    const url = urlCreator.createObjectURL( await blob );
-    let li = document.createElement( 'li' );
-    switch( blob.type ){
-      case 'image/png':
-        let img = document.createElement( 'img' );
-        img.setAttribute( 'src', url );
-        img.setAttribute( 'id', t );
-        li.appendChild( img );
-        li.classList.add( 'snap' );
-        snappedPhotos.current.appendChild( li );
-        break;
-      case 'video/webm':
-        let vid = document.createElement( 'video' );
-        vid.setAttribute( 'src', url );
-        vid.setAttribute( 'id', t );
-        li.appendChild( vid );
-        li.classList.add( 'vid' );
-        snappedPhotos.current.appendChild( li );
-        break;
-    }
-
-  };
   // Image Capture Routines
   // Attach audio output device to video element using device/sink ID.
   function start() {
@@ -1471,11 +1464,16 @@ function SnapPix( props ) {
       const blob = new Blob( recordedChunks.current, {
         type: "video/webm",
       } );
-      const timestamp = Date.now();
+      let stc = {
+        t: Date.now(),
+        loc: JSON.stringify( loc.current.coords )
+      }
+      // Save the scanned glyph
+      let snap = new Snap( stc.t, stc.loc, blob );
       // Display the photo
-      displaySnap( blob, timestamp, loc.current.coords );
+      displaySnap( snap )
       // Store Snap in SnapPix db
-      addSnap( { t: timestamp, blob: await blob, loc: JSON.stringify( loc.current.coords ) } );
+      addSnap( snap );
 
     }
 
@@ -1526,13 +1524,18 @@ function SnapPix( props ) {
     const photo_canvas = new OffscreenCanvas( videoElement.current.videoWidth, videoElement.current.videoHeight );
     const photo_context = photo_canvas.getContext( '2d', { alpha: false } );
     photo_context.drawImage( videoElement.current, 0, 0 );
-    const timestamp = Date.now();
-    const blob = await photo_canvas.convertToBlob( {type:'image/png', quality: 1} );
+    const snapImage = await photo_canvas.convertToBlob( {type:'image/png', quality: 1} );
+    let stc = {
+      t: Date.now(),
+      loc: JSON.stringify( loc.current.coords )
+    }
+    // Save the scanned glyph
+    let snap = new Snap( stc.t, stc.loc, snapImage );
 
     // Display the photo
-    displaySnap( blob, timestamp, loc.current.coords );
+    displaySnap( snap );
     // Store Snap in SnapPix db
-    addSnap( { t: timestamp, blob: await blob, loc: JSON.stringify( loc.current.coords ) } )
+    addSnap( snap );
 
   }
   async function recVid( e ){
@@ -1564,6 +1567,32 @@ function SnapPix( props ) {
     const addSnapReq = objectStore.add( snap );
     addSnapReq.onsuccess = ( event )=>{}
   }
+  async function displaySnap( snap ) {
+
+    const urlCreator = window.URL || window.webkitURL;
+    const url = urlCreator.createObjectURL( await snap.blob );
+    object_urls.current.push( url );
+    let li = document.createElement( 'li' );
+    switch( snap.blob.type ){
+      case 'image/png':
+        let img = document.createElement( 'img' );
+        img.setAttribute( 'src', url );
+        img.setAttribute( 'id', snap.id );
+        li.appendChild( img );
+        li.classList.add( 'snap' );
+        break;
+
+      case 'video/webm':
+        let vid = document.createElement( 'video' );
+        vid.setAttribute( 'src', url );
+        vid.setAttribute( 'id', snap.id );
+        vid.setAttribute( 'controls', true );
+        li.appendChild( vid );
+        li.classList.add( 'vid' );
+        break;
+    }
+    snappedPhotos.current.appendChild( li );
+  };
 
   return(
     <>
@@ -1669,12 +1698,13 @@ function RecordNote( props ) {
   const selectors = useRef();
   const loc = useRef( false );
   const recordedChunks = useRef( [] );
+  const object_urls = useRef( [] );
 
   const panel = useRef();
-  const recVid_button = useRef();
+  const dictate_button = useRef();
   const recordedNotes = useRef();
   const foot = useRef();
-  const videoElement = useRef();
+  const canvasElement = useRef();
   const audioInputSelect = useRef();
   const audioOutputSelect = useRef();
   const videoSelect = useRef();
@@ -1688,6 +1718,9 @@ function RecordNote( props ) {
           track.stop();
         }
       });
+    for( const objUrl of object_urls.current ){
+      URL.revokeObjectURL( objUrl );
+    }
   }
   function initialize(){
     'use strict';
@@ -1756,8 +1789,10 @@ function RecordNote( props ) {
     // Load SnapPix Database
     function onError( event ){ /* TODO: Show the failed attempt to the user */ };
     function onSuccess( event ){
-      db.current = event.target.result;
-      loadRecordedNotes();
+      if( event.type !== "upgradeneeded" ){
+        db.current = event.target.result;
+        loadRecordedNotes();
+      }
     }
     OpenIndexedDBRequest( 'RecordNote', 1, onError, onSuccess );
     /*
@@ -1828,37 +1863,32 @@ function RecordNote( props ) {
       if (!cursor) {
         return;
       }
-      const { blob, t, loc } = cursor.value;
-      displayRecording( blob, t, loc );
+      const dict = cursor.value;
+      displayRecording( dict );
 
 
       // continue on to the next item in the cursor
       cursor.continue();
     }
   }
-  async function displayRecording( blob, t, loc ) {
-
+  async function displayRecording( dict ) {
     const urlCreator = window.URL || window.webkitURL;
-    const url = urlCreator.createObjectURL( await blob );
+    const url = urlCreator.createObjectURL( await dict.blob );
+    object_urls.current.push( url );
     let li = document.createElement( 'li' );
-    switch( blob.type ){
-      case 'image/png':
-        let img = document.createElement( 'img' );
-        img.setAttribute( 'src', url );
-        img.setAttribute( 'id', t );
-        li.appendChild( img );
-        li.classList.add( 'snap' );
-        recordedNotes.current.appendChild( li );
-        break;
-      case 'video/webm':
-        let vid = document.createElement( 'video' );
-        vid.setAttribute( 'src', url );
-        vid.setAttribute( 'id', t );
-        li.appendChild( vid );
-        li.classList.add( 'vid' );
-        recordedNotes.current.appendChild( li );
-        break;
-    }
+    let img = document.createElement( 'img' );
+    img.setAttribute( 'src', './both_mic.png' );
+    img.setAttribute( 'id', dict.stc.t );
+    li.appendChild( img );
+    let audio_element = document.createElement( 'audio' );
+    audio_element.setAttribute( 'controls', true );
+    let audio_src = document.createElement( 'source' );
+    audio_src.setAttribute( 'src', url );
+    audio_src.setAttribute( 'type', dict.blob.type );
+    audio_element.appendChild( audio_src );
+    li.appendChild( audio_element );
+    li.classList.add( 'dict' );
+    recordedNotes.current.appendChild( li );
 
   };
   // Image Capture Routines
@@ -1900,7 +1930,7 @@ function RecordNote( props ) {
   }
   function gotStream(stream) {
     window.stream = stream; // make stream available to console
-    videoElement.current.srcObject = stream;
+    canvasElement.current.srcObject = stream;
 
     function handleDataAvailable( event ) {
       console.log( "data-available" );
@@ -1913,13 +1943,18 @@ function RecordNote( props ) {
     }
     async function download() {
       const blob = new Blob( recordedChunks.current, {
-        type: "video/webm",
+        type: "audio/mpeg",
       } );
-      const timestamp = Date.now();
+      let stc = {
+        t: Date.now(),
+        loc: JSON.stringify( loc.current.coords )
+      }
+      // Save the scanned glyph
+      let dict = new Dict( stc.t, stc.loc, blob );
       // Display the photo
-      displayRecording( blob, timestamp, loc.current.coords );
+      displayRecording( dict );
       // Store Snap in RecordNote db
-      addSnap( { t: timestamp, blob: await blob, loc: JSON.stringify( loc.current.coords ) } );
+      addDict( dict );
 
     }
 
@@ -1948,11 +1983,6 @@ function RecordNote( props ) {
       } else if (deviceInfo.kind === 'audiooutput') {
         option.text = deviceInfo.label || `speaker ${audioOutputSelect.current.length + 1}`;
         audioOutputSelect.current.appendChild(option);
-      } else if (deviceInfo.kind === 'videoinput') {
-        option.text = deviceInfo.label || `camera ${videoSelect.current.length + 1}`;
-        videoSelect.current.appendChild(option);
-      } else {
-        console.log('Some other kind of source/device: ', deviceInfo);
       }
     }
     selectors.current.forEach((select, selectorIndex) => {
@@ -1964,49 +1994,34 @@ function RecordNote( props ) {
   function handleError(error) {
     console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
   }
-  async function snapPic( e ){
-    e.preventDefault();
-
-    const photo_canvas = new OffscreenCanvas( videoElement.current.videoWidth, videoElement.current.videoHeight );
-    const photo_context = photo_canvas.getContext( '2d', { alpha: false } );
-    photo_context.drawImage( videoElement.current, 0, 0 );
-    const timestamp = Date.now();
-    const blob = await photo_canvas.convertToBlob( {type:'image/png', quality: 1} );
-
-    // Display the photo
-    displayRecording( blob, timestamp, loc.current.coords );
-    // Store Snap in RecordNote db
-    addSnap( { t: timestamp, blob: await blob, loc: JSON.stringify( loc.current.coords ) } )
-
-  }
-  async function recVid( e ){
+  async function recDict( e ){
     switch( mediaRecorder.current.state ){
       case 'recording':
         mediaRecorder.current.stop();
-        recVid_button.current.src = ".\\both_rec-vid.png";
+        dictate_button.current.src = ".\\both_rec-vid.png";
         break;
 
       case 'inactive':
         recordedChunks.current = [];
         mediaRecorder.current.start();
-        recVid_button.current.src = ".\\both_stop-gesture.png";
+        dictate_button.current.src = ".\\both_stop-gesture.png";
         break;
 
       case 'paused':
         mediaRecorder.current.start();
-        recVid_button.current.src = ".\\both_stop-gesture.png";
+        dictate_button.current.src = ".\\both_stop-gesture.png";
         break;
     }
   }
-  function addSnap( snap ){
+  function addDict( dict ){
     const transaction = db.current.transaction(['RecordNote'], 'readwrite');
     transaction.oncomplete = () => {
       // TODO: Verify that the image is in there?
     };
     transaction.onerror = () => {};
     let objectStore = transaction.objectStore( 'RecordNote' );
-    const addSnapReq = objectStore.add( snap );
-    addSnapReq.onsuccess = ( event )=>{}
+    const addDictReq = objectStore.add( dict );
+    addDictReq.onsuccess = ( event )=>{}
   }
 
   return(
@@ -2058,7 +2073,6 @@ function RecordNote( props ) {
           <br />
           <label htmlFor="audioSource">Audio Input</label>
         </li>
-
         <li className="image_select">
           <img src=".\both_sound.png" alt="Select audio output source" />
           <select ref={audioOutputSelect} name="audioOutput"></select>
@@ -2066,25 +2080,14 @@ function RecordNote( props ) {
           <label htmlFor="audioOutput">Audio Output</label>
         </li>
         <li><hr /></li>
-        <li className="image_select">
-          <img src=".\both_camera.png" alt="Select video source" />
-          <select ref={videoSelect} name="videoSource"></select>
-          <br />
-          <label htmlFor="videoSource">Camera</label>
-        </li>
-        <li id="snapPic_button" className="image_button">
-          <input  type="image" name="snap" onClick={snapPic} src=".\both_capture-photo.png" onMouseOver={()=>{setDId( 3 )}} alt="Snap Photo" />
-          <br />
-          <label htmlFor="snap" className="pip_text" >Snap Pix</label>
-        </li>
         <li className="image_button">
-          <input type="image" name="record" ref={recVid_button} onClick={recVid} src=".\both_rec-vid.png" onMouseOver={()=>{setDId( 3 )}} alt="Record Video" />
+          <input type="image" name="dictate" ref={dictate_button} onClick={recDict} src=".\both_rec-vid.png" onMouseOver={()=>{setDId( 3 )}} alt="Record Video" />
           <br />
-          <label htmlFor="record" className="pip_text">Record Vid</label>
+          <label htmlFor="dictate" className="pip_text">Dictate Memo</label>
         </li>
       </ul>
       <div className="body">
-        <video ref={videoElement} playsInline autoPlay></video>
+        <canvas ref={canvasElement}></canvas>
       </div>
       <ul className="status" ref={recordedNotes}></ul>
       <ul id="RecordNote_Foot" className="foot" ref={foot}>
@@ -2104,6 +2107,7 @@ function RemindMe( props ) {
 
   const remindMeDBRequest = useRef( false );
   const db = useRef( false );
+  const object_urls = useRef( [] );
 
   // UI Element Reference
   const panel = useRef();
@@ -2120,7 +2124,9 @@ function RemindMe( props ) {
   const notificationBtn = useRef();
 
   function cleanup(){
-
+    for( const objUrl of object_urls.current ){
+      URL.revokeObjectURL( objUrl );
+    }
   }
   function init(){
     const entrance_transition = new SceneTransformation({
@@ -2194,8 +2200,10 @@ function RemindMe( props ) {
     // Load RemindMe Database
     function onError( event ){ /* TODO: Show the failed attempt to the user */ };
     function onSuccess( event ){
-      db.current = event.target.result;
-      displayData();
+      if( event.type !== "upgradeneeded" ){
+        db.current = event.target.result;
+        displayData();
+      }
     }
     OpenIndexedDBRequest( 'RemindMe', 1, onError, onSuccess );
 /*
@@ -2626,9 +2634,12 @@ function Search( props ) {
   const [search_query, setSearchQuery] = useState('');
   const panel = useRef();
   const screenplay =  props.screenplay;
+  const object_urls = useRef( [] );
 
   function cleanup(){
-
+    for( const objUrl of object_urls.current ){
+      URL.revokeObjectURL( objUrl );
+    }
   }
   useEffect( ()=>{
     const entrance_transition = new SceneTransformation({
@@ -2742,6 +2753,7 @@ function Search( props ) {
     </div>
   );
 }
+// WeThe Header
 function WeTheHeader( props ){
   const screenplay = props.screenplay;
   const viewMode = props.viewMode;
@@ -3081,7 +3093,6 @@ function WeTheHeader( props ){
     <InformationPanel onDisplay={showInformation} toggleInformation={toggleInformation} screenplay={screenplay} />
     </>);
 }
-// Header Content
 function AccountPanel( props ){
   const account_panel = useRef();
   const screenplay =  props.screenplay;
@@ -3299,21 +3310,36 @@ function CollectionsPanel_WithCollisions( props ){
 }
 function CollectionsPanel( props ){
   const screenplay =  props.screenplay;
+
   const [phase_description, setPhaseDescription] = useState();
   const [phase, setPhase] = useState( 3 );
   const [dId, setDId] = useState( -1 );
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
-
-  const collectionsDBRequest = useRef( false );
-  const collectionsDB = useRef( false );
+  const [ready, setReady] = useState( false );
 
   const panel = useRef();
+  const body = useRef();
+  const svg = useRef();
+
+  const dbs = useRef( {} );
+  const resizeTimeout = useRef();
+  const snaps = useRef( [] );
+  const collections = useRef( [] );
+  const glyphs = useRef( [] );
+  const dicts = useRef( [] );
+  const minders = useRef( [] );
+  const object_urls = useRef( [] );
 
   function cleanup(){
-
+    window.removeEventListener( 'resize', resize );
+    for( const objUrl of object_urls.current ){
+      URL.revokeObjectURL( objUrl );
+    }
   }
   function init(){
+
+
     const entrance_transition = new SceneTransformation({
       update: ( delta )=>{
         let cache = entrance_transition.cache;
@@ -3375,42 +3401,1245 @@ function CollectionsPanel( props ){
     setExit( exit_transition );
     screenplay.updatables.set( 'panel_entrance_transition', entrance_transition );
 
-    // Load Collections Database
+    // Database Interaction
     function onError( event ){ /* TODO: Show the failed attempt to the user */ };
-    function onSuccess( event ){
-      db.current = event.target.result;
-      loadCollections();
+    // Load GlyphScanner Database
+    function onGlyphScannerSuccess( event ){
+      if( event.type !== "upgradeneeded" ){
+        dbs.current.GlyphScanner = event.target.result;
+        let gsOS = dbs.current.GlyphScanner.transaction( 'GlyphScanner' ).objectStore( 'GlyphScanner' );
+        gsOS.getAll().onsuccess = async (event) => {
+          for( const glyph of event.target.result ){
+            glyph.value = glyph.blob.size;
+            glyphs.current.push( glyph );
+          }
+          return true;
+        };
+      }
     }
-    OpenIndexedDBRequest( 'Collections', 1, onError, onSuccess );
+    // Load SnapPix Database
+    function onSnapPixSuccess( event ){
+      if( event.type !== "upgradeneeded" ){
+        dbs.current.SnapPix = event.target.result;
+        let spOS = dbs.current.SnapPix.transaction( 'SnapPix' ).objectStore( 'SnapPix' );
+        spOS.getAll().onsuccess = async (event) => {
+          for( const snap of event.target.result ){
+            snap.value = snap.blob.size;
+            snaps.current.push( snap );
+          }
+          return true;
+        };
+      }
+    }
+    // Load RecordNote Database
+    function onRecordNoteSuccess( event ){
+      if( event.type !== "upgradeneeded" ){
+        dbs.current.RecordNote = event.target.result;
+        let rnOS = dbs.current.RecordNote.transaction( 'RecordNote' ).objectStore( 'RecordNote' );
+        rnOS.getAll().onsuccess = async (event) => {
+          for( const dict of event.target.result ){
+            dict.value = dict.blob.size;
+            dicts.current.push( dict );
+          }
+          return true;
+        };
+      }
+    }
+    // Load RemindMe Database
+    function onRemindMeSuccess( event ){
+      if( event.type !== "upgradeneeded" ){
+        dbs.current.RemindMe = event.target.result;
+        let rmOS = dbs.current.RemindMe.transaction( 'RemindMe' ).objectStore( 'RemindMe' );
+        rmOS.getAll().onsuccess = async (event) => {
+          for( const minder of event.target.result ){
+            minder.value = 50000;
+            minders.current.push( minder );
+          }
+          return true;
+        };
+      }
+    }
+    // Load Collections Database
+    function onCollectionsSuccess( event ){
+      if( event.type !== "upgradeneeded" ){
+        dbs.current.Collections = event.target.result;
+        let coOS = dbs.current.Collections.transaction( 'Collections' ).objectStore( 'Collections' );
+        coOS.getAll().onsuccess = async (event) => {
+          collections.current = event.target.result;
+          return true;
+        };
+      }
+    }
+    const async_f = async ()=>{
+      await OpenIndexedDBRequest( 'GlyphScanner', 1, onError, onGlyphScannerSuccess );
+      await OpenIndexedDBRequest( 'SnapPix', 1, onError, onSnapPixSuccess );
+      await OpenIndexedDBRequest( 'RecordNote', 1, onError, onRecordNoteSuccess );
+      await OpenIndexedDBRequest( 'RemindMe', 1, onError, onRemindMeSuccess );
+      await OpenIndexedDBRequest( 'Collections', 1, onError, onCollectionsSuccess );
+      //displayCirclePacking();
+      circlePacking();
+    }
+    async_f();
+
+    window.addEventListener( 'resize', function(){
+      clearTimeout( resizeTimeout.current );
+      resizeTimeout.current = setTimeout( resize, 100 );
+    } );
 
     return cleanup;
   }
   useEffect( init , []);
 
-  async function loadCollections(){
+  function circlePacking(){
 
-    const objectStore = collectionsDB.current.transaction( 'Collections' ).objectStore( 'Collections' );
-    objectStore.openCursor().onsuccess = ( event )=>{
-      const cursor = event.target.result;
-      // Check if there are no (more) cursor items to iterate through
-      if (!cursor) {
-        return;
-      }
-      const collection = cursor.value;
-      displayCollection( collection );
-
-      // continue on to the next item in the cursor
-      cursor.continue();
-    }
-  }
-  async function displayCollection( collection ) {
-    const urlCreator = window.URL || window.webkitURL;
-    const url = urlCreator.createObjectURL( await collection.icon );
-
-    // TODO: Display this collection on the board.
-
+    // Specify the chart’s dimensions.
+    let width = body.current.clientWidth || body.current.offsetWidth;
+    let height = body.current.clientHeight || body.current.offsetHeight;
+    // Create the color scale.
+    const color = d3.scaleLinear().domain([0, 6]).range(["#052776", "#90A0C6"]).interpolate(d3.interpolateHcl);
+    // Compute the layout.
+    const pack = data => d3.pack()
+        .size([width, width])
+        .padding(3)
+      (d3.hierarchy(data)
+        .sum(d => d.value)
+        .sort((a, b) => b.value - a.value));
+    const old_data = {
+      "children": [
+          {
+              "children": [
+                  {
+                      "children": [
+                          {
+                              "name": "AgglomerativeCluster",
+                              "value": 3938
+                          },
+                          {
+                              "name": "CommunityStructure",
+                              "value": 3812
+                          },
+                          {
+                              "name": "HierarchicalCluster",
+                              "value": 6714
+                          },
+                          {
+                              "name": "MergeEdge",
+                              "value": 743
+                          }
+                      ],
+                      "name": "cluster"
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "BetweennessCentrality",
+                              "value": 3534
+                          },
+                          {
+                              "name": "LinkDistance",
+                              "value": 5731
+                          },
+                          {
+                              "name": "MaxFlowMinCut",
+                              "value": 7840
+                          },
+                          {
+                              "name": "ShortestPaths",
+                              "value": 5914
+                          },
+                          {
+                              "name": "SpanningTree",
+                              "value": 3416
+                          }
+                      ],
+                      "name": "graph"
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "AspectRatioBanker",
+                              "value": 7074
+                          }
+                      ],
+                      "name": "optimization"
+                  }
+              ],
+              "name": "analytics"
+          },
+          {
+              "children": [
+                  {
+                      "name": "Easing",
+                      "value": 17010
+                  },
+                  {
+                      "name": "FunctionSequence",
+                      "value": 5842
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "ArrayInterpolator",
+                              "value": 1983
+                          },
+                          {
+                              "name": "ColorInterpolator",
+                              "value": 2047
+                          },
+                          {
+                              "name": "DateInterpolator",
+                              "value": 1375
+                          },
+                          {
+                              "name": "Interpolator",
+                              "value": 8746
+                          },
+                          {
+                              "name": "MatrixInterpolator",
+                              "value": 2202
+                          },
+                          {
+                              "name": "NumberInterpolator",
+                              "value": 1382
+                          },
+                          {
+                              "name": "ObjectInterpolator",
+                              "value": 1629
+                          },
+                          {
+                              "name": "PointInterpolator",
+                              "value": 1675
+                          },
+                          {
+                              "name": "RectangleInterpolator",
+                              "value": 2042
+                          }
+                      ],
+                      "name": "interpolate"
+                  },
+                  {
+                      "name": "ISchedulable",
+                      "value": 1041
+                  },
+                  {
+                      "name": "Parallel",
+                      "value": 5176
+                  },
+                  {
+                      "name": "Pause",
+                      "value": 449
+                  },
+                  {
+                      "name": "Scheduler",
+                      "value": 5593
+                  },
+                  {
+                      "name": "Sequence",
+                      "value": 5534
+                  },
+                  {
+                      "name": "Transition",
+                      "value": 9201
+                  },
+                  {
+                      "name": "Transitioner",
+                      "value": 19975
+                  },
+                  {
+                      "name": "TransitionEvent",
+                      "value": 1116
+                  },
+                  {
+                      "name": "Tween",
+                      "value": 6006
+                  }
+              ],
+              "name": "animate"
+          },
+          {
+              "children": [
+                  {
+                      "children": [
+                          {
+                              "name": "Converters",
+                              "value": 721
+                          },
+                          {
+                              "name": "DelimitedTextConverter",
+                              "value": 4294
+                          },
+                          {
+                              "name": "GraphMLConverter",
+                              "value": 9800
+                          },
+                          {
+                              "name": "IDataConverter",
+                              "value": 1314
+                          },
+                          {
+                              "name": "JSONConverter",
+                              "value": 2220
+                          }
+                      ],
+                      "name": "converters"
+                  },
+                  {
+                      "name": "DataField",
+                      "value": 1759
+                  },
+                  {
+                      "name": "DataSchema",
+                      "value": 2165
+                  },
+                  {
+                      "name": "DataSet",
+                      "value": 586
+                  },
+                  {
+                      "name": "DataSource",
+                      "value": 3331
+                  },
+                  {
+                      "name": "DataTable",
+                      "value": 772
+                  },
+                  {
+                      "name": "DataUtil",
+                      "value": 3322
+                  }
+              ],
+              "name": "data"
+          },
+          {
+              "children": [
+                  {
+                      "name": "DirtySprite",
+                      "value": 8833
+                  },
+                  {
+                      "name": "LineSprite",
+                      "value": 1732
+                  },
+                  {
+                      "name": "RectSprite",
+                      "value": 3623
+                  },
+                  {
+                      "name": "TextSprite",
+                      "value": 10066
+                  }
+              ],
+              "name": "display"
+          },
+          {
+              "children": [
+                  {
+                      "name": "FlareVis",
+                      "value": 4116
+                  }
+              ],
+              "name": "flex"
+          },
+          {
+              "children": [
+                  {
+                      "name": "DragForce",
+                      "value": 1082
+                  },
+                  {
+                      "name": "GravityForce",
+                      "value": 1336
+                  },
+                  {
+                      "name": "IForce",
+                      "value": 319
+                  },
+                  {
+                      "name": "NBodyForce",
+                      "value": 10498
+                  },
+                  {
+                      "name": "Particle",
+                      "value": 2822
+                  },
+                  {
+                      "name": "Simulation",
+                      "value": 9983
+                  },
+                  {
+                      "name": "Spring",
+                      "value": 2213
+                  },
+                  {
+                      "name": "SpringForce",
+                      "value": 1681
+                  }
+              ],
+              "name": "physics"
+          },
+          {
+              "children": [
+                  {
+                      "name": "AggregateExpression",
+                      "value": 1616
+                  },
+                  {
+                      "name": "And",
+                      "value": 1027
+                  },
+                  {
+                      "name": "Arithmetic",
+                      "value": 3891
+                  },
+                  {
+                      "name": "Average",
+                      "value": 891
+                  },
+                  {
+                      "name": "BinaryExpression",
+                      "value": 2893
+                  },
+                  {
+                      "name": "Comparison",
+                      "value": 5103
+                  },
+                  {
+                      "name": "CompositeExpression",
+                      "value": 3677
+                  },
+                  {
+                      "name": "Count",
+                      "value": 781
+                  },
+                  {
+                      "name": "DateUtil",
+                      "value": 4141
+                  },
+                  {
+                      "name": "Distinct",
+                      "value": 933
+                  },
+                  {
+                      "name": "Expression",
+                      "value": 5130
+                  },
+                  {
+                      "name": "ExpressionIterator",
+                      "value": 3617
+                  },
+                  {
+                      "name": "Fn",
+                      "value": 3240
+                  },
+                  {
+                      "name": "If",
+                      "value": 2732
+                  },
+                  {
+                      "name": "IsA",
+                      "value": 2039
+                  },
+                  {
+                      "name": "Literal",
+                      "value": 1214
+                  },
+                  {
+                      "name": "Match",
+                      "value": 3748
+                  },
+                  {
+                      "name": "Maximum",
+                      "value": 843
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "add",
+                              "value": 593
+                          },
+                          {
+                              "name": "and",
+                              "value": 330
+                          },
+                          {
+                              "name": "average",
+                              "value": 287
+                          },
+                          {
+                              "name": "count",
+                              "value": 277
+                          },
+                          {
+                              "name": "distinct",
+                              "value": 292
+                          },
+                          {
+                              "name": "div",
+                              "value": 595
+                          },
+                          {
+                              "name": "eq",
+                              "value": 594
+                          },
+                          {
+                              "name": "fn",
+                              "value": 460
+                          },
+                          {
+                              "name": "gt",
+                              "value": 603
+                          },
+                          {
+                              "name": "gte",
+                              "value": 625
+                          },
+                          {
+                              "name": "iff",
+                              "value": 748
+                          },
+                          {
+                              "name": "isa",
+                              "value": 461
+                          },
+                          {
+                              "name": "lt",
+                              "value": 597
+                          },
+                          {
+                              "name": "lte",
+                              "value": 619
+                          },
+                          {
+                              "name": "max",
+                              "value": 283
+                          },
+                          {
+                              "name": "min",
+                              "value": 283
+                          },
+                          {
+                              "name": "mod",
+                              "value": 591
+                          },
+                          {
+                              "name": "mul",
+                              "value": 603
+                          },
+                          {
+                              "name": "neq",
+                              "value": 599
+                          },
+                          {
+                              "name": "not",
+                              "value": 386
+                          },
+                          {
+                              "name": "or",
+                              "value": 323
+                          },
+                          {
+                              "name": "orderby",
+                              "value": 307
+                          },
+                          {
+                              "name": "range",
+                              "value": 772
+                          },
+                          {
+                              "name": "select",
+                              "value": 296
+                          },
+                          {
+                              "name": "stddev",
+                              "value": 363
+                          },
+                          {
+                              "name": "sub",
+                              "value": 600
+                          },
+                          {
+                              "name": "sum",
+                              "value": 280
+                          },
+                          {
+                              "name": "update",
+                              "value": 307
+                          },
+                          {
+                              "name": "variance",
+                              "value": 335
+                          },
+                          {
+                              "name": "where",
+                              "value": 299
+                          },
+                          {
+                              "name": "xor",
+                              "value": 354
+                          },
+                          {
+                              "name": "_",
+                              "value": 264
+                          }
+                      ],
+                      "name": "methods"
+                  },
+                  {
+                      "name": "Minimum",
+                      "value": 843
+                  },
+                  {
+                      "name": "Not",
+                      "value": 1554
+                  },
+                  {
+                      "name": "Or",
+                      "value": 970
+                  },
+                  {
+                      "name": "Query",
+                      "value": 13896
+                  },
+                  {
+                      "name": "Range",
+                      "value": 1594
+                  },
+                  {
+                      "name": "StringUtil",
+                      "value": 4130
+                  },
+                  {
+                      "name": "Sum",
+                      "value": 791
+                  },
+                  {
+                      "name": "Variable",
+                      "value": 1124
+                  },
+                  {
+                      "name": "Variance",
+                      "value": 1876
+                  },
+                  {
+                      "name": "Xor",
+                      "value": 1101
+                  }
+              ],
+              "name": "query"
+          },
+          {
+              "children": [
+                  {
+                      "name": "IScaleMap",
+                      "value": 2105
+                  },
+                  {
+                      "name": "LinearScale",
+                      "value": 1316
+                  },
+                  {
+                      "name": "LogScale",
+                      "value": 3151
+                  },
+                  {
+                      "name": "OrdinalScale",
+                      "value": 3770
+                  },
+                  {
+                      "name": "QuantileScale",
+                      "value": 2435
+                  },
+                  {
+                      "name": "QuantitativeScale",
+                      "value": 4839
+                  },
+                  {
+                      "name": "RootScale",
+                      "value": 1756
+                  },
+                  {
+                      "name": "Scale",
+                      "value": 4268
+                  },
+                  {
+                      "name": "ScaleType",
+                      "value": 1821
+                  },
+                  {
+                      "name": "TimeScale",
+                      "value": 5833
+                  }
+              ],
+              "name": "scale"
+          },
+          {
+              "children": [
+                  {
+                      "name": "Arrays",
+                      "value": 8258
+                  },
+                  {
+                      "name": "Colors",
+                      "value": 10001
+                  },
+                  {
+                      "name": "Dates",
+                      "value": 8217
+                  },
+                  {
+                      "name": "Displays",
+                      "value": 12555
+                  },
+                  {
+                      "name": "Filter",
+                      "value": 2324
+                  },
+                  {
+                      "name": "Geometry",
+                      "value": 10993
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "FibonacciHeap",
+                              "value": 9354
+                          },
+                          {
+                              "name": "HeapNode",
+                              "value": 1233
+                          }
+                      ],
+                      "name": "heap"
+                  },
+                  {
+                      "name": "IEvaluable",
+                      "value": 335
+                  },
+                  {
+                      "name": "IPredicate",
+                      "value": 383
+                  },
+                  {
+                      "name": "IValueProxy",
+                      "value": 874
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "DenseMatrix",
+                              "value": 3165
+                          },
+                          {
+                              "name": "IMatrix",
+                              "value": 2815
+                          },
+                          {
+                              "name": "SparseMatrix",
+                              "value": 3366
+                          }
+                      ],
+                      "name": "math"
+                  },
+                  {
+                      "name": "Maths",
+                      "value": 17705
+                  },
+                  {
+                      "name": "Orientation",
+                      "value": 1486
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "ColorPalette",
+                              "value": 6367
+                          },
+                          {
+                              "name": "Palette",
+                              "value": 1229
+                          },
+                          {
+                              "name": "ShapePalette",
+                              "value": 2059
+                          },
+                          {
+                              "name": "SizePalette",
+                              "value": 2291
+                          }
+                      ],
+                      "name": "palette"
+                  },
+                  {
+                      "name": "Property",
+                      "value": 5559
+                  },
+                  {
+                      "name": "Shapes",
+                      "value": 19118
+                  },
+                  {
+                      "name": "Sort",
+                      "value": 6887
+                  },
+                  {
+                      "name": "Stats",
+                      "value": 6557
+                  },
+                  {
+                      "name": "Strings",
+                      "value": 22026
+                  }
+              ],
+              "name": "util"
+          },
+          {
+              "children": [
+                  {
+                      "children": [
+                          {
+                              "name": "Axes",
+                              "value": 1302
+                          },
+                          {
+                              "name": "Axis",
+                              "value": 24593
+                          },
+                          {
+                              "name": "AxisGridLine",
+                              "value": 652
+                          },
+                          {
+                              "name": "AxisLabel",
+                              "value": 636
+                          },
+                          {
+                              "name": "CartesianAxes",
+                              "value": 6703
+                          }
+                      ],
+                      "name": "axis"
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "AnchorControl",
+                              "value": 2138
+                          },
+                          {
+                              "name": "ClickControl",
+                              "value": 3824
+                          },
+                          {
+                              "name": "Control",
+                              "value": 1353
+                          },
+                          {
+                              "name": "ControlList",
+                              "value": 4665
+                          },
+                          {
+                              "name": "DragControl",
+                              "value": 2649
+                          },
+                          {
+                              "name": "ExpandControl",
+                              "value": 2832
+                          },
+                          {
+                              "name": "HoverControl",
+                              "value": 4896
+                          },
+                          {
+                              "name": "IControl",
+                              "value": 763
+                          },
+                          {
+                              "name": "PanZoomControl",
+                              "value": 5222
+                          },
+                          {
+                              "name": "SelectionControl",
+                              "value": 7862
+                          },
+                          {
+                              "name": "TooltipControl",
+                              "value": 8435
+                          }
+                      ],
+                      "name": "controls"
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "Data",
+                              "value": 20544
+                          },
+                          {
+                              "name": "DataList",
+                              "value": 19788
+                          },
+                          {
+                              "name": "DataSprite",
+                              "value": 10349
+                          },
+                          {
+                              "name": "EdgeSprite",
+                              "value": 3301
+                          },
+                          {
+                              "name": "NodeSprite",
+                              "value": 19382
+                          },
+                          {
+                              "children": [
+                                  {
+                                      "name": "ArrowType",
+                                      "value": 698
+                                  },
+                                  {
+                                      "name": "EdgeRenderer",
+                                      "value": 5569
+                                  },
+                                  {
+                                      "name": "IRenderer",
+                                      "value": 353
+                                  },
+                                  {
+                                      "name": "ShapeRenderer",
+                                      "value": 2247
+                                  }
+                              ],
+                              "name": "render"
+                          },
+                          {
+                              "name": "ScaleBinding",
+                              "value": 11275
+                          },
+                          {
+                              "name": "Tree",
+                              "value": 7147
+                          },
+                          {
+                              "name": "TreeBuilder",
+                              "value": 9930
+                          }
+                      ],
+                      "name": "data"
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "DataEvent",
+                              "value": 2313
+                          },
+                          {
+                              "name": "SelectionEvent",
+                              "value": 1880
+                          },
+                          {
+                              "name": "TooltipEvent",
+                              "value": 1701
+                          },
+                          {
+                              "name": "VisualizationEvent",
+                              "value": 1117
+                          }
+                      ],
+                      "name": "events"
+                  },
+                  {
+                      "children": [
+                          {
+                              "name": "Legend",
+                              "value": 20859
+                          },
+                          {
+                              "name": "LegendItem",
+                              "value": 4614
+                          },
+                          {
+                              "name": "LegendRange",
+                              "value": 10530
+                          }
+                      ],
+                      "name": "legend"
+                  },
+                  {
+                      "children": [
+                          {
+                              "children": [
+                                  {
+                                      "name": "BifocalDistortion",
+                                      "value": 4461
+                                  },
+                                  {
+                                      "name": "Distortion",
+                                      "value": 6314
+                                  },
+                                  {
+                                      "name": "FisheyeDistortion",
+                                      "value": 3444
+                                  }
+                              ],
+                              "name": "distortion"
+                          },
+                          {
+                              "children": [
+                                  {
+                                      "name": "ColorEncoder",
+                                      "value": 3179
+                                  },
+                                  {
+                                      "name": "Encoder",
+                                      "value": 4060
+                                  },
+                                  {
+                                      "name": "PropertyEncoder",
+                                      "value": 4138
+                                  },
+                                  {
+                                      "name": "ShapeEncoder",
+                                      "value": 1690
+                                  },
+                                  {
+                                      "name": "SizeEncoder",
+                                      "value": 1830
+                                  }
+                              ],
+                              "name": "encoder"
+                          },
+                          {
+                              "children": [
+                                  {
+                                      "name": "FisheyeTreeFilter",
+                                      "value": 5219
+                                  },
+                                  {
+                                      "name": "GraphDistanceFilter",
+                                      "value": 3165
+                                  },
+                                  {
+                                      "name": "VisibilityFilter",
+                                      "value": 3509
+                                  }
+                              ],
+                              "name": "filter"
+                          },
+                          {
+                              "name": "IOperator",
+                              "value": 1286
+                          },
+                          {
+                              "children": [
+                                  {
+                                      "name": "Labeler",
+                                      "value": 9956
+                                  },
+                                  {
+                                      "name": "RadialLabeler",
+                                      "value": 3899
+                                  },
+                                  {
+                                      "name": "StackedAreaLabeler",
+                                      "value": 3202
+                                  }
+                              ],
+                              "name": "label"
+                          },
+                          {
+                              "children": [
+                                  {
+                                      "name": "AxisLayout",
+                                      "value": 6725
+                                  },
+                                  {
+                                      "name": "BundledEdgeRouter",
+                                      "value": 3727
+                                  },
+                                  {
+                                      "name": "CircleLayout",
+                                      "value": 9317
+                                  },
+                                  {
+                                      "name": "CirclePackingLayout",
+                                      "value": 12003
+                                  },
+                                  {
+                                      "name": "DendrogramLayout",
+                                      "value": 4853
+                                  },
+                                  {
+                                      "name": "ForceDirectedLayout",
+                                      "value": 8411
+                                  },
+                                  {
+                                      "name": "IcicleTreeLayout",
+                                      "value": 4864
+                                  },
+                                  {
+                                      "name": "IndentedTreeLayout",
+                                      "value": 3174
+                                  },
+                                  {
+                                      "name": "Layout",
+                                      "value": 7881
+                                  },
+                                  {
+                                      "name": "NodeLinkTreeLayout",
+                                      "value": 12870
+                                  },
+                                  {
+                                      "name": "PieLayout",
+                                      "value": 2728
+                                  },
+                                  {
+                                      "name": "RadialTreeLayout",
+                                      "value": 12348
+                                  },
+                                  {
+                                      "name": "RandomLayout",
+                                      "value": 870
+                                  },
+                                  {
+                                      "name": "StackedAreaLayout",
+                                      "value": 9121
+                                  },
+                                  {
+                                      "name": "TreeMapLayout",
+                                      "value": 9191
+                                  }
+                              ],
+                              "name": "layout"
+                          },
+                          {
+                              "name": "Operator",
+                              "value": 2490
+                          },
+                          {
+                              "name": "OperatorList",
+                              "value": 5248
+                          },
+                          {
+                              "name": "OperatorSequence",
+                              "value": 4190
+                          },
+                          {
+                              "name": "OperatorSwitch",
+                              "value": 2581
+                          },
+                          {
+                              "name": "SortOperator",
+                              "value": 2023
+                          }
+                      ],
+                      "name": "operator"
+                  },
+                  {
+                      "name": "Visualization",
+                      "value": 16540
+                  }
+              ],
+              "name": "vis"
+          }
+      ],
+      "name": "flare"
   };
+  debugger;
+    const data = {
+      children: [ ...glyphs.current, ...snaps.current, ...dicts.current, ...minders.current, collections.current ],
+      name: "Collected Things!"
+    }
+    const root = pack( data );
+    // Create the SVG container.
+    const urlCreator = window.URL || window.webkitURL;
+    const svg = d3.create("svg")
+        .attr("viewBox", `-${width} -${height} ${width * 2} ${height * 2}`)
+        .attr("width", width)
+        .attr("height", height);
 
+        // Append the nodes.
+      const nodes = svg.append("g");
+      const node = nodes.selectAll("circle")
+        .data(root)
+        .join("circle")
+          .attr("fill", ( d ) => color( d.depth ) )
+          .attr("pointer-events", d => !d.children ? null : null)
+          .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
+          .on("mouseout", function() { d3.select(this).attr("stroke", null); })
+          .on("click", (event, d) => focus !== d && (clickZoom(event, d), event.stopPropagation()))
+            .append("svg:image")
+            .attr("xlink:href", ( d ) => {
+              if( d.data.blob && d.data.blob.type ){
+                const url = urlCreator.createObjectURL( d.data.blob );
+                object_urls.current.push( url );
+                return url;
+              }});
+
+
+      // Append the text labels.
+      const labels = svg.append("g");
+      const label = labels.attr("class", "pip_title")
+          .attr("pointer-events", "none")
+          .attr("text-anchor", "middle")
+        .selectAll("text")
+        .data(root.descendants())
+        .join("text")
+          .style("fill-opacity", d => d.parent === root ? 1 : 0)
+          .style("display", d => d.parent === root ? "inline" : "none")
+          .text(d => d.data.name);
+
+      // Create the zoom behavior and zoom immediately in to the initial focus node.
+      svg.on("click", (event) => clickZoom(event, root));
+      body.current.appendChild( svg.node() );
+
+      let focus = root;
+      let view;
+      let k;
+      zoomTo([focus.x, focus.y, focus.r]);
+
+      function zoomTo(v) {
+        k = height / v[2];
+
+        view = v;
+
+        label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+        node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+        node.attr("r", d => d.r * k);
+      }
+      function clickZoom(event, d) {
+        const focus0 = focus;
+
+        focus = d;
+
+        const transition = svg.transition()
+            .duration(event.altKey ? 1500 : 750)
+            .tween("zoom", d => {
+              const i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r]);
+              return t => zoomTo(i(t));
+            });
+
+        label
+          .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
+          .transition(transition)
+            .style("fill-opacity", d => d.parent === focus ? 1 : 0)
+            .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+            .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+      }
+
+      const zoom = d3.zoom()
+      .scaleExtent([1, 40])
+      .on("zoom", zoomed);
+      nodes.call(zoom);
+      function zoomed({transform}) {
+        nodes.attr("transform", transform);
+        labels.attr("transform", transform);
+      }
+  }
+
+  function resize( event ){
+
+    circlePacking();
+  }
 
   return(<>
     <style>{`
@@ -3453,12 +4682,12 @@ function CollectionsPanel( props ){
       <div className="head">
         <h1 className="pip_title">Collections</h1>
       </div>
-      <div className="body">
+      <div ref={body} className="body">
       </div>
       <div className="controls">
+        <button className="pip_cancel" onClick={props.toggleCollections}>Exit</button>
 
       </div>
-      <button className="pip_cancel" onClick={props.toggleCollections}>Exit</button>
     </div>
   </>);
 }
@@ -3499,7 +4728,6 @@ function ArchitectPanel( props ){
   const architect_panel = useRef();
 
   function cleanup(){
-    document.getElementById( 'root' ).append( screenplay.lil_gui.domElement );
     screenplay.lil_gui.hide();
   }
   useEffect(()=>{
@@ -3640,34 +4868,43 @@ function ArchitectPanel( props ){
       const ship_navigation = {
 
         Neptune: function() {
-
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Neptune);
         },
         Uranus: function() {
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Uranus);
         },
         Saturn: function() {
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Saturn);
         },
         Jupiter: function() {
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Jupiter);
         },
         Mars: function() {
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Mars);
         },
         Earth: function() {
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Earth);
         },
         Moon: function() {
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Moon);
         },
         Venus: function() {
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Venus);
         },
         Mercury: function() {
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Mercury);
         },
         Sun: function() {
+          props.toggleArchitect();
           screenplay.actions.warp_to(screenplay.actors.Sun);
         }
       }
@@ -3680,16 +4917,18 @@ function ArchitectPanel( props ){
       const earth_navigation = {
 
         Landing: function() {
+          props.toggleArchitect();
           let landing_coords = new THREE.Vector3().setFromSphericalCoords( earth.surface_distance, 1, 1 ).add( earth.position );
           screenplay.actions.land_at( landing_coords );
         },
         GeoOrbit: function() {
+          props.toggleArchitect();
           let arrival_coords = new THREE.Vector3().setFromSphericalCoords( earth.orbital_distance, 1, 1 ).add( earth.position );
           screenplay.actions.impulse_to( screenplay.actors.Moon );
         },
         SpaceStation: function() {
-          let arrival_coords = new THREE.Vector3().setFromSphericalCoords( earth.surface_distance + 1000000, 1, 1 ).add( earth.position );
-          screenplay.actions.impulse_to( arrival_coords );
+          props.toggleArchitect();
+          screenplay.actions.warp_to(screenplay.props.HomeDome);
         }
 
       }
@@ -3865,6 +5104,8 @@ function ArchitectPanel( props ){
 
         }
       }
+
+      architect_panel.current.append( screenplay.lil_gui.domElement );
     }
     if( screenplay.lil_gui ) {
       architect_panel.current.append( screenplay.lil_gui.domElement );
@@ -5103,7 +6344,7 @@ function InformationPanel( props ){
     </>
   )
 }
-// Starship Content
+// WeThe Starship
 function ViewScreenDisplay( props ){
   const [onDisplay, setOnDisplay] = useState(false);
   const [sources, setSources] = useState(false);
@@ -5242,9 +6483,94 @@ function ViewScreenDisplay( props ){
   );
 }
 
-// Sub-Routines
+// Class Definitions
+class Glyph{
+  id;
+  stc;
+  code;
+  blob;
+  results;
+
+  constructor( t = false, loc = false, code, blob, results ){
+    this.id = crypto.randomUUID();
+    this.stc = {
+      t: ( t ) ? t : Date.now(),
+      loc: ( loc ) ? loc : ( navigator.geolocation ) ? navigator.geolocation.getCurrentPosition( pos => this.stc.loc = pos ) : false
+    }
+    this.code = code;
+    this.blob = blob;
+    this.results = results;
+  }
+}
+class Snap{
+  id;
+  stc;
+  blob;
+
+  constructor( t = false, loc = false, blob ){
+    this.id = crypto.randomUUID();
+    this.stc = {
+      t: ( t ) ? t : Date.now(),
+      loc: ( loc ) ? loc : ( navigator.geolocation ) ? navigator.geolocation.getCurrentPosition( pos => this.stc.loc = pos ) : false
+    }
+    this.blob = blob;
+  }
+}
+class Dict{
+  id;
+  stc;
+  blob;
+
+  constructor( t = false, loc = false, blob ){
+    this.id = crypto.randomUUID();
+    this.stc = {
+      t: ( t ) ? t : Date.now(),
+      loc: ( loc ) ? loc : ( navigator.geolocation ) ? navigator.geolocation.getCurrentPosition( pos => this.stc.loc = pos ) : false
+    }
+    this.blob = blob;
+  }
+}
+class Minder{
+  id;
+  stc;
+  title;
+  icon;
+  notified;
+
+  constructor( t = false, loc = false, title, icon ){
+    this.id = crypto.randomUUID();
+    this.stc = {
+      t: ( t ) ? t : Date.now(),
+      loc: ( loc ) ? loc : ( navigator.geolocation ) ? navigator.geolocation.getCurrentPosition( pos => this.stc.loc = pos ) : false
+    };
+    this.title = title;
+    this.icon = icon;
+    this.notified = false;
+  }
+}
+class Collection{
+  id;
+  stc;
+  icon;
+  children;
+
+  constructor( t = false, loc = false, icon ){
+    this.id = crypto.randomUUID();
+    this.stc = {
+      t: ( t ) ? t : Date.now(),
+      loc: ( loc ) ? loc : ( navigator.geolocation ) ? navigator.geolocation.getCurrentPosition( pos => this.stc.loc = pos ) : false
+    }
+    this.icon = icon;
+    this.children = [];
+    this.links = [];
+  }
+}
+
+// SubRoutines
 async function OpenIndexedDBRequest( name, version, onError, onSuccess ){
-  let dbReq = window.indexedDB.open( name, version );
+  let dbReq = await window.indexedDB.open( name, version );
+  await dbReq;
+  let db;
   dbReq.onerror = onError;
   dbReq.onsuccess = onSuccess;
   dbReq.onupgradeneeded = (event) => {
@@ -5253,37 +6579,35 @@ async function OpenIndexedDBRequest( name, version, onError, onSuccess ){
     // Define the schemas here so that there is one location to update.
     switch( name ){
       case "GlyphScanner":
-          let gsObjectStore = db.createObjectStore('GlyphScanner', { keyPath: 't' });
+          let gsObjectStore = db.createObjectStore('GlyphScanner', { keyPath: 'id' });
+          gsObjectStore.createIndex('stc', 'stc', { unique: false });
           gsObjectStore.createIndex('code', 'code', { unique: false });
-          gsObjectStore.createIndex('crop', 'crop', { unique: false });
+          gsObjectStore.createIndex('blob', 'blob', { unique: false });
           gsObjectStore.createIndex('results', 'results', { unique: false });
-          gsObjectStore.createIndex('loc', 'loc', { unique: false });
 
         break;
       case "SnapPix":
-          let spObjectStore = db.createObjectStore('SnapPix', { keyPath: 't' });
+          let spObjectStore = db.createObjectStore('SnapPix', { keyPath: 'id' });
+          spObjectStore.createIndex('stc', 'stc', { unique: false });
           spObjectStore.createIndex('blob', 'blob', { unique: false });
-          spObjectStore.createIndex('loc', 'loc', { unique: false });
         break;
       case "RecordNote":
-          let rnObjectStore = db.current.createObjectStore('RecordNote', { keyPath: 't' });
+          let rnObjectStore = db.createObjectStore('RecordNote', { keyPath: 'id' });
+          rnObjectStore.createIndex('stc', 'stc', { unique: false });
           rnObjectStore.createIndex('blob', 'blob', { unique: false });
-          rnObjectStore.createIndex('loc', 'loc', { unique: false });
         break;
       case "RemindMe":
-          let rmObjectStore = db.current.createObjectStore('RemindMe', { keyPath: 'taskTitle' });
-          rmObjectStore.createIndex('hours', 'hours', { unique: false });
-          rmObjectStore.createIndex('minutes', 'minutes', { unique: false });
-          rmObjectStore.createIndex('day', 'day', { unique: false });
-          rmObjectStore.createIndex('month', 'month', { unique: false });
-          rmObjectStore.createIndex('year', 'year', { unique: false });
+          let rmObjectStore = db.createObjectStore('RemindMe', { keyPath: 'id' });
+          rmObjectStore.createIndex('stc', 'stc', { unique: false });
+          rmObjectStore.createIndex('title', 'title', { unique: false });
+          rmObjectStore.createIndex('icon', 'icon', { unique: false });
           rmObjectStore.createIndex('notified', 'notified', { unique: false });
         break;
       case "Collections":
-          let coObjectStore = collectionsDB.current.createObjectStore('Collections', { keyPath: 'key' });
-          /*
-          coObjectStore.createIndex('hours', 'hours', { unique: false });
-          */
+          let coObjectStore = db.createObjectStore('Collections', { keyPath: 'id' });
+          coObjectStore.createIndex('stc', 'stc', { unique: false });
+          coObjectStore.createIndex('icon', 'icon', { unique: false });
+          coObjectStore.createIndex('children', 'children', { unique: false });
         break;
       default:
         alert( "No DB schema setup for the " + name + " db");

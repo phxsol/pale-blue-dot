@@ -69,11 +69,14 @@ class SceneDirections extends _SceneDirections {
    let starship = await screenplay.actors.Starship;
    let opsStation = starship.getObjectByName( 'OpsStation' );
    let ops_pos = opsStation.position;
-   //starship.position.addVectors( screenplay.actors.Earth.position, screenplay.actors.Earth.orbital_vector);
-   starship.position.copy( new THREE.Vector3( 149600000000, 5000000, 5000000 ) );
+   //starship.position.copy( screenplay.actors.Earth.orbital_vector );
+   //starship.quaternion.copy( screenplay.actors.Earth.orbital_quaternion );
+   starship.position.copy( screenplay.actors.Saturn.orbital_vector );
    starship.lookAt( screenplay.actors.Sun.position );
+
    starship.updateMatrixWorld( true );
 
+   //debugger;
    await starship.animations.warp_tunnel.init();
    screenplay.updatables.set( 'Warp_Tunnel', starship.animations.warp_tunnel );
 

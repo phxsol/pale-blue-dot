@@ -554,6 +554,10 @@ class Screenplay{
 
     // System Virtual Environment Renderer
     const svr = this.sys_ve_renderer = new THREE.WebGLRenderer( { antialias: true, logarithmicDepthBuffer: true} );
+    svr.shadowMap.enabled = true;
+		svr.toneMapping = THREE.ACESFilmicToneMapping;
+		svr.toneMappingExposure = 1;
+
     svr.setSize( window.innerWidth, window.innerHeight );
     svr.setPixelRatio( window.devicePixelRatio ? window.devicePixelRatio : 1 );
     // Turn on VR support
