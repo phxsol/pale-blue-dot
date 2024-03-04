@@ -53,7 +53,12 @@ class Screenplay extends _Screenplay{
       neptune.orbital_distance = 3 * 34820000;
       neptune.orbital_vector = neptune.position.clone().add( {x:158232000, y:34700831, z:-35700831} );
       neptune.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
-
+      neptune.destinations = [
+        {
+          vector: neptune.position.clone().add( {x:158232000, y:34700831, z:-35700831} ),
+          quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+        }
+      ];
 
       delete this.Neptune;
       return this.Neptune = neptune;
@@ -79,6 +84,12 @@ class Screenplay extends _Screenplay{
       uranus.orbital_distance = 3 * 35867000;
       uranus.orbital_vector = uranus.position.clone().add( {x:158232000, y:34700831, z:-35700831} );
       uranus.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
+      uranus.destinations = [
+        {
+          vector: uranus.position.clone().add( {x:158232000, y:34700831, z:-35700831} ),
+          quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+        }
+      ]
 
       delete this.Uranus;
       return this.Uranus = uranus;
@@ -136,7 +147,12 @@ class Screenplay extends _Screenplay{
       //saturn.orbital_vector = new THREE.Vector3( 82352000, 82352000, 82352000 );
       saturn.orbital_vector = saturn.position.clone().add( {x:158232000, y:34700831, z:-35700831} );
       saturn.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
-
+      saturn.destinations = [
+        {
+          vector: saturn.position.clone().add( {x:158232000, y:34700831, z:-35700831} ),
+          quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+        }
+      ];
       delete this.Saturn;
       return this.Saturn = saturn;
     },
@@ -162,6 +178,12 @@ class Screenplay extends _Screenplay{
 
       jupiter.orbital_vector = jupiter.position.clone().add( {x:158232000, y:34700831, z:-35700831} );
       jupiter.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
+      jupiter.destinations = [
+        {
+          vector: jupiter.position.clone().add( {x:158232000, y:34700831, z:-35700831} ),
+          quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+        }
+      ];
 
       delete this.Jupiter;
       return this.Jupiter = jupiter;
@@ -189,6 +211,12 @@ class Screenplay extends _Screenplay{
 
       mars.orbital_vector = mars.position.clone().add( {x:158232000, y:34700831, z:-35700831} );
       mars.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
+      mars.destinations = [
+        {
+          vector: mars.position.clone().add( {x:158232000, y:34700831, z:-35700831} ),
+          quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+        }
+      ];
 
       delete this.Mars;
       return this.Mars = mars;
@@ -247,7 +275,12 @@ class Screenplay extends _Screenplay{
             earth.orbital_distance = 1 * 9009000;
             earth.orbital_vector = earth.position.clone().add( {x:1977000, y:5000000, z:5000000} );
             earth.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
-
+            earth.destinations = [
+              {
+                vector: earth.position.clone().add( {x:1977000, y:5000000, z:5000000} ),
+                quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+              }
+            ];
             resolve( earth );
           },
           async function ( xhr ) {
@@ -296,7 +329,12 @@ class Screenplay extends _Screenplay{
       moon.orbital_distance = 3 * 2454000;
       moon.orbital_vector = moon.position.clone().add( {x:1977000, y:5000000, z:5000000} );
       moon.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
-
+      moon.destinations = [
+        {
+          vector: moon.position.clone().add( {x:1977000, y:5000000, z:5000000} ),
+          quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+        }
+      ];
 
       delete this.Moon;
       return this.Moon = moon;
@@ -323,6 +361,12 @@ class Screenplay extends _Screenplay{
       venus.orbital_distance = 3 * 8558820;
       venus.orbital_vector = venus.position.clone().add( {x:158232000, y:34700831, z:-35700831} );
       venus.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
+      venus.destinations = [
+        {
+          vector: venus.position.clone().add( {x:158232000, y:34700831, z:-35700831} ),
+          quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+        }
+      ];
 
       delete this.Venus;
       return this.Venus = venus;
@@ -349,7 +393,12 @@ class Screenplay extends _Screenplay{
       mercury.orbital_distance = 3 * 3449973;
       mercury.orbital_vector = mercury.position.clone().add( {x:158232000, y:34700831, z:-35700831} );
       mercury.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
-
+      mercury.destinations = [
+        {
+          vector: mercury.position.clone().add( {x:158232000, y:34700831, z:-35700831} ),
+          quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+        }
+      ];
       delete this.Mercury;
       return this.Mercury = mercury;
     },
@@ -374,7 +423,12 @@ class Screenplay extends _Screenplay{
       sun.orbital_distance = 20000000000;
       sun.orbital_vector = sun.position.clone().add( {x:158232000, y:34700831, z:-35700831} );
       sun.orbital_quaternion = new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 );
-
+      sun.destinations = [
+        {
+          vector: sun.position.clone().add( {x:158232000, y:34700831, z:-35700831} ),
+          quaternion: new THREE.Quaternion( 0.000011816426533634118, -0.7071185976130878, 0.000011816821474275852, 0.7070949643650667 )
+        }
+      ];
       sun.material.depthTest = false;
       sun.light = new THREE.DirectionalLight( 0xffffff, 1 );
       sun.add( sun.light );
@@ -693,9 +747,19 @@ class Screenplay extends _Screenplay{
             );
             navdot_aftward.position.copy( {x:0, y:0, z:-50} );
 
+            let helms_point = new THREE.Mesh(
+              new THREE.SphereGeometry( 0.01, 3, 2 ),
+              new THREE.MeshPhongMaterial( { color: 0x0000ff } )
+            );
+
             // A-Line is a standard 100 unit line running directly through the center of the ship.
             // This is used for course calculation and ship orientation during flight.
             let a_line = new THREE.Line3( navdot_aftward.position, navdot_forward.position );
+            let hecto_meter = a_line.distance();
+            let at_mega_meter = 1000000 / hecto_meter;
+            let at_decakilo_meter = 10000 / hecto_meter;
+            let _helms_point = a_line.at( at_decakilo_meter, new THREE.Vector3() );
+            helms_point.position.copy( _helms_point );
 
             let _sl = new THREE.QuadraticBezierCurve3( new THREE.Vector3( 0,-1,0 ), navdot_forward.position, new THREE.Vector3( 0,3,0 ) );
             let  _sl_points = _sl.getPoints( 50 );
@@ -715,7 +779,8 @@ class Screenplay extends _Screenplay{
             let nav_dots = {
               forward: navdot_forward,
               aftward: navdot_aftward,
-              sight_target: sight_target
+              sight_target: sight_target,
+              helms_point: helms_point
             }
             let nav_lines = {
               a_line: a_line,
@@ -723,8 +788,10 @@ class Screenplay extends _Screenplay{
             };
             starship.NavDots = nav_dots;
             starship.NavLines = nav_lines;
-            starship.add( sight_target ); // As a child, the position will update.
-            starship.add( sight_line );
+            starship.add( navdot_forward ); // As a child, the position will update.
+            starship.add( navdot_aftward );
+            starship.add( sight_target );
+            starship.add( helms_point );
 
             let starship_asset = new SceneAsset3D( starship );
             resolve( starship_asset );
@@ -1173,135 +1240,172 @@ class Screenplay extends _Screenplay{
       }
       this.updatables.set('warp_to', plotted_course );
     },
-    warp_to: async ( planetary_body, equidistant_orbit = false, arrival_emitter = false ) =>{
+    warp_to: async ( planetary_body, destination = 0, arrival_emitter = false ) =>{
       let ship = this.actors.Starship;
 
       let start_position = new THREE.Vector3()
       ship.getWorldPosition( start_position );
 
-      let end_position = planetary_body.orbital_vector.clone();
-      let _crow_line = new THREE.LineCurve3( start_position, end_position );
+      let helms_point = new THREE.Vector3();
+      ship.NavDots.helms_point.getWorldPosition( helms_point );
 
-      let sight_target = new THREE.Vector3();
-      ship.NavDots.sight_target.getWorldPosition( sight_target );
+      let end_position = planetary_body.destinations[destination].vector.clone();
 
-      let _sight_line = new THREE.LineCurve3( start_position, sight_target );
-      let _sight_length = _sight_line.getLength();
-      let _at_a_million = 1000000 / _sight_length;
-      let far_ahead = _sight_line.getPoint( _at_a_million );
-      let a_line = new THREE.LineCurve3( start_position, far_ahead );
+      let a_line = new THREE.Line3( planetary_body.position, end_position );
+      let a_distance = a_line.distance();
+      let at_approach_distance = ( a_distance + 10000 ) / a_distance;
+      let approach_anchor = a_line.at( at_approach_distance, new THREE.Vector3() );
 
-      // a² + b² = c²
-      // The Departure Point is at the hypotenuse-length point of the Crow Line
-      // This is the point b-line joins with the c-line, where a-line joins b-line one-million ( 1,000,000 ) units directly in front of the ship.
-      let _a = a_line.getLength();
-      let _b = _a;
-      let _c = Math.sqrt( ( _a * _a ) + ( _a * _a ) );
-      let _at_a_length = _c / _crow_line.getLength();
-      let departure_point = _crow_line.getPoint( _at_a_length );
+      let crow_line = new THREE.Line3( start_position, approach_anchor );
+      let crow_line_distance = crow_line.distance();
+      let at_departure_distance = 10000 / crow_line_distance;
+      let departure_anchor = crow_line.at( at_departure_distance, new THREE.Vector3() );
 
-      let diff = new THREE.Vector3().subVectors( start_position, departure_point );
-      let arrival_point = end_position.clone().add( diff );
+      let departure_course = new THREE.QuadraticBezierCurve3( start_position, helms_point, departure_anchor );
+      let warp_anchor = departure_course.getPoint( 1.1 );
+      let warp_course = new THREE.QuadraticBezierCurve3( departure_anchor, warp_anchor, approach_anchor );  // All warp courses are drawn toward the Sun.
 
-      let warp_line = new THREE.LineCurve3( departure_point, arrival_point );
+      let approach_line = new THREE.Line3( warp_course.getPoint( 0.999 ), warp_course.getPoint( 1 ) );
+      let al_distance = approach_line.distance();
+      let at_docking_distance = ( al_distance + 10000 ) / al_distance;
+      let docking_anchor = approach_line.at( at_docking_distance, new THREE.Vector3() );
 
-      let _warp_length = warp_line.getLength();
-      let _plus_a_million = ( 1000000 + _warp_length ) / _warp_length;
-      let arrival_anchor = warp_line.getPoint( _plus_a_million );
+      let docking_course = new THREE.QuadraticBezierCurve3( approach_anchor, docking_anchor, end_position );
+      let docking_quat = planetary_body.destinations[destination].quaternion;
 
-      let orientation_curve = new THREE.QuadraticBezierCurve3( start_position, far_ahead, departure_point );
-      let warping_line = new THREE.QuadraticBezierCurve3( departure_point, orientation_curve.getPoint( 1.1 ), arrival_point );
-      let docking_curve = new THREE.QuadraticBezierCurve3( arrival_point, arrival_anchor, end_position );
+      const course = new THREE.CurvePath();
+      course.curves.push( departure_course );
+      course.curves.push( warp_course );
+      course.curves.push( docking_course );
+      let course_length = course.getLength();
 
-      let course = new THREE.CurvePath();
-      course.autoClose = false;
-      course.curves.push( orientation_curve );
-      course.curves.push( warping_line );
-      course.curves.push( docking_curve );
+      let pilot = new THREE.Object3D();
+      pilot.position.copy( start_position );
 
-      course.quaternions = [];
-      let _x = new THREE.Object3D();
-      _x.position.copy( departure_point );
-      _x.lookAt( arrival_point );
-      course.quaternions.push( _x.quaternion.clone() );
-      course.quaternions.push( planetary_body.orbital_quaternion );
-
-      // Accelleration is at a fps rate and is in meters... so .8 = 60 * .8 meters / second... ~ 9.8g force accelleration.
-      // lol, Don't forget to engage those inertial dampeners!
-      const AccellerationVelocities = ( distance, accelleration = 42, velocity = 0 )=>{
-        let velocities = new Map();
-
-        let travelled = velocity;
-        let initial_progress = travelled / distance;
-        velocities.set( initial_progress, velocity );
-        for( ; travelled <= distance; ){
-          velocity += accelleration;
-          travelled += velocity;
-          let progress = travelled / distance;
-          velocities.set( progress, velocity );
-        }
-        velocity += accelleration;
-        travelled += velocity;
-        let final_progress = travelled / distance;
-        velocities.set( final_progress, velocity );
-
-        return velocities;
-      }
-      const DecellerationVelocities = ( distance, accelleration = 42, velocity )=>{
-        let velocities = new Map();
-
-        let travelled = velocity;
-        let initial_progress = travelled / distance;
-        let initial_velocity = velocity;
-        velocity = 0;
-        for( ; travelled <= distance; ){
-          velocity += accelleration;
-          travelled += velocity;
-          let progress = 1 - travelled / distance;
-          velocities.set( progress, velocity );
-        }
-        velocity += accelleration;
-        travelled += velocity;
-        velocities.set( initial_progress, initial_velocity );
-        for( const prog  of Array.from(velocities.keys()) ){
-          if( prog < initial_progress ) velocities.delete( prog );
-        }
-        let course_velocities = new Map();
-        let rev_array = Array.from(velocities.keys());
-        while( rev_array.length > 0 ){
-          let key = rev_array.pop();
-          let val = velocities.get( key );
-          course_velocities.set( key, val );
-          if( rev_array.length == 0 ){
-            let key_inc = ( 1 - key ) / 420;
-            let val_dec = val / 420;
-            for( let docking_frames = 420 ; docking_frames > 0; docking_frames-- ){
-              key += key_inc;
-              val -= val_dec;
-              let docking_key = Math.min( 1, key );
-              course_velocities.set( docking_key, val );
-            }
-          }
-        }
-
-        return course_velocities;
-      }
-      let orientation_velocities = AccellerationVelocities( orientation_curve.getLength(), 42, 0 );
-      let current_velocity = Array.from(orientation_velocities.values()).pop();
-      let docking_velocities = DecellerationVelocities( docking_curve.getLength(), 42, current_velocity );
-
-      course.velocities = [];
-      course.velocities.push( Array.from(orientation_velocities.keys()) );
-      course.velocities.push( [ 1 ] );
-      course.velocities.push( Array.from(docking_velocities.keys()) );
       let plotted_course = {
-        update: ( )=>{
+        compile: async ( )=>{
 
           let cache = plotted_course.cache;
+          let pilot = cache.pilot;
+          let starship = cache.starship;
 
-          // Call this last to clear the function
+          let course = cache.course;
+
+          switch( cache.stage ){
+            case 0:
+              if( cache.stage_frame >= cache.durations[0] ) {
+                cache.stage = 1;
+                cache.stage_frame = -1;
+              }
+              else{
+                let _prog = cache.stage_frame / cache.durations[0];
+                let turn_progress = _prog * Math.min( 1, _prog ** (2-(2*_prog)) );
+                let next_pos = course.curves[0].getPointAt( turn_progress );
+                console.log( starship.position.distanceTo( pilot.position.clone() ));
+                starship.position.copy( pilot.position.clone() );
+                cache.compilation.starship.positions.push( pilot.position.clone() );
+                pilot.position.copy( next_pos );
+                if( cache.stage_frame > 15 ){
+                  let _now = starship.quaternion.clone();
+                  starship.lookAt( pilot.position );
+                  let _rot = starship.quaternion.clone();
+                  let turning_speed = 3.14159 / cache.durations[0];
+                  _now.rotateTowards( _rot, turning_speed );
+                  starship.quaternion.copy( _now );
+                  cache.compilation.starship.quaternions.push( _now.clone() );
+                } else {
+                  cache.compilation.starship.quaternions.push( starship.quaternion.clone() );
+                }
+              }
+              break;
+            case 1:
+            if( cache.stage_frame >= cache.durations[1] ) {
+              cache.stage = 2;
+              cache.stage_frame = -1;
+            } else {
+              let _prog = cache.stage_frame / cache.durations[1];
+              let _rem = ( cache.durations[2] - cache.stage_frame ) / cache.durations[2];
+              let warp_progress = _prog * Math.min( 1, _prog ** (2-(2*_rem)) );
+              let next_pos = course.curves[1].getPointAt( warp_progress );
+
+              starship.position.copy( pilot.position.clone() );
+              cache.compilation.starship.positions.push( pilot.position.clone() );
+              pilot.position.copy( next_pos );
+              let _now = starship.quaternion.clone();
+              starship.lookAt( pilot.position );
+              let _rot = starship.quaternion.clone();
+              let turning_speed = .0314159 / cache.durations[1];
+              _now.rotateTowards( _rot, turning_speed );
+              starship.quaternion.copy( _now );
+              cache.compilation.starship.quaternions.push( _now.clone() );
+            }
+              break;
+            case 2:
+              if( cache.stage_frame >= ( cache.durations[2] - 5 ) ) {
+                cache.stage = 3;
+                cache.stage_frame = -1;
+                cache.docking_prog = ( cache.durations[2] - 5 ) / cache.durations[2];
+              }
+              else{
+                let _prog = cache.stage_frame / cache.durations[2];
+                let _rem = ( cache.durations[2] - cache.stage_frame ) / cache.durations[2];
+                let arrival_progress = _prog * Math.min( 1, _prog ** (2-(2*_rem)) );
+                let next_pos = course.curves[2].getPointAt( arrival_progress );
+                starship.position.copy( pilot.position.clone() );
+                cache.compilation.starship.positions.push( pilot.position.clone() );
+                pilot.position.copy( next_pos );
+                if( cache.stage_frame > 0 ){
+                  let _now = starship.quaternion.clone();
+                  starship.lookAt( pilot.position );
+                  let _rot = starship.quaternion.clone();
+                  let turning_speed = 3.14159 / cache.durations[2];
+                  _now.rotateTowards( _rot, turning_speed );
+                  starship.quaternion.copy( _now );
+                  cache.compilation.starship.quaternions.push( _now.clone() );
+                } else {
+                  cache.compilation.starship.quaternions.push( starship.quaternion.clone() );
+                }
+              }
+              break;
+            case 3:
+              if( cache.stage_frame >= cache.durations[3] || cache.compiled ) {
+                starship.position.copy( course.curves[2].getPointAt( 1 ) );
+                cache.compilation.starship.positions.push( course.curves[2].getPointAt( 1 ) );
+                starship.quaternion.copy( cache.docking_quat );
+                cache.compilation.starship.quaternions.push( cache.docking_quat );
+                cache.compiled = true;
+              }
+              else{
+                let _rem_prog = 1 - cache.docking_prog;
+                let _prog = cache.docking_prog + ( _rem_prog * ( cache.stage_frame / cache.durations[3] ) );
+                let _rem = 1 - _prog;
+                let docking_progress = _prog * Math.min( 1, _prog ** (2-(2*_rem)) );
+                let next_pos = course.curves[2].getPointAt( docking_progress );
+                starship.position.copy( pilot.position.clone() );
+                cache.compilation.starship.positions.push( pilot.position.clone() );
+                pilot.position.copy( next_pos );
+                let turning_speed = 3.14159 / cache.durations[3];
+                if( cache.stage_frame < cache.durations[3] - 120 ){
+                  let _now = starship.quaternion.clone();
+                  starship.lookAt( pilot.position );
+                  let _rot = starship.quaternion.clone();
+                  _now.rotateTowards( _rot, turning_speed );
+                  starship.quaternion.copy( _now );
+                  cache.compilation.starship.quaternions.push( _now.clone() );
+                }
+                else {
+                  starship.quaternion.rotateTowards( cache.docking_quat, turning_speed );
+                  cache.compilation.starship.quaternions.push( starship.quaternion.clone() );
+                }
+              }
+              break;
+          }
+          cache.stage_frame++;
+          return;
+        },
+        update: ()=>{
+          let cache = plotted_course.cache;
           if( cache.completed ){
-
             this.updatables.delete( 'warp_to' );
             let a = cache.arrival_emitter;
             if ( a && a instanceof Function ) {
@@ -1309,76 +1413,42 @@ class Screenplay extends _Screenplay{
             } else if( a && a.dictum_name && a.ndx ) {
               a.director.emit( `${a.dictum_name}_progress`, a.dictum_name, a.ndx );
             }
-
           } else {
-            let course = cache.course;
-
-            switch( cache.stage ){
-              case 0:
-                if( cache.frame >= course.velocities[0].length ) {
-                  cache.stage = 1;
-                  cache.frame = -1;
-                }
-                else{
-                  let _prog = cache.frame / course.velocities[0].length
-                  let turn_progress = Math.min( 1, _prog ** (2-(2.05*_prog)) );
-                  let next_pos = course.curves[0].getPoint( turn_progress );
-                  cache.starship.position.copy( next_pos );
-                  cache.starship.quaternion.slerp( course.quaternions[0], _prog );
-                  cache.starship.updateMatrixWorld( true );
-                }
-                break;
-              case 1:
-              if( cache.frame >= 420 ) {
-                cache.stage = 2;
-                cache.frame = -1;
-              } else {
-                let pos_prog = cache.frame / 420;
-                let warp_progress = Math.min( 1, pos_prog ** (2-(2.05*pos_prog)) );
-                let next_pos = course.curves[1].getPoint( warp_progress );
-                cache.starship.position.copy( next_pos );
-                cache.starship.quaternion.slerp( course.quaternions[0], pos_prog );
-
-                cache.starship.updateMatrixWorld( true );
-              }
-                break;
-              case 2:
-                if( cache.frame >= course.velocities[2].length ) {
-                  cache.completed = true;
-                  cache.starship.position.copy( course.curves[2].getPoint( 1 ) );
-                  cache.starship.quaternion.slerp( cache.destination.orbital_quaternion, 1 );
-                  cache.starship.updateMatrixWorld( true );
-                }
-                else{
-                  let pos_prog = cache.frame / course.velocities[2].length
-                  let docking_progress = Math.min( 1, pos_prog ** (2-(2.05*pos_prog)) );
-                  let next_pos = course.curves[2].getPoint( docking_progress );
-                  cache.starship.position.copy( next_pos );
-
-                  //let look_prog = pos_prog + .001;
-                  //let look_at = course.curves[2].getPoint( look_prog );
-                  //cache.starship.lookAt( look_at );
-                  let quat_prog = cache.frame / course.velocities[2].length;
-                  cache.starship.quaternion.slerp( course.quaternions[1], quat_prog );
-
-                  cache.starship.updateMatrixWorld( true );
-                }
-                break;
+            if( cache.frame < cache.compilation.starship.positions.length || cache.frame < cache.compilation.starship.quaternions.length){
+              cache.starship.position.copy( cache.compilation.starship.positions[cache.frame] );
+              cache.starship.quaternion.copy( cache.compilation.starship.quaternions[cache.frame] );
+            } else {
+              cache.completed = true;
             }
-            cache.frame++;
           }
+          cache.frame++;
         },
         cache: {
+          compiled: false,
           completed: false,
           frame: 0,
+          stage_frame: 0,
           arrival_emitter: arrival_emitter,
           course: course,
           stage: 0,
+          durations:[ 120, 180, 240, 180 ],
           starship: this.actors.Starship,
-          destination: planetary_body
+          destination: planetary_body,
+          docking_quat: docking_quat,
+          pilot: pilot,
+          compilation: {
+            starship: {
+              positions: [],
+              quaternions: []
+            }
+          }
         }
       }
-
+      const arrSum = arr => arr.reduce((a,b) => a + b, 0)
+      let duration = arrSum( plotted_course.cache.durations ) + plotted_course.cache.durations.length;
+      for( let ndx = 0; ndx < duration; ndx++ ){
+        plotted_course.compile();
+      }
       this.updatables.set('warp_to', plotted_course );
     },
     change_cam_old: async ( cam_name ) =>{
@@ -1803,7 +1873,12 @@ class Screenplay extends _Screenplay{
             home_dome.name = 'HomeDome';
             home_dome.orbital_vector = home_dome.position.clone().add( {x:1, y:4, z:98} );
             home_dome.orbital_quaternion = new THREE.Quaternion( 0, 1, 0, 0.0000013267948966775328 );
-
+            home_dome.destinations = [
+              {
+                vector: home_dome.position.clone().add( {x:1, y:4, z:98} ),
+                quaternion: new THREE.Quaternion( 0, 1, 0, 0.0000013267948966775328 )
+              }
+            ];
 
 
             resolve( home_dome );
