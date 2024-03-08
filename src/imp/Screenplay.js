@@ -437,231 +437,6 @@ class Screenplay extends _Screenplay{
       return this.Sun = sun;
     },
 
-    // Ship
-    get Ship(){
-
-      let loading = new Promise( ( resolve, reject )=>{
-        const loader = new GLTFLoader();
-        // Optional: Provide a DRACOLoader instance to decode compressed mesh data
-        const dracoLoader = new DRACOLoader();
-        dracoLoader.setDecoderPath( 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/' );
-        loader.setDRACOLoader( dracoLoader );
-        loader.load( 'models/bridge.glb',
-          async ( gltf )=>{
-
-            let ship = new THREE.Group();
-            ship = gltf.scene;
-            let _bulkhead_mat = new THREE.MeshPhongMaterial();
-            let _bulkhead = ship.getObjectByName( 'Bulkhead' );
-            _bulkhead.castShadow = true;
-            _bulkhead.receiveShadow = true;
-            _bulkhead.material = _bulkhead_mat;
-            _bulkhead.material.wireframe = true;
-            ship.bulkhead = _bulkhead;
-            ship.bulkhead.visible = false;
-
-            let _bulkhead_open = ship.getObjectByName( 'BulkheadOpen' );
-            _bulkhead_open.castShadow = true;
-            _bulkhead_open.receiveShadow = true;
-            _bulkhead_open.material = _bulkhead_mat;
-            _bulkhead_open.material.wireframe = true;
-            ship.bulkhead_open = _bulkhead_open;
-            ship.bulkhead_open.visible = true;
-
-            let _aft_wall = ship.getObjectByName( 'Aft_Wall' );
-            _aft_wall.castShadow = true;
-            _aft_wall.receiveShadow = true;
-            _aft_wall.material = _bulkhead_mat;
-            ship.aft_wall = _aft_wall;
-
-            let _light = ship.getObjectByName( 'Light' ).children[ 0 ];
-            _light.intensity = 1;
-            _light.distance = 100;
-            _light.decay = 1;
-            //_light.position.add( new THREE.Vector3( 0, -2, 0) );
-            ship.light = _light;
-
-            RectAreaLightUniformsLib.init();
-            const rectLight1 = new THREE.RectAreaLight( 0xffff00, 1.5, 4, 4 );
-            rectLight1.rotateX( Math.PI / 2 );
-            rectLight1.position.set( 0, 0, 0 );
-            const rectLight2 = new THREE.RectAreaLight( 0x0000ff, 1.5, 4, 4 );
-            rectLight2.rotateX( - Math.PI / 2 );
-            rectLight2.position.set( 0, 1, 0 );
-
-            let _station_mats = new THREE.MeshPhongMaterial( { color: 0x222222, shininess: 50 } );
-            let _ops_station = ship.getObjectByName( 'OpsStation' );
-            _ops_station.castShadow = true;
-            _ops_station.receiveShadow = true;
-            _ops_station.material = _station_mats;
-            _ops_station.add( rectLight1 );
-            ship.ops_light = rectLight1;
-            _ops_station.add( rectLight2 );
-            ship.ops_light_above = rectLight2;
-            ship.ops_station = _ops_station;
-            //let _conn_station = ship.getObjectByName( 'ConnStation' );
-            //_conn_station.castShadow = true;
-            //_conn_station.receiveShadow = true;
-            //_conn_station.material = _station_mats;
-            //ship.conn_station = _conn_station;
-            let _sec_station = ship.getObjectByName( 'SecurityStation' );
-            _sec_station.castShadow = true;
-            _sec_station.receiveShadow = true;
-            _sec_station.material = _station_mats;
-            ship.sec_station = _sec_station;
-            let _conference_table = ship.getObjectByName( 'Conference__Table' );
-            _conference_table.castShadow = true;
-            _conference_table.receiveShadow = true;
-            _conference_table.material = _station_mats;
-            ship.conference_table = _conference_table;
-
-            // Generate the Warp Tunnel Structure and Effects
-            let cloud_boiling_texture = new THREE.TextureLoader().load( 'textures/effects/cloud_boiling.jpg' );
-            let clouds_clouds_clouds_texture = new THREE.TextureLoader().load( 'textures/effects/clouds_clouds_clouds.jpg' );
-            let cloud_patches_texture = new THREE.TextureLoader().load( 'textures/effects/cloud_patches.jpg' );
-            let cloud_ribbons_texture = new THREE.TextureLoader().load( 'textures/effects/cloud_ribbons.jpg' );
-            let clouds_noclouds_texture = new THREE.TextureLoader().load( 'textures/effects/clouds_noclouds.jpg' );
-
-            let _warp_tunnel = []
-            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone000' ) );
-            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone001' ) );
-            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone002' ) );
-            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone003' ) );
-            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone004' ) );
-            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone005' ) );
-            _warp_tunnel.push( ship.getObjectByName( 'Warp_Cone006' ) );
-
-            let warp_tunnel = new THREE.Group();
-            for( let cone_ndx=0; cone_ndx<_warp_tunnel.length; cone_ndx++ ){
-
-              let primary_shell = new SceneAsset3D( _warp_tunnel[ cone_ndx ] );
-              let secondary_shell = new SceneAsset3D( _warp_tunnel[ cone_ndx ].clone( false ) );
-              let tertiary_shell = new SceneAsset3D( _warp_tunnel[ cone_ndx ].clone( false ) );
-
-              primary_shell.material = new THREE.MeshPhongMaterial( { color: 0x000000, emissive: 0x040bff, wireframe: true, side: THREE.DoubleSide, alphaMap: cloud_boiling_texture, alphaTest: 0.5, transparent: true, opacity: 0.9 } );
-              secondary_shell.material = new THREE.MeshPhongMaterial( { color: 0x000000, emissive: 0x0000ff,  side: THREE.DoubleSide, alphaMap: clouds_clouds_clouds_texture, alphaTest: 0.7, transparent: true, opacity: 0.8});
-              tertiary_shell.material = new THREE.MeshPhongMaterial( { color: 0x000000, emissive: 0xffffff, wireframe: true, side: THREE.DoubleSide, alphaMap: cloud_ribbons_texture, alphaTest: 0.7, transparent: true, opacity: 0.9 });
-
-              primary_shell.directions.set( 'revolve', function( delta, warp_speed ){
-                if( warp_speed > 0 ) primary_shell.rotation.y += 1.5 * warp_speed;
-              });
-              secondary_shell.directions.set( 'revolve', function( delta, warp_speed ){
-                if( warp_speed > 0 ) secondary_shell.rotation.y -= 1 * warp_speed;
-              });
-              tertiary_shell.directions.set( 'revolve', function( delta, warp_speed ){
-                if( warp_speed > 0 ) tertiary_shell.rotation.y += 0.5 * warp_speed;
-              });
-
-              warp_tunnel.add( primary_shell );
-              warp_tunnel.add( secondary_shell );
-              warp_tunnel.add( tertiary_shell );
-            }
-            ship.warp_tunnel = warp_tunnel;
-
-
-            // Define Key Navigation Data
-            let _fwd = ship.getObjectByName( 'NavdotForward' );
-            let navdot_forward = new THREE.Mesh(
-              new THREE.SphereGeometry( 0.01, 3, 2 ),
-              new THREE.MeshPhongMaterial( { color: 0x0000ff } )
-            );
-            navdot_forward.position.copy( _fwd.position );
-
-            let _awd = ship.getObjectByName( 'NavdotAftward' );
-            let navdot_aftward = new THREE.Mesh(
-              new THREE.SphereGeometry( 0.01, 3, 2 ),
-              new THREE.MeshPhongMaterial( { color: 0xff0000 } )
-            );
-            navdot_aftward.position.copy( _awd.position );
-
-            let _al = new THREE.Line3( _awd.position, _fwd.position );
-            let _al_geometry = new THREE.BufferGeometry().setFromPoints( [ _al.start, _al.end ] );
-            let _al_material = new THREE.LineBasicMaterial( { color: 0xff00ff } );
-            let a_line = new THREE.Line( _al_geometry, _al_material );
-            a_line.visible = false;
-
-            let _sl_ctrl = new THREE.Vector3();
-            _al.at( 1, _sl_ctrl );
-            _sl_ctrl.add( new THREE.Vector3( 0, 0, 0 ));
-            let _sl = new THREE.QuadraticBezierCurve3( new THREE.Vector3( 0,-1,0 ), _fwd.position, new THREE.Vector3( 0,3,0 ) );
-            let  _sl_points = _sl.getPoints( 50 );
-            let  _sl_geometry = new THREE.BufferGeometry().setFromPoints( _sl_points );
-            let  _sl_material = new THREE.LineBasicMaterial( { color: 0xffffff } );
-            let  sight_line = new THREE.Line( _sl_geometry, _sl_material );
-            sight_line.visible = false;
-
-            let _st_v = new THREE.Vector3();
-            _sl.getPointAt( 0.55, _st_v);
-            let sight_target = new THREE.Mesh(
-              new THREE.TorusKnotGeometry( 1, 1, 3, 3, 3, 3 ),
-              new THREE.MeshPhongMaterial( { color: 0xffffff } )
-            );
-            sight_target.position.copy( _st_v );
-
-            let nav_dots = {
-              forward: navdot_forward,
-              aftward: navdot_aftward,
-              sight_target: sight_target
-            }
-            let nav_lines = {
-              a_line: a_line,
-              sight_line: sight_line
-            };
-            ship.NavDots = nav_dots;
-            ship.NavLines = nav_lines;
-            ship.add( sight_target ); // As a child, the position will update.
-            ship.add( sight_line );
-
-            ship.cameras = new Map();
-            gltf.cameras.forEach( (camera)=>{
-              //camera.position.copy( camera.parent.position );
-              ship.cameras.set( camera.parent.name, camera );
-            });
-            let third_person_cam = new THREE.PerspectiveCamera( VIEW.fov, VIEW.aspect, VIEW.near, VIEW.far );
-            third_person_cam.position.addVectors( ship.position, new THREE.Vector3( 0, 5, -25 ) );
-            third_person_cam.up.copy( ship.up );
-            third_person_cam.name = '3rdPerson';
-            third_person_cam.lookAt( ship.position );
-            third_person_cam.updateProjectionMatrix();
-            ship.add( third_person_cam );
-            ship.cameras.set( third_person_cam.name, third_person_cam );
-
-
-            ship.viewscreen = ship.getObjectByName( 'Viewscreen' );
-            ship.viewscreen.material.transparent = true;
-            ship.viewscreen.material.opacity = 0.17;
-            ship.viewscreen.visible = false;
-
-            ship.name = "Ship";
-            let ship_asset = new SceneAsset3D( ship );
-            resolve( ship_asset );
-          },
-          async function ( xhr ) {
-            // TODO: Add Repair progress functionality... if needed.
-            //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-          },
-          async ( err )=>{
-            console.error( err );
-            reject( err );
-          }
-        );
-      });
-
-
-      return (async () => {
-        try {
-          return await loading.then(( ship )=>{
-
-            delete this.Ship;
-            return this.Ship = ship;
-
-          })
-        } catch(e) {
-          return 0; // fallback value;
-        }
-      })();
-    },
-
     // Starship
     get Starship(){
 
@@ -705,7 +480,7 @@ class Screenplay extends _Screenplay{
 
             starship.cameras = new Map();
             gltf.cameras.forEach( (camera)=>{
-              camera.fov=90;
+              camera.fov=110;
               starship.cameras.set( camera.name, camera );
             });
 
@@ -1431,7 +1206,7 @@ class Screenplay extends _Screenplay{
           arrival_emitter: arrival_emitter,
           course: course,
           stage: 0,
-          durations:[ 120, 180, 240, 180 ],
+          durations:[ 180, 360, 120, 1200 ],
           starship: this.actors.Starship,
           destination: planetary_body,
           docking_quat: docking_quat,
@@ -1451,7 +1226,7 @@ class Screenplay extends _Screenplay{
       }
       this.updatables.set('warp_to', plotted_course );
     },
-    change_cam_old: async ( cam_name ) =>{
+    change_cam_original: async ( cam_name ) =>{
       let ship = this.actors.Starship;
       let new_position = new THREE.Vector3();
       let new_target_position = new THREE.Vector3();
@@ -1482,7 +1257,7 @@ class Screenplay extends _Screenplay{
       this.active_cam.name = cam_name;
 
     },
-    change_cam: async ( cam_name ) =>{
+    change_cam_old: async ( cam_name ) =>{
       // REPLACE WITH MOVING TRANSITION... NO MORE JUMP CUTS!!!
       let travel_duration = 30; // calculate paths for any distance.
       let a = new THREE.Vector3();
@@ -1632,6 +1407,109 @@ class Screenplay extends _Screenplay{
         }
       });
       this.updatables.set( 'change_cam', camera_change );
+    },
+    change_cam: async ( cam_name ) => {
+      if( cam_name !== this.active_cam.name ){
+        function StringBuilder(){
+          var _string = arguments[0] || '';
+
+          for (var i=1; i < arguments.length; i++) {
+            var symbol = '%' + i;
+            var replacement = arguments[i] || 0;
+            _string = _string.replace(symbol, replacement);
+          }
+          return _string;
+        }
+
+        function StringCombiner(){
+          var _string = arguments[0] || '';
+
+          for (var i=1; i < arguments.length; i++) {
+            _string += ' ' + arguments[i];
+          }
+          return _string;
+        }
+
+
+        document.title = StringCombiner( 'Dollying to ', cam_name ,' | Wethe.Network' );
+        let start_position = this.active_cam.getWorldPosition( new THREE.Vector3() );
+        let dolly_cam = this.active_cam.clone();
+        dolly_cam.position.copy( start_position );
+        this.sys_ve_scene.add( dolly_cam );
+        this.active_cam = dolly_cam;
+        let destination_camera = this.cameras.get( cam_name );
+        let finish_position = destination_camera.getWorldPosition( new THREE.Vector3() );
+        let distance_between = start_position.distanceTo( finish_position );
+        let ahead = new THREE.Vector3(0, 0, -1).transformDirection( dolly_cam.matrixWorld.clone() );
+        let ray_forward = new THREE.Ray( start_position, ahead );
+        let a_tenth_ahead = ray_forward.at( distance_between / 10, new THREE.Vector3() );
+
+        let dolly_path = new THREE.QuadraticBezierCurve3( start_position, a_tenth_ahead, finish_position );
+        let pilot = new THREE.Object3D();
+        pilot.position.copy( start_position );
+        let transition_course = {
+          compile: ( )=>{
+
+            let cache = transition_course.cache;
+            let dolly_cam = cache.dolly_cam;
+            let course = cache.course;
+            let pilot = cache.pilot;
+
+            for( ;cache.iteration < cache.duration; cache.iteration++ ){
+              let _prog = cache.iteration / cache.duration;
+              let dolly_progress = _prog * Math.min( 1, _prog ** (2-(2*_prog)) );
+              let next_pos = course.getPointAt( dolly_progress );
+
+              dolly_cam.position.copy( pilot.position.clone() );
+              cache.compilation.dolly_cam.positions.push( dolly_cam.position.clone() );
+              pilot.position.copy( next_pos );
+              dolly_cam.lookAt( pilot.position );
+              cache.compilation.dolly_cam.quaternions.push( dolly_cam.quaternion.clone() );
+            }
+            cache.compilation.dolly_cam.positions.push( course.getPointAt( 1 ) );
+            cache.compilation.dolly_cam.quaternions.push( cache.destination.quaternion );
+            return cache.compiled = true;
+          },
+          update: ()=>{
+            let cache = transition_course.cache;
+            let dolly_cam = cache.dolly_cam;
+            if( cache.completed ){
+              this.updatables.delete( 'dolly_to' );
+              this.sys_ve_scene.remove( dolly_cam );
+              this.active_cam = cache.destination;
+            } else {
+              if( cache.frame < cache.compilation.dolly_cam.positions.length || cache.frame < cache.compilation.dolly_cam.quaternions.length){
+                dolly_cam.position.copy( cache.compilation.dolly_cam.positions[cache.frame] );
+                dolly_cam.quaternion.copy( cache.compilation.dolly_cam.quaternions[cache.frame] );
+
+                dolly_cam.updateProjectionMatrix();
+              } else {
+                cache.completed = true;
+              }
+            }
+            cache.frame++;
+          },
+          cache: {
+            compiled: false,
+            completed: false,
+            frame: 0,
+            iteration: 0,
+            course: dolly_path,
+            duration: 180,
+            destination: destination_camera,
+            dolly_cam: dolly_cam,
+            pilot: pilot,
+            compilation: {
+              dolly_cam: {
+                positions: [],
+                quaternions: []
+              }
+            }
+          }
+        }
+        transition_course.compile();
+        this.updatables.set('dolly_to', transition_course );
+      }
     },
     transform: async ( objects, targets, duration, arrival_emitter = false )=>{
       // Remove actively competing animations by resetting this engine.

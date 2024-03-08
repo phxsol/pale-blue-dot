@@ -4746,7 +4746,10 @@ function ArchitectPanel( props ){
       let cameras = screenplay.cameras;
       cameras.forEach( function( cam, name ){
         let ctrl = {};
-        ctrl[name] = function(){screenplay.actions.change_cam( `${name}` )};
+        ctrl[name] = function(){
+          props.toggleArchitect();
+          screenplay.actions.change_cam( `${name}` )
+        };
         gui.camera_controls.add( ctrl, name );
         let cam_settings = gui.camera_controls.addFolder( name );
 

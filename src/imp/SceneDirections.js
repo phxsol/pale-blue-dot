@@ -225,7 +225,7 @@ class SceneDirections extends _SceneDirections {
      this.set( ndx, cam );
    }, screenplay.cameras );
 
-   await screenplay.actions.change_cam( '3rdShipCam' );
+
 
    // lensflares
    const textureLoader = new THREE.TextureLoader();
@@ -245,6 +245,8 @@ class SceneDirections extends _SceneDirections {
    sys_ve_scene.add( sun.light );
    //screenplay.actors.Sun.visible = true;
 
+   screenplay.active_cam = screenplay.cameras.get( '3rdShipCam' );
+   document.title = 'Outside Ship | Wethe.Network';
    director.emit( next_emit, dictum_name );
   };
 

@@ -651,10 +651,11 @@ class Workflow extends _Workflow{
       return false;
     }
   };
+
   // [ On-New || !CAN_SAVE ] Test the user's device performance and adjust the app to match.
   test_client = async ( screenplay, dictum_name, director, ndx ) => {
     console.log( 'Workflow.test_client' );
-    document.title = 'Workflow.test_client | MySpace';
+    document.title = 'test_client | WeThe.Network';
 
     // Performance Test the client if untested.
     let performance_results = ( screenplay.CAN_SAVE ) ? localStorage.getItem("ups_test") : false;
@@ -672,7 +673,7 @@ class Workflow extends _Workflow{
 
   tutorial = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.tutorial');
-    document.title = 'Workflow.tutorial | MySpace';
+    document.title = 'tutorial | WeThe.Network';
 
     // Performance Test the client if untested.
     let last_shown_tutorial = ( screenplay.CAN_SAVE ) ? localStorage.getItem("last_shown_tutorial") : false;
@@ -794,7 +795,7 @@ class Workflow extends _Workflow{
   // Load the WeThe Node System according to the user's preferences
   load_wethe = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.load_wethe');
-    document.title = 'Workflow.load_wethe | MySpace';
+    document.title = 'load_wethe | WeThe.Network';
 
     //this.react_app.render( <ErrorBoundary><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /></ErrorBoundary> );
     director.emit( `${dictum_name}_progress`, dictum_name, ndx );
@@ -802,7 +803,7 @@ class Workflow extends _Workflow{
   // Load and resume the user's experience ( @Time-Space Coordinates + difference )
   resume_user = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.resume_user');
-    document.title = 'Workflow.resume_user | MySpace';
+    document.title = 'resume_user | WeThe.Network';
 
     const verifyToken = async ( uname, token ) => {
       if( !uname && !token ) return false;
@@ -887,7 +888,7 @@ class Workflow extends _Workflow{
 
   init_controls = async ( screenplay, dictum_name, director, ndx ) => {
     console.log('Workflow.init_controls');
-    document.title = 'Workflow.init_controls | MySpace';
+    document.title = 'init_controls | WeThe.Network';
     function WorkingViewScreenDisplay( props ){
       const screenplay = props.screenplay;
       const panel = useRef();
@@ -965,6 +966,7 @@ class Workflow extends _Workflow{
       let sys_ui_scene = screenplay.sys_ui_scene;
       let page_ve_scene = screenplay.page_ve_scene;
       let page_ui_scene = screenplay.page_ui_scene;
+
 
     } catch( e ) {
 
