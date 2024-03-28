@@ -11,11 +11,6 @@ import { Peer } from "peerjs";
 
 import * as THREE from 'three';
 // Support Library Reference
-import { OrbitControls } from '../lib/OrbitControls.js';
-import { FirstPersonControls } from '../lib/FirstPersonControls.js';
-import { FlyControls } from '../lib/FlyControls.js';
-import { TrackballControls } from '../lib/TrackballControls.js';
-import { CSS3DRenderer, CSS3DObject } from '../lib/CSS3DRenderer.js';
 import { GLTFLoader } from '../lib/GLTFLoader.js';
 import { GLTFExporter } from '../lib/GLTFExporter.js';
 
@@ -984,7 +979,13 @@ class Workflow extends _Workflow{
     console.log('Workflow.new_room');
     document.title = 'Workflow.new_room | MySpace';
 
-    this.react_app.render( <ErrorBoundary><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /><PipGUI pipGUI={false} /><ViewScreenDisplay screenplay={screenplay} /></ErrorBoundary> );
+
+
+
+
+
+
+    this.react_app.render( <><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /><ViewScreenDisplay screenplay={screenplay} onDisplay={false} selfCamStream={selfCamStream} videoStreams={videoStreams} /></> );
     director.emit( `${dictum_name}_progress`, dictum_name, ndx );
   };
   event_model = async ( screenplay, dictum_name, director, ndx ) => {

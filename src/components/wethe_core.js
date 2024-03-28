@@ -1,6 +1,6 @@
 import { SceneTransformation } from '../bin/ScreenDirector.js';
 import React from 'react';
-import { useState, useEffect, useRef, Fragment } from 'react';
+import { useState, useEffect, useRef, Fragment, Component } from 'react';
 // Support Library Reference
 import * as THREE from 'three';
 import jsQR from 'jsqr';
@@ -386,6 +386,7 @@ function GlyphScanner( props ){
   const videoSelect = useRef();
   const scan_button = useRef();
   const scannedGlyphs = useRef();
+  const gs_body = useRef();
 
   function cleanup(){
     deInitComponent();
@@ -538,19 +539,53 @@ function GlyphScanner( props ){
     }
   }
   async function displayGlyph( glyph ) {
-    const urlCreator = window.URL || window.webkitURL;
-    const url = urlCreator.createObjectURL( await glyph.blob );
-    object_urls.current.push( url );
-    let li = document.createElement( 'li' );
-    let img = document.createElement( 'img' );
-    img.setAttribute( 'src', url );
-    img.setAttribute( 'id', glyph.id );
-    img.setAttribute( 'data-time', glyph.stc.t );
-    img.setAttribute( 'data-loc', glyph.stc.loc );
-    li.appendChild( img );
-    li.classList.add( 'glyph' );
-    scannedGlyphs.current.appendChild( li );
+    class DisplayGlyph{
+      glyph; name = "Scanned Glyph";
+      constructor( glyph ){
+        if( glyph.results.link ){
+
+        }
+        const urlCreator = window.URL || window.webkitURL;
+        const scan_url = urlCreator.createObjectURL( glyph.blob );
+        object_urls.current.push( scan_url );
+        let li = document.createElement( 'li' );
+        let img = document.createElement( 'img' );
+        img.setAttribute( 'src', scan_url );
+        img.setAttribute( 'id', glyph.id );
+        img.setAttribute( 'data-time', glyph.stc.t );
+        img.setAttribute( 'data-loc', glyph.stc.loc );
+        li.appendChild( img );
+        li.classList.add( 'glyph' );
+        li.addEventListener("click", this, false);
+        scannedGlyphs.current.appendChild( li );
+        this.glyph = glyph;
+        this.scan_url = scan_url;
+      }
+
+      handleEvent( event ) {
+        console.log(event.type);
+        switch (event.type) {
+          case "click":
+            debugger;
+            let resolving = dns.lookup( this.glyph.code.data , ( err, address, family )=>{
+              debugger;
+            });
+            const new_iframe = document.createElement( 'iframe' );
+            new_iframe.src = this.glyph.code.data;
+            gs_body.current.appendChild( new_iframe );
+            // some code here…
+            break;
+          case "dblclick":
+            // some code here…
+            break;
+        }
+      }
+    }
+    let glyphDisplay = new DisplayGlyph( glyph );
   };
+  async function analyzeLink( link ){
+    debugger;
+  }
   function updateDevices(deviceInfos) {
     // Handles being called several times to update labels. Preserve values.
     const values = selectors.current.map( select => select.value);
@@ -828,7 +863,7 @@ function GlyphScanner( props ){
             <label htmlFor="scan" className="pip_text" >Start Scanner</label>
           </li>
         </ul>
-        <div className="body">
+        <div ref={gs_body} className="body">
           <video ref={videoElement} className="video" playsInline autoPlay></video>
         </div>
         <ul className="status" ref={scannedGlyphs}></ul>
@@ -4921,13 +4956,15 @@ function ArchitectPanel( props ){
 
         Landing: function() {
           props.toggleArchitect();
+          let earth = screenplay.actors.Earth;
           let landing_coords = new THREE.Vector3().setFromSphericalCoords( earth.surface_distance, 1, 1 ).add( earth.position );
           screenplay.actions.land_at( landing_coords );
         },
         GeoOrbit: function() {
           props.toggleArchitect();
+          let earth = screenplay.actors.Earth;
           let arrival_coords = new THREE.Vector3().setFromSphericalCoords( earth.orbital_distance, 1, 1 ).add( earth.position );
-          screenplay.actions.impulse_to( screenplay.actors.Moon );
+          screenplay.actions.impulse_to( arrival_coords );
         },
         SpaceStation: function() {
           props.toggleArchitect();
@@ -5217,6 +5254,7 @@ function InformationPanel( props ){
           <a target="_blank" href="https://icons8.com/icon/RC42DqVAI9ju/record-video">Record Video</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
           <a target="_blank" href="https://icons8.com/icon/KLyXgIpg7AdE/stop-gesture">Stop Gesture</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
           <a target="_blank" href="https://icons8.com/icon/42355/tick-box">Tick Box</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+          <a target="_blank" href="https://skfb.ly/oDnoC">"Diner BO2-Zombies inspired" by JoSaCo</a> is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).<br/>
         </span>
 
         <div id="color_test" className="info_card">
@@ -6568,6 +6606,118 @@ class Collection{
     this.links = [];
   }
 }
+
+class ContentMenu extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isOpen: false,
+    };
+    this.handleContextMenu = this.handleContextMenu.bind(this);
+    this.closeMenu = this.closeMenu.bind(this);
+  }
+
+  componentDidMount() {
+    // Add event listener for right-click context menu
+    document.addEventListener('contextmenu', this.handleContextMenu);
+    // Add event listener for touch and hold on touch devices
+    document.addEventListener('touchstart', this.handleTouchStart);
+    document.addEventListener('touchend', this.handleTouchEnd);
+  }
+
+  componentWillUnmount() {
+    // Remove event listeners when component unmounts
+    document.removeEventListener('contextmenu', this.handleContextMenu);
+    document.removeEventListener('touchstart', this.handleTouchStart);
+    document.removeEventListener('touchend', this.handleTouchEnd);
+  }
+
+  handleContextMenu(event) {
+    event.preventDefault();
+    // Check if right-clicked on the object
+    const { object } = this.props;
+    const menuOptions = this.getMenuOptions(object);
+    if (menuOptions.length > 0) {
+      this.setState({ isOpen: true });
+      // Calculate and set position of the menu based on mouse coordinates
+      this.setPosition(event.clientX, event.clientY);
+    }
+  }
+
+  handleTouchStart(event) {
+    // Start a timer when touch starts
+    this.touchStartTime = new Date().getTime();
+  }
+
+  handleTouchEnd(event) {
+    // Calculate touch duration
+    const touchEndTime = new Date().getTime();
+    const touchDuration = touchEndTime - this.touchStartTime;
+    // Open menu if touch duration exceeds a certain threshold (e.g., 500ms)
+    if (touchDuration > 500) {
+      event.preventDefault();
+      const { object } = this.props;
+      const menuOptions = this.getMenuOptions(object);
+      if (menuOptions.length > 0) {
+        this.setState({ isOpen: true });
+        // Calculate and set position of the menu based on touch coordinates
+        const touch = event.changedTouches[0];
+        this.setPosition(touch.clientX, touch.clientY);
+      }
+    }
+  }
+
+  getMenuOptions(object) {
+    const menuOptions = [];
+    // Define all menu options and their corresponding flags
+    const options = [
+      { flag: 'isUser', label: 'Contact' },
+      { flag: 'isOrganization', label: 'Contact' },
+      { flag: 'isUser', label: 'View Profile' },
+      { flag: 'isOrganization', label: 'View Profile' },
+      { flag: 'isUser', label: 'Interact' },
+      { flag: 'isOrganization', label: 'Interact' },
+      { flag: 'isUser', label: 'Report/Block' },
+      { flag: 'isOrganization', label: 'Report/Block' },
+      // Add more menu options here as needed
+    ];
+
+    // Check flags and add corresponding menu options
+    options.forEach(option => {
+      if (object[option.flag]) {
+        menuOptions.push(option.label);
+      }
+    });
+
+    return menuOptions;
+  }
+
+  setPosition(x, y) {
+    // Set position of the menu
+    // Here, you would set the state for menu position based on x and y coordinates
+    // This could involve CSS styling to position the menu
+  }
+
+  closeMenu() {
+    // Close the menu
+    this.setState({ isOpen: false });
+  }
+
+  render() {
+    const { isOpen } = this.state;
+    const { object } = this.props;
+    const menuOptions = this.getMenuOptions(object);
+
+    return isOpen && menuOptions.length > 0 ? (
+      <div className="content-menu" onBlur={this.closeMenu}>
+        {menuOptions.map((option, index) => (
+          <MenuItem key={index}>{option}</MenuItem>
+        ))}
+      </div>
+    ) : null;
+  }
+}
+
 
 // SubRoutines
 async function OpenIndexedDBRequest( name, version, onError, onSuccess ){

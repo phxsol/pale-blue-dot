@@ -609,45 +609,14 @@ class Screenplay extends _Screenplay{
   cameras;
   actions = {
     impulse_to: async ( arrival_coords, arrival_emitter = false ) =>{
-      // TODO: Replace this (warp_to copy) with impulse_to plotted course
-      let plotted_course = {
-        update: ( )=>{},
-        cache: {
-          iniQ: iniQ,
-          endQ: endQ,
-          path: travel_path,
-          up_now: this.actors.Starship.up.clone(),
-          turn_duration: 2 * Math.max( 100, Math.ceil( _quat_diff * ( 250 / Math.PI ) ) ),
-          travel_duration: 2 * Math.ceil( 100 + ( travel_distance / 15000000000 ) ),
-          warp_duration: 2 * 15,
-          duration: this.turn_duration + this.travel_duration,  // TODO: Vary this by the travel_distance to target
-          frame: 0,
-          locking_on: false,
-          locked_on: false,
-          warping: false,
-          warp_speed: 0,
-          warp_tunnel_buildup: 2 * 250,
-          warped: false,
-          at_destination: false,
-          completed: true,
-          cleanup_phase: false,
-          arrival_emitter: arrival_emitter
-        }
-      }
-      this.updatables.set('impulse_to', plotted_course );
+      let ship = this.actors.Starship;
+      ship.position.copy( arrival_coords );
+      ship.updateMatrixWorld( true );
     },
     land_at: async ( landing_coords, arrival_emitter = false ) =>{
-      // TODO: Replace this (warp_to copy) with land_at plotted course
-      let plotted_course = {
-        update: ( )=>{
-
-        },
-        cache: {
-          completed: true,
-          arrival_emitter: arrival_emitter
-        }
-      }
-      this.updatables.set('land_at', plotted_course );
+      let ship = this.actors.Starship;
+      ship.position.set( landing_coords );
+      ship.updateMatrixWorld( true );
     },
     warp_to_old: async ( planetary_body, equidistant_orbit = false, arrival_emitter = false ) =>{
       // Find yourself.
@@ -1159,7 +1128,7 @@ class Screenplay extends _Screenplay{
                 starship.position.copy( pilot.position.clone() );
                 cache.compilation.starship.positions.push( pilot.position.clone() );
                 pilot.position.copy( next_pos );
-                let turning_speed = 3.14159 / cache.durations[3];
+                let turning_speed = 3.14159 / 120 / 3;
                 if( cache.stage_frame < cache.durations[3] - 120 ){
                   let _now = starship.quaternion.clone();
                   starship.lookAt( pilot.position );
@@ -1477,6 +1446,8 @@ class Screenplay extends _Screenplay{
               this.updatables.delete( 'dolly_to' );
               this.sys_ve_scene.remove( dolly_cam );
               this.active_cam = cache.destination;
+              document.title = StringCombiner( cam_name,' | Wethe.Network' );
+
             } else {
               if( cache.frame < cache.compilation.dolly_cam.positions.length || cache.frame < cache.compilation.dolly_cam.quaternions.length){
                 dolly_cam.position.copy( cache.compilation.dolly_cam.positions[cache.frame] );
@@ -1656,7 +1627,7 @@ class Screenplay extends _Screenplay{
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath( 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/' );
         loader.setDRACOLoader( dracoLoader );
-        loader.load( 'models/base_female.glb',
+        loader.load( 'models/Avatar.glb',
           async ( gltf )=>{
             resolve( gltf );
           },
@@ -1803,6 +1774,7 @@ class Screenplay extends _Screenplay{
   constructor( ){
     super( );
 
+    
     this.VIEW = VIEW;
 
     // Camera & Controls Setup

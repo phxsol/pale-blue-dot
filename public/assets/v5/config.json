@@ -1,0 +1,300 @@
+{
+  "innequin": {
+    "baseURIs": {
+      "MODELS_ANIMATIONS_EMOTIONS": "/models/animations/emotions/",
+      "MODELS_BODY": "/models/body/",
+      "TEXTURES_BODY": "/textures/body/",
+      "TEXTURES_FACIAL_EMOTIONS": "/textures/face/emotions/"
+    },
+    "defaults": {
+      "INTRO_ANIMATION": "Neutral_Hello_Long_01",
+      "EMOTION": "NEUTRAL",
+      "MODEL": "innequin.glb",
+      "SKIN": "WOOD1"
+    },
+    "animations": {
+      "Angry_Idle": {
+        "emotion": "ANGRY",
+        "type": "idle",
+        "file": "inniquin_angry_idle.glb"
+      },
+      "Angry_Intro_01": {
+        "emotion": "ANGRY",
+        "type": "intro",
+        "file": "inniquin_angry_intro_01.glb"
+      },
+      "Angry_Outro_01": {
+        "emotion": "ANGRY",
+        "type": "outro",
+        "file": "inniquin_angry_outro_01.glb"
+      },
+      "Angry_Gesture_Long_01": {
+        "emotion": "ANGRY",
+        "type": "gesture",
+        "file": "inniquin_angry_gesture_long_01.glb"
+      },
+      "Angry_Gesture_Short_01": {
+        "emotion": "ANGRY",
+        "type": "gesture",
+        "file": "inniquin_angry_gesture_short_01.glb"
+      },
+      "Angry_Gesture_Short_02": {
+        "emotion": "ANGRY",
+        "type": "gesture",
+        "file": "inniquin_angry_gesture_short_02.glb"
+      },
+      "Angry_Gesture_Short_03": {
+        "emotion": "ANGRY",
+        "type": "gesture",
+        "file": "inniquin_angry_gesture_short_03.glb"
+      },
+      "Fear_Idle_01": {
+        "emotion": "FEAR",
+        "type": "idle",
+        "file": "inniquin_fear_idle_01.glb"
+      },
+      "Fear_Intro_01": {
+        "emotion": "FEAR",
+        "type": "intro",
+        "file": "inniquin_fear_intro_01.glb"
+      },
+      "Fear_Outro_01": {
+        "emotion": "FEAR",
+        "type": "outro",
+        "file": "inniquin_fear_outro_01.glb"
+      },
+      "Fear_Gesture_01": {
+        "emotion": "FEAR",
+        "type": "gesture",
+        "file": "inniquin_fear_gesture_01.glb"
+      },
+      "Fear_Gesture_02": {
+        "emotion": "FEAR",
+        "type": "gesture",
+        "file": "inniquin_fear_gesture_02.glb"
+      },
+      "Fear_Gesture_03": {
+        "emotion": "FEAR",
+        "type": "gesture",
+        "file": "inniquin_fear_gesture_03.glb"
+      },
+      "Happy_Idle_01": {
+        "emotion": "HAPPY",
+        "type": "idle",
+        "file": "inniquin_happy_idle_01.glb"
+      },
+      "Happy_Intro_01": {
+        "emotion": "HAPPY",
+        "type": "intro",
+        "file": "inniquin_happy_intro_01.glb"
+      },
+      "Happy_Outro_01": {
+        "emotion": "HAPPY",
+        "type": "outro",
+        "file": "inniquin_happy_outro_01.glb"
+      },
+      "Happy_Gesture_Long_01": {
+        "emotion": "HAPPY",
+        "type": "gesture",
+        "file": "inniquin_happy_gesture_long_01.glb"
+      },
+      "Happy_Gesture_Long_02": {
+        "emotion": "HAPPY",
+        "type": "gesture",
+        "file": "inniquin_happy_gesture_long_02.glb"
+      },
+      "Happy_Gesture_Long_03": {
+        "emotion": "HAPPY",
+        "type": "gesture",
+        "file": "inniquin_happy_gesture_long_03.glb"
+      },
+      "Happy_Gesture_Short_01": {
+        "emotion": "HAPPY",
+        "type": "gesture",
+        "file": "inniquin_happy_gesture_short_01.glb"
+      },
+      "Happy_Gesture_Short_02": {
+        "emotion": "HAPPY",
+        "type": "gesture",
+        "file": "inniquin_happy_gesture_short_02.glb"
+      },
+      "Happy_Gesture_Short_03": {
+        "emotion": "HAPPY",
+        "type": "gesture",
+        "file": "inniquin_happy_gesture_short_03.glb"
+      },
+      "Happy_Gesture_Short_04": {
+        "emotion": "HAPPY",
+        "type": "gesture",
+        "file": "inniquin_happy_gesture_short_04.glb"
+      },
+      "Happy_Gesture_Short_05": {
+        "emotion": "HAPPY",
+        "type": "gesture",
+        "file": "inniquin_happy_gesture_short_05.glb"
+      },
+      "Neutral_Idle": {
+        "emotion": "NEUTRAL",
+        "type": "idle",
+        "file": "inniquin_neutral_idle.glb"
+      },
+      "Neutral_Hello_Long_01": {
+        "emotion": "NEUTRAL",
+        "type": "hello",
+        "file": "inniquin_neutral_hello_long_01.glb"
+      },
+      "Neutral_Hello_Short_01": {
+        "emotion": "NEUTRAL",
+        "type": "hello",
+        "file": "inniquin_neutral_hello_short_01.glb"
+      },
+      "Neutral_Hello_Short_02": {
+        "emotion": "NEUTRAL",
+        "type": "hello",
+        "file": "inniquin_neutral_hello_short_02.glb"
+      },
+      "Neutral_Gesture_Long_01": {
+        "emotion": "NEUTRAL",
+        "type": "gesture",
+        "file": "inniquin_neutral_gesture_long_01.glb"
+      },
+      "Neutral_Gesture_Long_02": {
+        "emotion": "NEUTRAL",
+        "type": "gesture",
+        "file": "inniquin_neutral_gesture_long_02.glb"
+      },
+      "Neutral_Gesture_Short_01": {
+        "emotion": "NEUTRAL",
+        "type": "gesture",
+        "file": "inniquin_neutral_gesture_short_01.glb"
+      },
+      "Neutral_Gesture_Short_02": {
+        "emotion": "NEUTRAL",
+        "type": "gesture",
+        "file": "inniquin_neutral_gesture_short_02.glb"
+      },
+      "Neutral_Gesture_Short_03": {
+        "emotion": "NEUTRAL",
+        "type": "gesture",
+        "file": "inniquin_neutral_gesture_short_03.glb"
+      },
+      "Neutral_Gesture_Short_04": {
+        "emotion": "NEUTRAL",
+        "type": "gesture",
+        "file": "inniquin_neutral_gesture_short_04.glb"
+      },
+      "Sad_Idle": {
+        "emotion": "SAD",
+        "type": "idle",
+        "file": "inniquin_sad_idle.glb"
+      },
+      "Sad_Intro_01": {
+        "emotion": "SAD",
+        "type": "intro",
+        "file": "inniquin_sad_intro_01.glb"
+      },
+      "Sad_Outro_01": {
+        "emotion": "SAD",
+        "type": "outro",
+        "file": "inniquin_sad_outro_01.glb"
+      },
+      "Sad_Gesture_Long_01": {
+        "emotion": "SAD",
+        "type": "gesture",
+        "file": "inniquin_sad_gesture_long_01.glb"
+      },
+      "Sad_Gesture_Long_02": {
+        "emotion": "SAD",
+        "type": "gesture",
+        "file": "inniquin_sad_gesture_long_02.glb"
+      },
+      "Sad_Gesture_Long_03": {
+        "emotion": "SAD",
+        "type": "gesture",
+        "file": "inniquin_sad_gesture_long_03.glb"
+      },
+      "Sad_Gesture_Long_04": {
+        "emotion": "SAD",
+        "type": "gesture",
+        "file": "inniquin_sad_gesture_long_04.glb"
+      },
+      "Sad_Gesture_Short_01": {
+        "emotion": "SAD",
+        "type": "gesture",
+        "file": "inniquin_sad_gesture_short_01.glb"
+      },
+      "Sad_Gesture_Short_02": {
+        "emotion": "SAD",
+        "type": "gesture",
+        "file": "inniquin_sad_gesture_short_02.glb"
+      },
+      "Sad_Gesture_Short_03": {
+        "emotion": "SAD",
+        "type": "gesture",
+        "file": "inniquin_sad_gesture_short_03.glb"
+      }
+    },
+    "assets": {
+      "InWorld_Hat_SpaceHelmetMale": {
+        "type": "HAT",
+        "enabled": false
+      }
+    },
+    "skins": {
+      "WOOD0": {
+        "color": "tex_innequin_wood0_basecolor.jpg",
+        "metallic": "tex_innequin_wood_metallic.jpg",
+        "normals": "tex_innequin_wood_normals.jpg",
+        "roughness": "tex_innequin_wood_roughness.jpg"
+      },
+      "WOOD1": {
+        "color": "tex_innequin_wood1_basecolor.jpg",
+        "metallic": "tex_innequin_wood_metallic.jpg",
+        "normals": "tex_innequin_wood_normals.jpg",
+        "roughness": "tex_innequin_wood_roughness.jpg"
+      },
+      "WOOD2": {
+        "color": "tex_innequin_wood2_basecolor.jpg",
+        "metallic": "tex_innequin_wood_metallic.jpg",
+        "normals": "tex_innequin_wood_normals.jpg",
+        "roughness": "tex_innequin_wood_roughness.jpg"
+      },
+      "WOOD3": {
+        "color": "tex_innequin_wood3_basecolor.jpg",
+        "metallic": "tex_innequin_wood_metallic.jpg",
+        "normals": "tex_innequin_wood_normals.jpg",
+        "roughness": "tex_innequin_wood_roughness.jpg"
+      },
+      "WOOD4": {
+        "color": "tex_innequin_wood4_basecolor.jpg",
+        "metallic": "tex_innequin_wood_metallic.jpg",
+        "normals": "tex_innequin_wood_normals.jpg",
+        "roughness": "tex_innequin_wood_roughness.jpg"
+      },
+      "SCIFI": {
+        "color": "tex_OptimizedSciFiExplorerMale.BaseColor.jpg",
+        "metallic": "tex_OptimizedSciFiExplorerMale.Metallic.jpg",
+        "normals": "tex_OptimizedSciFiExplorerMale.Normals.jpg",
+        "roughness": "tex_OptimizedSciFiExplorerMale.Roughness.jpg"
+      },
+      "CAMO": {
+        "color": "InWorld_Mannequin_Camo_BaseColor.jpg",
+        "metallic": "InWorld_Mannequin_Camo_Metallics.jpg",
+        "normals": "InWorld_Mannequin_Camo_Normals.jpg",
+        "roughness": "InWorld_Mannequin_Camo_Roughness.jpg"
+      },
+      "DOTS": {
+        "color": "InWorld_Mannequin_Dots_BaseColor.jpg",
+        "metallic": "InWorld_Mannequin_Dots_Metallics.jpg",
+        "normals": "InWorld_Mannequin_Dots_Normals.jpg",
+        "roughness": "InWorld_Mannequin_Dots_Roughness.jpg"
+      },
+      "SPITZ": {
+        "color": "InWorld_Mannequin_spitz_BaseColor.jpg",
+        "metallic": "InWorld_Mannequin_spitz_Metallics.jpg",
+        "normals": "InWorld_Mannequin_spitz_Normals.jpg",
+        "roughness": "InWorld_Mannequin_spitz_Roughness.jpg"
+      }
+    }
+  }
+}

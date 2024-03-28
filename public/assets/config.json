@@ -1,0 +1,50 @@
+{
+  "rpm": {
+    "baseURIs": {
+      "ANIMATIONS_JSON": "/animations/",
+      "MODELS_BODY": "/models/"
+    },
+    "defaults": {
+      "IDLE_ANIMATION": "Neutral_Idle_01",
+      "EMOTION": "NEUTRAL",
+      "MODEL": "Default.glb"
+    },
+    "animations": {
+      "Neutral_Idle_01": {
+        "emotion": "neutral",
+        "type": "idle",
+        "file": "IdleNeutral.json"
+      },
+      "Neutral_Talking_02": {
+        "emotion": "neutral",
+        "type": "talking",
+        "file": "TalkingNeutral2.json"
+      },
+      "Neutral_Talking_03": {
+        "emotion": "neutral",
+        "type": "talking",
+        "file": "TalkingNeutral3.json"
+      },
+      "Neutral_Talking_04": {
+        "emotion": "neutral",
+        "type": "talking",
+        "file": "TalkingNeutral4.json"
+      },
+      "Neutral_Talking_05": {
+        "emotion": "neutral",
+        "type": "talking",
+        "file": "TalkingNeutral5.json"
+      },
+      "Neutral_Talking_06": {
+        "emotion": "neutral",
+        "type": "talking",
+        "file": "TalkingNeutral6.json"
+      },
+      "Neutral_Talking_07": {
+        "emotion": "neutral",
+        "type": "talking",
+        "file": "TalkingNeutral7.json"
+      }
+    }
+  }
+}

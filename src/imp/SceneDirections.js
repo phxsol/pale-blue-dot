@@ -71,14 +71,14 @@ class SceneDirections extends _SceneDirections {
    let ops_pos = opsStation.position;
    //starship.position.copy( screenplay.actors.Earth.orbital_vector );
    //starship.quaternion.copy( screenplay.actors.Earth.orbital_quaternion );
-   starship.position.copy( screenplay.actors.Saturn.orbital_vector );
-   starship.lookAt( screenplay.actors.Sun.position );
-
+   starship.position.copy( screenplay.actors.Moon.orbital_vector );
+   starship.quaternion.copy( screenplay.actors.Moon.orbital_quaternion );
    starship.updateMatrixWorld( true );
+   screenplay.actions.warp_to( screenplay.actors.Earth );
 
    //debugger;
-   await starship.animations.warp_tunnel.init();
-   screenplay.updatables.set( 'Warp_Tunnel', starship.animations.warp_tunnel );
+   //await starship.animations.warp_tunnel.init();
+   //screenplay.updatables.set( 'Warp_Tunnel', starship.animations.warp_tunnel );
 
    // Create the Navigation Hologram Interface, to represent the system as it currently is.
    let distance_scale = 0.1 / ( screenplay.actors.Neptune.surface_distance ) / 30000;

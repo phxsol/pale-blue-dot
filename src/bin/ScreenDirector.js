@@ -462,7 +462,6 @@ class Screenplay{
     } else {
       this.SHOULD_SAVE = false;
     }
-
     this.VIEW = {
       fov: 45,
       aspect: window.innerWidth / window.innerHeight,
