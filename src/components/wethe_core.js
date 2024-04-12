@@ -3160,9 +3160,9 @@ function AccountPanel( props ){
 
 
         `}</style>
-      <div ref={account_panel} id="contacts_panel" className="pip_gui pip_menu">
+      <div ref={account_panel} id="accounts_panel" className="pip_gui pip_menu">
         <div className="head">
-          <h1 className="pip_title">Collections</h1>
+          <h1 className="pip_title">My Accounts</h1>
         </div>
         <div ref={body} className="body">
         </div>
@@ -3187,7 +3187,7 @@ function ContactsPanel( props ){
       `}</style>
     <div ref={contacts_panel} id="contacts_panel" className="pip_gui pip_menu">
       <div className="head">
-        <h1 className="pip_title">Collections</h1>
+        <h1 className="pip_title">Contacts Management</h1>
       </div>
       <div ref={body} className="body">
       </div>
@@ -4733,7 +4733,7 @@ function CollectionsPanel( props ){
       `}</style>
     <div ref={panel} id="collections_panel" className="pip_gui pip_menu">
       <div className="head">
-        <h1 className="pip_title">Collections</h1>
+        <h1 className="pip_title">Collected Things</h1>
       </div>
       <div ref={body} className="body">
       </div>
@@ -5342,7 +5342,7 @@ function InformationPanel( props ){
     `}</style>
     <div ref={information_panel} id="information_panel" className={classNames}>
       <div className="head">
-        <h1 className="pip_title">Architect's Panel</h1>
+        <h1 className="pip_title">Info About WeThe</h1>
       </div>
       <div ref={body} className="body">
       <span id="attributions" className="info_card">
