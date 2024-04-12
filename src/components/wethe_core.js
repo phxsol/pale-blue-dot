@@ -407,13 +407,13 @@ function GlyphScanner( props ){
         }
       },
       cache: {
-        duration: 15, /* do something in 15 frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 15 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'panel_entrance_transition', entrance_transition );
       },
@@ -436,13 +436,13 @@ function GlyphScanner( props ){
         }
       },
       cache: {
-        duration: 15, /* do something in this many frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        exit_transition.cache.duration = 15;
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
         screenplay.updatables.set( 'panel_exit_transition', exit_transition );
       },
@@ -900,13 +900,13 @@ function ShareContact( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in 60 frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
       },
@@ -929,13 +929,13 @@ function ShareContact( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in this many frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        exit_transition.cache.duration = 15;
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
         screenplay.updatables.set( 'ShareContact_exit_transition', exit_transition );
       },
@@ -1028,13 +1028,13 @@ function DropPin( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in 60 frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
       },
@@ -1057,13 +1057,13 @@ function DropPin( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in this many frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        exit_transition.cache.duration = 15;
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
         screenplay.updatables.set( 'ShareContact_exit_transition', exit_transition );
       },
@@ -1299,13 +1299,13 @@ function SnapPix( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in 60 frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
       },
@@ -1328,13 +1328,13 @@ function SnapPix( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in this many frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        exit_transition.cache.duration = 15;
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
         screenplay.updatables.set( 'SnapPix_exit_transition', exit_transition );
       },
@@ -1772,13 +1772,13 @@ function RecordNote( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in 60 frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'SnapPix_entrance_transition', entrance_transition );
       },
@@ -1801,13 +1801,13 @@ function RecordNote( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in this many frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        exit_transition.cache.duration = 15;
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
         screenplay.updatables.set( 'SnapPix_exit_transition', exit_transition );
       },
@@ -2176,13 +2176,13 @@ function RemindMe( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in 60 frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
       },
@@ -2205,13 +2205,13 @@ function RemindMe( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in this many frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        exit_transition.cache.duration = 15;
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
         screenplay.updatables.set( 'ShareContact_exit_transition', exit_transition );
       },
@@ -2689,13 +2689,13 @@ function Search( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in 60 frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'Search_entrance_transition', entrance_transition );
       },
@@ -2718,13 +2718,13 @@ function Search( props ) {
         }
       },
       cache: {
-        duration: 15, /* do something in this many frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        exit_transition.cache.duration = 15;
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
         screenplay.updatables.set( 'Search_exit_transition', exit_transition );
       },
@@ -3403,13 +3403,13 @@ function CollectionsPanel( props ){
         }
       },
       cache: {
-        duration: 15, /* do something in 60 frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'panel_entrance_transition', entrance_transition );
       },
@@ -3432,13 +3432,13 @@ function CollectionsPanel( props ){
         }
       },
       cache: {
-        duration: 15, /* do something in this many frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        exit_transition.cache.duration = 15;
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
         screenplay.updatables.set( 'panel_exit_transition', exit_transition );
       },

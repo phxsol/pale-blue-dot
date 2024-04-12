@@ -180,12 +180,12 @@ class VerifyCapabilitiesModal extends Component {
         if ( test_results.score > 20 || test_results.max_fps > 30 ) {
           document.querySelector( '#verify_capabilities .success').classList.remove( 'hidden' );
           setTimeout( ( dictum_name, ndx )=>{
-            screenplay.slo_mode = true; // TODO: REMOVE THIS TO STOP FORCING SLO_MODE
+            this.screenplay.slo_mode = true; // TODO: REMOVE THIS TO STOP FORCING SLO_MODE
             this.director.emit( `${dictum_name}_progress`, dictum_name, ndx );
           }, 3000, this.dictum_name, this.ndx );
         } else {
           setTimeout( ( dictum_name, ndx )=>{
-            screenplay.slo_mode = true;
+            this.screenplay.slo_mode = true;
             document.querySelector( '#verify_capabilities .failure').classList.remove( 'hidden' );
             this.director.emit( `${dictum_name}_failure`, dictum_name, ndx );
           }, 3000, this.dictum_name, this.ndx );
@@ -283,13 +283,13 @@ function LoginForm( { director, screenplay, dictum_name, ndx }) {
         }
       },
       cache: {
-        duration: 15, /* do something in 15 frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 15 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'ResumeUserModal_entrance_transition', entrance_transition );
       },
@@ -312,13 +312,13 @@ function LoginForm( { director, screenplay, dictum_name, ndx }) {
         }
       },
       cache: {
-        duration: 15, /* do something in this many frames */
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
         frame: 0,
         manual_control: false,
         og_transition: false
       },
       reset: ()=>{
-        exit_transition.cache.duration = 15;
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
         screenplay.updatables.set( 'ResumeUserModal_exit_transition', exit_transition );
       },
@@ -695,14 +695,14 @@ class Workflow extends _Workflow{
                 }
               },
               cache: {
-                duration: 15, /* do something in 60 frames */
+                duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
                 frame: 0,
                 panel: this.panel,
                 manual_control: false,
                 og_transition: false
               },
               reset: ()=>{
-                this.entrance_transition.cache.duration = 15;
+                this.entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
                 this.entrance_transition.cache.frame = 0;
                 screenplay.updatables.set( 'UserInstructionModal_entrance_transition', this.entrance_transition );
               },
@@ -726,14 +726,14 @@ class Workflow extends _Workflow{
               }
             },
             cache: {
-              duration: 15, /* do something in 60 frames */
+              duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
               frame: 0,
               panel: this.panel,
               manual_control: false,
               og_transition: false
             },
             reset: ()=>{
-              this.exit_transition.cache.duration = 15;
+              this.exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
               this.exit_transition.cache.frame = 0;
               screenplay.updatables.set( 'UserInstructionModal_exit_transition', this.exit_transition );
             },
@@ -1019,11 +1019,11 @@ class Workflow extends _Workflow{
         }
       },
       cache: {
-        duration: 30, /* do something in 60 frames */
+        duration: screenplay.slo_mode ? 1 : 30, /* do something in 30 frames */
         frame: 0,
       },
       reset: ()=>{
-        entrance_transition.cache.duration = 15;
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 30;
         entrance_transition.cache.frame = 0;
         screenplay.updatables.set( 'event_model_entrance', event_model_entrance );
       },
