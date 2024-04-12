@@ -3048,23 +3048,23 @@ function WeTheHeader( props ){
 
       #account_panel{}
       #contacts_panel{
-        background-image: url(/backgrounds/contacts.jpeg);
+        background-image: url(./backgrounds/contacts.jpeg);
         background-size: cover;
         background-position: center bottom;
       }
       #collections_panel{}
       #discussions_panel{
-        background-image: url(/backgrounds/discussions2.jpeg);
+        background-image: url(./backgrounds/discussions2.jpeg);
         background-size: cover;
         background-position: center bottom;
       }
       #events_panel{
-        background-image: url(/backgrounds/events.jpeg);
+        background-image: url(./backgrounds/events.jpeg);
         background-size: cover;
         background-position: center bottom;
       }
       #classifieds_panel{
-        background-image: url(/backgrounds/classifieds.jpeg);
+        background-image: url(./backgrounds/classifieds.jpeg);
         background-size: cover;
         background-position: center bottom;
       }

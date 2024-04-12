@@ -986,7 +986,6 @@ class Screenplay extends _Screenplay{
     },
     warp_to: async ( planetary_body, destination = 0, arrival_emitter = false ) =>{
       let slo_mode = this.slo_mode;
-
       let ship = this.actors.Starship;
       let start_position = new THREE.Vector3()
       ship.getWorldPosition( start_position );

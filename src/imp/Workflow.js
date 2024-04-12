@@ -161,8 +161,8 @@ class VerifyCapabilitiesModal extends Component {
         }
       },
       cache: {
-       duration: 200,
-       frames: 200,
+       duration: 60,
+       frames: 60,
        test_results: {
          stamps: [],
          time: 0,
@@ -972,8 +972,8 @@ class Workflow extends _Workflow{
 
     } finally{
 
-      this.react_app.render( <><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /><ViewScreenDisplay screenplay={screenplay} onDisplay={false} selfCamStream={selfCamStream} videoStreams={videoStreams} /></> );
       director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      this.react_app.render( <><WeTheHeader viewMode="desktop" screenplay={screenplay} /><WeTheMenu screenplay={screenplay} mode="collapsed" /><ViewScreenDisplay screenplay={screenplay} onDisplay={false} selfCamStream={selfCamStream} videoStreams={videoStreams} /></> );
     }
   };
 

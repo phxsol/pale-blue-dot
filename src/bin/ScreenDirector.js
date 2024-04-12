@@ -194,7 +194,7 @@ class Screenplay{
   sys_ve_renderer; sys_ui_renderer; page_ve_renderer; page_ui_renderer;
   sys_ve_post; sys_ui_post; page_ve_post; page_ui_post;
   sys_ve_composer = false; sys_ui_composer = false; page_ve_composer = false; page_ui_composer = false;
-  slo_mode = false; fps;
+  slo_mode = true; fps;
   clock; delta = 0; frame_delta = 0; heartbeat_delta = 0; qm_delta = 0; m_delta = 0; qh_delta = 0; hh_delta = 0; h_delta = 0; qd_delta = 0; hd_delta = 0; d_delta = 0;
   raycaster; mouse;
   stop_me;
