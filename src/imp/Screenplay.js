@@ -35,7 +35,7 @@ class Screenplay extends _Screenplay{
 
     // Neptune
     get Neptune(){
-      let _map = new THREE.TextureLoader().load('resources/neptunemap.jpg');
+      let _map = new THREE.TextureLoader().load('textures/neptunemap.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 24622000, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, shininess: 100 } )
@@ -66,7 +66,7 @@ class Screenplay extends _Screenplay{
 
     // Uranus
     get Uranus(){
-      let _map = new THREE.TextureLoader().load('resources/uranusmap.jpg');
+      let _map = new THREE.TextureLoader().load('textures/uranusmap.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 25362000, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, shininess: 100 } )
@@ -97,7 +97,7 @@ class Screenplay extends _Screenplay{
 
     // Saturn
     get Saturn(){
-      const _ring_texture = new THREE.TextureLoader().load( 'resources/saturnringcolor.jpg' );
+      const _ring_texture = new THREE.TextureLoader().load( 'textures/saturnringcolor.jpg' );
       const _ring_geometry = new THREE.RingBufferGeometry( 65232000, 138232000, 64 );
       var pos = _ring_geometry.attributes.position;
       var v3 = new THREE.Vector3();
@@ -127,7 +127,7 @@ class Screenplay extends _Screenplay{
 			_rings_mesh.receiveShadow = true;
       _rings_mesh.name = 'Saturnal Rings';
 
-      let _map = new THREE.TextureLoader().load( 'resources/saturnmap.jpg' );
+      let _map = new THREE.TextureLoader().load( 'textures/saturnmap.jpg' );
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 58232000, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, side: THREE.DoubleSide, shininess: 1 } )
@@ -159,7 +159,7 @@ class Screenplay extends _Screenplay{
 
     // Jupiter
     get Jupiter(){
-      let _map = new THREE.TextureLoader().load('resources/jupitermap.jpg');
+      let _map = new THREE.TextureLoader().load('textures/jupitermap.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 69911000, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, shininess: 100 } )
@@ -191,8 +191,8 @@ class Screenplay extends _Screenplay{
 
     // Mars
     get Mars(){
-      let _map = new THREE.TextureLoader().load('resources/mars_1k_color.jpg');
-      let _topo = new THREE.TextureLoader().load('resources/mars_1k_topo.jpg');
+      let _map = new THREE.TextureLoader().load('textures/mars_1k_color.jpg');
+      let _topo = new THREE.TextureLoader().load('textures/mars_1k_topo.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 3389000, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, displacementMap: _topo, shininess: 100 } )
@@ -224,14 +224,14 @@ class Screenplay extends _Screenplay{
 
     // Earth
     get OldEarth(){
-      let _map = new THREE.TextureLoader().load('resources/earthmap1k.jpg');
-      let _spec = new THREE.TextureLoader().load('resources/earthspec1k.jpg');
-      let _bump = new THREE.TextureLoader().load('resources/earthbump1k.jpg');
-      let _cloud = new THREE.TextureLoader().load('resources/earthcloudmap.jpg');
-      let _cloud_trans = new THREE.TextureLoader().load('resources/earthcloudmaptrans.jpg');
-      let _lights = new THREE.TextureLoader().load('resources/earthlights1k.jpg');
-      let _emissive = new THREE.TextureLoader().load('resources/earthlights1k_dark.jpg');
-      let _lights_negative = new THREE.TextureLoader().load('resources/earthlights1k_negative.jpg');
+      let _map = new THREE.TextureLoader().load('textures/earthmap1k.jpg');
+      let _spec = new THREE.TextureLoader().load('textures/earthspec1k.jpg');
+      let _bump = new THREE.TextureLoader().load('textures/earthbump1k.jpg');
+      let _cloud = new THREE.TextureLoader().load('textures/earthcloudmap.jpg');
+      let _cloud_trans = new THREE.TextureLoader().load('textures/earthcloudmaptrans.jpg');
+      let _lights = new THREE.TextureLoader().load('textures/earthlights1k.jpg');
+      let _emissive = new THREE.TextureLoader().load('textures/earthlights1k_dark.jpg');
+      let _lights_negative = new THREE.TextureLoader().load('textures/earthlights1k_negative.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 6371000, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, emissive: 0xffffff, emissiveMap: _emissive, shininess: 100 } )
@@ -310,8 +310,8 @@ class Screenplay extends _Screenplay{
 
     // Moon
     get Moon(){
-      let _map = new THREE.TextureLoader().load('resources/moonmap1k.jpg');
-      let _bump = new THREE.TextureLoader().load('resources/moonbump1k.jpg');
+      let _map = new THREE.TextureLoader().load('textures/moonmap1k.jpg');
+      let _bump = new THREE.TextureLoader().load('textures/moonbump1k.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 1735500, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, bumpMap: _bump, shininess: 100 })
@@ -342,8 +342,8 @@ class Screenplay extends _Screenplay{
 
     // Venus
     get Venus(){
-      let _map = new THREE.TextureLoader().load('resources/venusmap.jpg');
-      let _bump = new THREE.TextureLoader().load('resources/venusbump.jpg');
+      let _map = new THREE.TextureLoader().load('textures/venusmap.jpg');
+      let _bump = new THREE.TextureLoader().load('textures/venusbump.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 6052000, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, bumpMap: _bump, shininess: 100 } )
@@ -374,8 +374,8 @@ class Screenplay extends _Screenplay{
 
     // Mercury
     get Mercury(){
-      let _map = new THREE.TextureLoader().load('resources/mercurymap.jpg');
-      let _bump = new THREE.TextureLoader().load('resources/mercurybump.jpg');
+      let _map = new THREE.TextureLoader().load('textures/mercurymap.jpg');
+      let _bump = new THREE.TextureLoader().load('textures/mercurybump.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 2439500, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, bumpMap: _bump, shininess: 100 } )
@@ -405,8 +405,8 @@ class Screenplay extends _Screenplay{
 
     // Sun
     get Sun(){
-      let _map = new THREE.TextureLoader().load('resources/solarmap.jpg');
-      let _spec = new THREE.TextureLoader().load('resources/sunmap.jpg');
+      let _map = new THREE.TextureLoader().load('textures/solarmap.jpg');
+      let _spec = new THREE.TextureLoader().load('textures/sunmap.jpg');
       let _mesh = new THREE.Mesh(
         new THREE.SphereGeometry( 695508000, 128, 128 ),
         new THREE.MeshPhongMaterial( { map: _map, side: THREE.DoubleSide, wireframe: true } )
@@ -985,8 +985,9 @@ class Screenplay extends _Screenplay{
       this.updatables.set('warp_to', plotted_course );
     },
     warp_to: async ( planetary_body, destination = 0, arrival_emitter = false ) =>{
-      let ship = this.actors.Starship;
+      let slo_mode = this.slo_mode;
 
+      let ship = this.actors.Starship;
       let start_position = new THREE.Vector3()
       ship.getWorldPosition( start_position );
 
@@ -1175,7 +1176,7 @@ class Screenplay extends _Screenplay{
           arrival_emitter: arrival_emitter,
           course: course,
           stage: 0,
-          durations:[ 180, 360, 120, 1200 ],
+          durations: slo_mode ? [1,1,1,1] :[ 180, 360, 120, 1200 ],
           starship: this.actors.Starship,
           destination: planetary_body,
           docking_quat: docking_quat,
@@ -1399,7 +1400,7 @@ class Screenplay extends _Screenplay{
           return _string;
         }
 
-
+        let slo_mode = this.slo_mode;
         document.title = StringCombiner( 'Dollying to ', cam_name ,' | Wethe.Network' );
         let start_position = this.active_cam.getWorldPosition( new THREE.Vector3() );
         let dolly_cam = this.active_cam.clone();
@@ -1466,7 +1467,7 @@ class Screenplay extends _Screenplay{
             frame: 0,
             iteration: 0,
             course: dolly_path,
-            duration: 180,
+            duration: slo_mode ? 1 : 180,
             destination: destination_camera,
             dolly_cam: dolly_cam,
             pilot: pilot,
@@ -1774,7 +1775,7 @@ class Screenplay extends _Screenplay{
   constructor( ){
     super( );
 
-    
+
     this.VIEW = VIEW;
 
     // Camera & Controls Setup

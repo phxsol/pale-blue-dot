@@ -324,35 +324,35 @@ function WeTheMenu( props ){
     <div id="WeTheMenu" ref={panel} className={props.mode} >
       <div className="menu_title" onClick={toggleMenu}>
         <label htmlFor="OpenWeTheMenu" className="menu_label pip_title">System Menu</label>
-        <input type="image" src=".\both_wethebrand.png" name="OpenWeTheMenu" className="menu_icon" />
+        <input type="image" src=".\elements\both_wethebrand.png" name="OpenWeTheMenu" className="menu_icon" />
       </div>
       <div className="menu_choice" data-position={1} onClick={toggleGlyphScanner} >
         <label htmlFor="OpenGlyphScanner" className="pip_text">Scan a Glyph</label>
-        <input type="image" src=".\both_glyphscanner.png" name="OpenGlyphScanner" />
+        <input type="image" src=".\elements\both_glyphscanner.png" name="OpenGlyphScanner" />
       </div>
       <div className="menu_choice" data-position={2} onClick={toggleShareContact} >
-        <input type="image" src=".\both_atme_safe.png" name="OpenShareContact" />
+        <input type="image" src=".\elements\contacts.png" name="OpenShareContact" />
         <label htmlFor="OpenShareContact" className="pip_text">Share Contact</label>
       </div>
       <div className="menu_choice" data-position={3} onClick={toggleDropPin} >
         <label htmlFor="OpenDropPin" className="pip_text">Drop-A-Pin</label>
-        <input type="image" src=".\dark_pindrop.png" name="OpenDropPin" />
+        <input type="image" src=".\elements\pin_location.png" name="OpenDropPin" />
       </div>
       <div className="menu_choice" data-position={4} onClick={toggleSnapPix} >
         <label htmlFor="OpenSnapPix" className="pip_text">Snap Pix</label>
-        <input type="image" src=".\both_camera.png" name="OpenSnapPix"/>
+        <input type="image" src=".\elements\snap_pix.png" name="OpenSnapPix"/>
       </div>
       <div className="menu_choice" data-position={5} onClick={toggleRecordNote} >
         <label htmlFor="OpenRecordNote" className="pip_text">Record Audio</label>
-        <input type="image" src=".\both_mic.png" name="OpenRecordNote"/>
+        <input type="image" src=".\elements\record_audio.png" name="OpenRecordNote"/>
       </div>
       <div className="menu_choice" data-position={6} onClick={toggleRemindMe} >
-        <input type="image" src=".\both_stickynote.png" name="OpenRemindMe" />
+        <input type="image" src=".\elements\remind_me.png" name="OpenRemindMe" />
         <label htmlFor="OpenRemindMe" className="pip_text">Remind Me!</label>
       </div>
       <div className="menu_choice" data-position={7} onClick={toggleSearch} >
         <label htmlFor="OpenSearch" className="pip_text">Search</label>
-        <input type="image" src=".\both_search.png" name="OpenSearch" />
+        <input type="image" src=".\elements\both_search.png" name="OpenSearch" />
       </div>
     </div>
     {activePipGUID === 1 ? <GlyphScanner toggle={toggleGlyphScanner} screenplay={screenplay} /> : <></>}
@@ -791,12 +791,12 @@ function GlyphScanner( props ){
     event.stopPropagation();
     switch( code_found ){
       case true:
-        scan_button.current.src = ".\\both_stop-gesture.png";
+        scan_button.current.src = ".\elements\\both_stop-gesture.png";
         start();
         break;
 
       case false:
-        scan_button.current.src = ".\\both_glyphscanner.png";
+        scan_button.current.src = ".\elements\\both_glyphscanner.png";
         deInitComponent();
         break;
     }
@@ -852,13 +852,13 @@ function GlyphScanner( props ){
         <ul className="controls ctrl" style={{ padding: 0, margin: 0 }}>
           <li><hr /></li>
           <li className="image_select">
-            <img src=".\both_camera.png" alt="Select video source" />
+            <img src=".\elements\both_camera.png" alt="Select video source" />
             <select ref={videoSelect} name="videoSource"></select>
             <br />
             <label htmlFor="videoSource">Camera</label>
           </li>
           <li id="startScan_button" className="image_button">
-            <input ref={scan_button} type="image" name="scan" onClick={toggleScanner} src=".\both_capture-photo.png" alt="Snap Photo" />
+            <input ref={scan_button} type="image" name="scan" onClick={toggleScanner} src=".\elements\both_capture-photo.png" alt="Snap Photo" />
             <br />
             <label htmlFor="scan" className="pip_text" >Start Scanner</label>
           </li>
@@ -972,14 +972,14 @@ function ShareContact( props ) {
         </div>
         <ul className="controls" style={{ padding: 0, margin: 0 }}>
           <li className="image_select">
-            <img src=".\both_mic.png" alt="Select from this list" />
+            <img src=".\elements\both_mic.png" alt="Select from this list" />
             <select name="listName"></select>
             <br />
             <label htmlFor="listName">.image_select</label>
           </li>
 
           <li className="image_button">
-            <input  type="image" name="clickme" src=".\both_capture-photo.png" alt="Do Something" />
+            <input  type="image" name="clickme" src=".\elements\both_capture-photo.png" alt="Do Something" />
             <br />
             <label htmlFor="clickme" className="pip_text" >.image_button</label>
           </li>
@@ -1215,14 +1215,14 @@ function DropPin( props ) {
         </div>
         <ul className="controls" style={{ padding: 0, margin: 0 }}>
           <li className="image_select">
-            <img src=".\both_mic.png" alt="Select from this list" />
+            <img src=".\elements\both_mic.png" alt="Select from this list" />
             <select name="listName"></select>
             <br />
             <label htmlFor="listName">.image_select</label>
           </li>
 
           <li className="image_button">
-            <input  type="image" name="clickme" src=".\both_capture-photo.png" alt="Do Something" />
+            <input  type="image" name="clickme" src=".\elements\both_capture-photo.png" alt="Do Something" />
             <br />
             <label htmlFor="clickme" className="pip_text" >.image_button</label>
           </li>
@@ -1577,18 +1577,18 @@ function SnapPix( props ) {
     switch( mediaRecorder.current.state ){
       case 'recording':
         mediaRecorder.current.stop();
-        recVid_button.current.src = ".\\both_rec-vid.png";
+        recVid_button.current.src = ".\elements\\both_rec-vid.png";
         break;
 
       case 'inactive':
         recordedChunks.current = [];
         mediaRecorder.current.start();
-        recVid_button.current.src = ".\\both_stop-gesture.png";
+        recVid_button.current.src = ".\elements\\both_stop-gesture.png";
         break;
 
       case 'paused':
         mediaRecorder.current.start();
-        recVid_button.current.src = ".\\both_stop-gesture.png";
+        recVid_button.current.src = ".\elements\\both_stop-gesture.png";
         break;
     }
   }
@@ -1673,32 +1673,32 @@ function SnapPix( props ) {
       </div>
       <ul className="controls" style={{ padding: 0, margin: 0 }}>
         <li className="image_select">
-          <img src=".\both_mic.png" alt="Select audio input source" />
+          <img src=".\elements\both_mic.png" alt="Select audio input source" />
           <select ref={audioInputSelect} name="audioSource"></select>
           <br />
           <label htmlFor="audioSource">Audio Input</label>
         </li>
 
         <li className="image_select">
-          <img src=".\both_sound.png" alt="Select audio output source" />
+          <img src=".\elements\both_sound.png" alt="Select audio output source" />
           <select ref={audioOutputSelect} name="audioOutput"></select>
           <br />
           <label htmlFor="audioOutput">Audio Output</label>
         </li>
         <li><hr /></li>
         <li className="image_select">
-          <img src=".\both_camera.png" alt="Select video source" />
+          <img src=".\elements\both_camera.png" alt="Select video source" />
           <select ref={videoSelect} name="videoSource"></select>
           <br />
           <label htmlFor="videoSource">Camera</label>
         </li>
         <li id="snapPic_button" className="image_button">
-          <input  type="image" name="snap" onClick={snapPic} src=".\both_capture-photo.png" onMouseOver={()=>{setDId( 3 )}} alt="Snap Photo" />
+          <input  type="image" name="snap" onClick={snapPic} src=".\elements\both_capture-photo.png" onMouseOver={()=>{setDId( 3 )}} alt="Snap Photo" />
           <br />
           <label htmlFor="snap" className="pip_text" >Snap Pix</label>
         </li>
         <li className="image_button">
-          <input type="image" name="record" ref={recVid_button} onClick={recVid} src=".\both_rec-vid.png" onMouseOver={()=>{setDId( 3 )}} alt="Record Video" />
+          <input type="image" name="record" ref={recVid_button} onClick={recVid} src=".\elements\both_rec-vid.png" onMouseOver={()=>{setDId( 3 )}} alt="Record Video" />
           <br />
           <label htmlFor="record" className="pip_text">Record Vid</label>
         </li>
@@ -2033,18 +2033,18 @@ function RecordNote( props ) {
     switch( mediaRecorder.current.state ){
       case 'recording':
         mediaRecorder.current.stop();
-        dictate_button.current.src = ".\\both_rec-vid.png";
+        dictate_button.current.src = ".\\elements\\both_rec-vid.png";
         break;
 
       case 'inactive':
         recordedChunks.current = [];
         mediaRecorder.current.start();
-        dictate_button.current.src = ".\\both_stop-gesture.png";
+        dictate_button.current.src = ".\\elements\\both_stop-gesture.png";
         break;
 
       case 'paused':
         mediaRecorder.current.start();
-        dictate_button.current.src = ".\\both_stop-gesture.png";
+        dictate_button.current.src = ".\\elements\\both_stop-gesture.png";
         break;
     }
   }
@@ -2103,20 +2103,20 @@ function RecordNote( props ) {
       </div>
       <ul className="controls" style={{ padding: 0, margin: 0 }}>
         <li className="image_select">
-          <img src=".\both_mic.png" alt="Select audio input source" />
+          <img src=".\elements\both_mic.png" alt="Select audio input source" />
           <select ref={audioInputSelect} name="audioSource"></select>
           <br />
           <label htmlFor="audioSource">Audio Input</label>
         </li>
         <li className="image_select">
-          <img src=".\both_sound.png" alt="Select audio output source" />
+          <img src=".\elements\both_sound.png" alt="Select audio output source" />
           <select ref={audioOutputSelect} name="audioOutput"></select>
           <br />
           <label htmlFor="audioOutput">Audio Output</label>
         </li>
         <li><hr /></li>
         <li className="image_button">
-          <input type="image" name="dictate" ref={dictate_button} onClick={recDict} src=".\both_rec-vid.png" onMouseOver={()=>{setDId( 3 )}} alt="Record Video" />
+          <input type="image" name="dictate" ref={dictate_button} onClick={recDict} src=".\elements\both_rec-vid.png" onMouseOver={()=>{setDId( 3 )}} alt="Record Video" />
           <br />
           <label htmlFor="dictate" className="pip_text">Dictate Memo</label>
         </li>
@@ -2545,25 +2545,25 @@ function RemindMe( props ) {
         </div>
         <ul className="controls" style={{ padding: 0, margin: 0 }}>
           <li className="image_toggle">
-            <img src=".\both_mic.png" alt="Notify Me!" />
+            <img src=".\elements\both_mic.png" alt="Notify Me!" />
             <input id="NotifyMe" type="radio" name="reminder_type" value="NotifyMe" />
             <br />
             <label htmlFor="NotifyMe">Notify Me!</label>
           </li>
           <li className="image_toggle">
-            <img src=".\both_mic.png" alt="Prioritize This!" />
+            <img src=".\elements\both_mic.png" alt="Prioritize This!" />
             <input id="PrioritizeThis" type="radio" name="reminder_type" value="PrioritizeThis" />
             <br />
             <label htmlFor="PrioritizeThis">Prioritize This!</label>
           </li>
           <li className="image_toggle">
-            <img src=".\both_mic.png" alt="Plan This!" />
+            <img src=".\elements\both_mic.png" alt="Plan This!" />
             <input id="PlanThis" type="radio" name="reminder_type" value="PlanThis" />
             <br />
             <label htmlFor="PlanThis">Plan This!</label>
           </li>
           <li className="image_checkbox">
-            <img src=".\both_mic.png" alt="Allow Browser Alerts?" />
+            <img src=".\elements\both_mic.png" alt="Allow Browser Alerts?" />
             <input ref={notificationBtn} type="checkbox" name="AllowAlerts" value="Allow" />
             <br />
             <label htmlFor="allow_alerts">Allow Browser Alerts?</label>
@@ -3047,11 +3047,27 @@ function WeTheHeader( props ){
       }
 
       #account_panel{}
-      #contacts_panel{}
+      #contacts_panel{
+        background-image: url(/backgrounds/contacts.jpeg);
+        background-size: cover;
+        background-position: center bottom;
+      }
       #collections_panel{}
-      #discussions_panel{}
-      #events_panel{}
-      #classifieds_panel{}
+      #discussions_panel{
+        background-image: url(/backgrounds/discussions2.jpeg);
+        background-size: cover;
+        background-position: center bottom;
+      }
+      #events_panel{
+        background-image: url(/backgrounds/events.jpeg);
+        background-size: cover;
+        background-position: center bottom;
+      }
+      #classifieds_panel{
+        background-image: url(/backgrounds/classifieds.jpeg);
+        background-size: cover;
+        background-position: center bottom;
+      }
       #ticker_panel{}
       #architect_panel{}
       #architect_panel > .lil-gui.root{
@@ -3068,47 +3084,47 @@ function WeTheHeader( props ){
       <ul className="menu_items">
 
         <li className="header_menu_item account" onClick={toggleAccount}>
-          <img src=".\both_vault.png" />
+          <img src=".\elements\both_vault.png" />
           <span className="account_balance">{account_balance}</span>
           <span className="account_change">{account_change}</span>
         </li>
 
         <li className="header_menu_item contacts" onClick={toggleContacts}>
-          <img src=".\both_groups.png" />
+          <img src=".\elements\both_groups.png" />
           <span className="online_contacts">{online_contacts}</span>
           <span className="alerts">{contacts_alerts}</span>
         </li>
 
         <li className="header_menu_item collections" onClick={toggleCollections}>
-          <img src=".\both_museum.png" />
+          <img src=".\elements\collections.png" />
           <span className="active_collections">{active_collections}</span>
           <span className="alerts">{collections_alerts}</span>
         </li>
 
         <li className="header_menu_item discussions" onClick={toggleDiscussions}>
-          <img src=".\both_wethebrand.png" />
+          <img src=".\elements\both_wethebrand.png" />
           <span className="active_discussions">{active_discussions}</span>
           <span className="alerts">{discussions_alerts}</span>
         </li>
 
         <li className="header_menu_item events" onClick={toggleEvents}>
-          <img src=".\both_planet_alert.png" />
+          <img src=".\elements\both_planet_alert.png" />
           <span className="active_events">{active_events}</span>
           <span className="alerts">{events_alerts}</span>
         </li>
 
         <li className="header_menu_item classifieds" onClick={toggleClassifieds}>
-          <img src=".\both_postboard_alert.png" />
+          <img src=".\elements\classifieds.png" />
           <span className="active_classifieds">{active_classifieds}</span>
           <span className="alerts">{classifieds_alerts}</span>
         </li>
 
         <li className="header_menu_item architect" onClick={toggleArchitect}>
-          <img src=".\dark_architect.png" />
+          <img src=".\elements\architect.png" />
         </li>
 
         <li className="header_menu_item information" onClick={toggleInformation}>
-          <img src=".\dark_information.png" />
+          <img src=".\elements\dark_information.png" />
         </li>
 
         <li className="header_menu_item ticker">
@@ -3144,7 +3160,7 @@ function ContactsPanel( props ){
   const screenplay =  props.screenplay;
   const contacts_panel = useRef();
 
-  return( <div ref={contacts_panel} className="pip_gui pip_menu">
+  return( <div ref={contacts_panel} id="contacts_panel" className="pip_gui pip_menu">
     <button className="pip_continue" onClick={props.toggleContacts}>close</button>
   </div> );
 }
@@ -4713,7 +4729,7 @@ function CollectionsPanel( props ){
       }
 
       `}</style>
-    <div ref={panel} className="pip_gui pip_menu">
+    <div ref={panel} id="collections_panel" className="pip_gui pip_menu">
       <div className="head">
         <h1 className="pip_title">Collections</h1>
       </div>
@@ -4730,7 +4746,7 @@ function DiscussionsPanel( props ){
   const screenplay =  props.screenplay;
   const discussions_panel = useRef();
 
-  return(<div ref={discussions_panel} className="pip_gui pip_menu">
+  return(<div ref={discussions_panel} id="discussions_panel" className="pip_gui pip_menu">
     <button className="pip_continue" onClick={props.toggleDiscussions}>close</button>
   </div>);
 }
@@ -4738,7 +4754,7 @@ function EventsPanel( props ){
   const screenplay =  props.screenplay;
   const events_panel = useRef();
 
-  return( <div ref={events_panel} className="pip_gui pip_menu">
+  return( <div ref={events_panel} id="events_panel" className="pip_gui pip_menu">
     <button className="pip_continue" onClick={props.toggleEvents}>close</button>
   </div> );
 }
@@ -4746,7 +4762,7 @@ function ClassifiedsPanel( props ){
   const screenplay =  props.screenplay;
   const classifieds_panel = useRef();
 
-  return( <div ref={classifieds_panel} className="pip_gui pip_menu">
+  return( <div ref={classifieds_panel} id="classifieds_panel" className="pip_gui pip_menu">
     <button className="pip_continue" onClick={props.toggleClassifieds}>close</button>
   </div> );
 }

@@ -135,7 +135,7 @@ class VerifyCapabilitiesModal extends Component {
     this.screenplay.updatables.set( 'ups_test', this.test );
   }
   componentDidMount(){
-    document.getElementById( 'root' ).classList.add( 'no_gui' );
+
     // Give the results to the next SceneTransformation for display
     this.result_display = new SceneTransformation({
       update: ( delta )=>{
@@ -180,10 +180,12 @@ class VerifyCapabilitiesModal extends Component {
         if ( test_results.score > 20 || test_results.max_fps > 30 ) {
           document.querySelector( '#verify_capabilities .success').classList.remove( 'hidden' );
           setTimeout( ( dictum_name, ndx )=>{
+            screenplay.slo_mode = true; // TODO: REMOVE THIS TO STOP FORCING SLO_MODE
             this.director.emit( `${dictum_name}_progress`, dictum_name, ndx );
           }, 3000, this.dictum_name, this.ndx );
         } else {
           setTimeout( ( dictum_name, ndx )=>{
+            screenplay.slo_mode = true;
             document.querySelector( '#verify_capabilities .failure').classList.remove( 'hidden' );
             this.director.emit( `${dictum_name}_failure`, dictum_name, ndx );
           }, 3000, this.dictum_name, this.ndx );
@@ -192,7 +194,7 @@ class VerifyCapabilitiesModal extends Component {
     });
   }
   componentWillUnmount(){
-    document.getElementById( 'root' ).classList.remove( 'no_gui' );
+
   }
   render(){
     return (
@@ -281,7 +283,7 @@ function LoginForm( { director, screenplay, dictum_name, ndx }) {
         }
       },
       cache: {
-        duration: 15, /* do something in 60 frames */
+        duration: 15, /* do something in 15 frames */
         frame: 0,
         manual_control: false,
         og_transition: false
@@ -659,10 +661,11 @@ class Workflow extends _Workflow{
 
       this.react_app.render( <VerifyCapabilitiesModal director={director} screenplay={screenplay} dictum_name={dictum_name} ndx={ndx}/> );
     } else {
+
       // TODO: If low performance, switch to lo-fps mode.
       // TODO: Make a 'lo-fps' mode.
       // FORNOW: Move to next dictum.
-      director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      this.react_app.render( <VerifyCapabilitiesModal director={director} screenplay={screenplay} dictum_name={dictum_name} ndx={ndx}/> );
     }
   };
 

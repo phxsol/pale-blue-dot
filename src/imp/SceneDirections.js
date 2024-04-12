@@ -86,7 +86,6 @@ class SceneDirections extends _SceneDirections {
    // Neptune
    let neptune = await screenplay.actors.Neptune;
    sys_ve_scene.add( neptune );
-   screenplay.interactives.push( neptune );
    screenplay.actives.push( neptune );
    let holo_neptune = neptune.clone( );
    let neptune_scale = 0.02 / ( neptune.surface_distance );
