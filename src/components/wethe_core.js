@@ -3048,23 +3048,23 @@ function WeTheHeader( props ){
 
       #account_panel{}
       #contacts_panel{
-        background-image: url(./backgrounds/contacts.jpeg);
+        background-image: url(backgrounds/contacts.jpeg);
         background-size: cover;
         background-position: center bottom;
       }
       #collections_panel{}
       #discussions_panel{
-        background-image: url(./backgrounds/discussions2.jpeg);
+        background-image: url(backgrounds/discussions2.jpeg);
         background-size: cover;
         background-position: center bottom;
       }
       #events_panel{
-        background-image: url(./backgrounds/events.jpeg);
+        background-image: url(backgrounds/events.jpeg);
         background-size: cover;
         background-position: center bottom;
       }
       #classifieds_panel{
-        background-image: url(./backgrounds/classifieds.jpeg);
+        background-image: url(backgrounds/classifieds.jpeg);
         background-size: cover;
         background-position: center bottom;
       }
@@ -3147,22 +3147,56 @@ function WeTheHeader( props ){
 function AccountPanel( props ){
   const account_panel = useRef();
   const screenplay =  props.screenplay;
+  const body = useRef();
 
   useEffect(()=>{
     account_panel.current.classList.remove('loading');
   },[]);
-  return(
-    <div ref={account_panel} className="pip_gui pip_menu loading">
-      <button className="pip_continue" onClick={props.toggleAccount}>close</button>
-    </div> );
+
+    return(<>
+      <style>{`
+
+
+
+
+        `}</style>
+      <div ref={account_panel} id="contacts_panel" className="pip_gui pip_menu">
+        <div className="head">
+          <h1 className="pip_title">Collections</h1>
+        </div>
+        <div ref={body} className="body">
+        </div>
+        <div className="controls">
+          <button className="pip_cancel" onClick={props.toggleAccount}>Exit</button>
+
+        </div>
+      </div>
+    </>);
 }
 function ContactsPanel( props ){
   const screenplay =  props.screenplay;
   const contacts_panel = useRef();
+  const body = useRef();
 
-  return( <div ref={contacts_panel} id="contacts_panel" className="pip_gui pip_menu">
-    <button className="pip_continue" onClick={props.toggleContacts}>close</button>
-  </div> );
+  return(<>
+    <style>{`
+
+
+
+
+      `}</style>
+    <div ref={contacts_panel} id="contacts_panel" className="pip_gui pip_menu">
+      <div className="head">
+        <h1 className="pip_title">Collections</h1>
+      </div>
+      <div ref={body} className="body">
+      </div>
+      <div className="controls">
+        <button className="pip_cancel" onClick={props.toggleContacts}>Exit</button>
+
+      </div>
+    </div>
+  </>);
 }
 function CollectionsPanel_WithCollisions( props ){
   const screenplay =  props.screenplay;
@@ -4696,38 +4730,6 @@ function CollectionsPanel( props ){
     <style>{`
 
 
-      #SnapPix .status{
-        display: grid;
-        grid-auto-rows: 1fr;
-        grid-template-columns: repeat(5, 1fr);
-        grid-gap: calc( var(--sF) * 1rem );
-        background: var(--panelBG);
-      }
-      #SnapPix .status li{
-        height: 7rem;
-        cursor: pointer;
-      }
-      #SnapPix .status img, #SnapPix status video{
-        height: 100%;
-      }
-
-      #snapPic_button:active{
-        background: white;
-      }
-
-      #exit_SnapPix{
-        grid-column: 1;
-      }
-      #reset_SnapPix{
-        grid-column: 2;
-      }
-
-      #SnapPix video{
-        margin: auto;
-        max-width: 100%;
-        max-height: 100%;
-      }
-
       `}</style>
     <div ref={panel} id="collections_panel" className="pip_gui pip_menu">
       <div className="head">
@@ -4745,38 +4747,107 @@ function CollectionsPanel( props ){
 function DiscussionsPanel( props ){
   const screenplay =  props.screenplay;
   const discussions_panel = useRef();
+  const body = useRef();
 
-  return(<div ref={discussions_panel} id="discussions_panel" className="pip_gui pip_menu">
-    <button className="pip_continue" onClick={props.toggleDiscussions}>close</button>
-  </div>);
+  return(<>
+    <style>{`
+
+
+
+
+      `}</style>
+    <div ref={discussions_panel} id="discussions_panel" className="pip_gui pip_menu">
+      <div className="head">
+        <h1 className="pip_title">News & Discussions</h1>
+      </div>
+      <div ref={body} className="body">
+      </div>
+      <div className="controls">
+        <button className="pip_cancel" onClick={props.toggleDiscussions}>Exit</button>
+
+      </div>
+    </div>
+  </>);
 }
 function EventsPanel( props ){
   const screenplay =  props.screenplay;
   const events_panel = useRef();
+  const body = useRef();
 
-  return( <div ref={events_panel} id="events_panel" className="pip_gui pip_menu">
-    <button className="pip_continue" onClick={props.toggleEvents}>close</button>
-  </div> );
+  return(<>
+    <style>{`
+
+
+
+
+      `}</style>
+    <div ref={events_panel} id="events_panel" className="pip_gui pip_menu">
+      <div className="head">
+        <h1 className="pip_title">What's Going On?</h1>
+      </div>
+      <div ref={body} className="body">
+      </div>
+      <div className="controls">
+        <button className="pip_cancel" onClick={props.toggleEvents}>Exit</button>
+
+      </div>
+    </div>
+  </>);
 }
 function ClassifiedsPanel( props ){
   const screenplay =  props.screenplay;
   const classifieds_panel = useRef();
+  const body = useRef();
 
-  return( <div ref={classifieds_panel} id="classifieds_panel" className="pip_gui pip_menu">
-    <button className="pip_continue" onClick={props.toggleClassifieds}>close</button>
-  </div> );
+  return(<>
+    <style>{`
+
+
+
+
+      `}</style>
+    <div ref={classifieds_panel} id="classifieds_panel" className="pip_gui pip_menu">
+      <div className="head">
+        <h1 className="pip_title">Community Classifieds</h1>
+      </div>
+      <div ref={body} className="body">
+      </div>
+      <div className="controls">
+        <button className="pip_cancel" onClick={props.toggleClassifieds}>Exit</button>
+
+      </div>
+    </div>
+  </>);
 }
 function TickerPanel( props ){
   const screenplay =  props.screenplay;
   const ticker_panel = useRef();
+  const body = useRef();
 
-  return( <div ref={ticker_panel} id="ticker_panel" className="pip_gui pip_menu">
-    <button className="pip_continue" onClick={props.toggleTicker}>close</button>
-  </div> );
+  return(<>
+    <style>{`
+
+
+
+
+      `}</style>
+    <div ref={ticker_panel} id="ticker_panel" className="pip_gui pip_menu">
+      <div className="head">
+        <h1 className="pip_title">Heads up Notifications</h1>
+      </div>
+      <div ref={body} className="body">
+      </div>
+      <div className="controls">
+        <button className="pip_cancel" onClick={props.toggleTicker}>Exit</button>
+
+      </div>
+    </div>
+  </>);
 }
 function ArchitectPanel( props ){
   const screenplay =  props.screenplay;
   const architect_panel = useRef();
+  const body = useRef();
 
   function cleanup(){
     screenplay.lil_gui.hide();
@@ -4788,7 +4859,7 @@ function ArchitectPanel( props ){
       let sys_ui_scene = screenplay.sys_ui_scene;
       let page_ve_scene = screenplay.page_ve_scene;
       let page_ui_scene = screenplay.page_ui_scene;
-      let gui = screenplay.lil_gui = new GUI( { title: 'Architect Interface', container: architect_panel.current });
+      let gui = screenplay.lil_gui = new GUI( { title: 'Architect Interface', container: body.current });
 
       gui.camera_controls = gui.addFolder( 'Camera Controls' );
       gui.camera_controls.add( screenplay, 'fps' ).name('Frames / Second').onChange(()=>{
@@ -4832,7 +4903,7 @@ function ArchitectPanel( props ){
         cam_settings.add( cam, 'zoom' ).onChange(()=>{
           cam.updateProjectionMatrix();
         });
-
+        cam_settings.open( false );
       } );
 
       let ui_cam_settings = gui.camera_controls.addFolder( 'UI Camera' );
@@ -4864,6 +4935,7 @@ function ArchitectPanel( props ){
       ui_cam_settings.add( ui_cam, 'zoom' ).onChange(()=>{
         ui_cam.updateProjectionMatrix();
       });
+      ui_cam_settings.open( false );
 
       const camera_controls = {
         Orbiting: ()=>{
@@ -5044,6 +5116,7 @@ function ArchitectPanel( props ){
            base.up.setZ(value);
         }).name( `up: Z` );
         folder.add( base, 'visible' ).listen().name( `Visible` );
+        folder.open( false );
       }
 
       let addGroup = async ( folder, group )=>{
@@ -5055,36 +5128,43 @@ function ArchitectPanel( props ){
             case 'Group':
             case 'Object3D':
               let group_folder = folder.addFolder( child.name );
+              group_folder.open( false );
               addGroup( group_folder, child );
               break;
 
             case 'Mesh':
               let mesh_folder = folder.addFolder( child.name );
+              mesh_folder.open( false );
               addMesh( mesh_folder, child );
               break;
 
             case 'DirectionalLight':
               let dlight_folder = folder.addFolder( 'Directional Light' );
+              dlight_folder.open( false );
               addDirectionalLight( dlight_folder, child );
               break;
 
             case 'AmbientLight':
               let amblight_folder = folder.addFolder( 'Ambient Light' );
+              amblight_folder.open( false );
               addAmbientLight( amblight_folder, child );
               break;
 
             case 'SpotLight':
               let slight_folder = folder.addFolder( 'Spot Light' );
+              slight_folder.open( false );
               addSpotLight( slight_folder, child );
               break;
 
             case 'PointLight':
               let plight_folder = folder.addFolder( 'Point Light' );
+              plight_folder.open( false );
               addPointLight( plight_folder, child );
               break;
 
             default:
               let default_folder = folder.addFolder( child.type );
+              default_folder.open( false );
               base_props( default_folder, child );
               break;
 
@@ -5159,20 +5239,36 @@ function ArchitectPanel( props ){
             break;
 
         }
+        model_folder.open( false );
       }
+      modeling_folder.open( false );
 
-      architect_panel.current.append( screenplay.lil_gui.domElement );
+      body.current.append( screenplay.lil_gui.domElement );
     }
     if( screenplay.lil_gui ) {
-      architect_panel.current.append( screenplay.lil_gui.domElement );
+      body.current.append( screenplay.lil_gui.domElement );
       screenplay.lil_gui.show();
     }
     return cleanup;
   }, [])
-  return( <>
+  return(<>
+    <style>{`
+
+
+
+
+      `}</style>
     <div ref={architect_panel} id="architect_panel" className="pip_gui pip_menu">
-    <button className="pip_continue" onClick={props.toggleArchitect}>close</button>
-  </div>
+      <div className="head">
+        <h1 className="pip_title">Architect's Panel</h1>
+      </div>
+      <div ref={body} className="body">
+      </div>
+      <div className="controls">
+        <button className="pip_cancel" onClick={props.toggleArchitect}>Exit</button>
+
+      </div>
+    </div>
   </>);
 }
 function InformationPanel( props ){
@@ -5180,6 +5276,7 @@ function InformationPanel( props ){
   const showInformation = props.onDisplay
   const [classNames, setClassNames] = useState( 'pip_gui pip_menu hidden' );
   const information_panel = useRef();
+  const body = useRef();
 
   useEffect(()=>{
     showInformation ?
@@ -5188,1218 +5285,1229 @@ function InformationPanel( props ){
 
   }, [showInformation]);
 
-  return(
-    <>
-      <style>{`
-        #information_panel{
+  return(<>
+    <style>{`
 
-        }
-        #information_panel.hidden{
-          scale: 0;
-        }
-        .info_card{
-          height: 42vh; width: 26vh;
-        }
-        #attributions{
-          grid-row: 1;
-          grid-column: 1;
-          overflow: auto;
-          margin: 1em;
-          border: solid 1px var(--b1);
-        }
-        #color_test{
-          grid-row: 1;
-          grid-column: 2;
-          overflow: auto;
-        }
-        #color_test > ul{
-          display: inline-flex;
-        }
-        #color_test ul{
-          list-style: none;
-          padding: 0;
-          margin: 0;
-        }
-        .color_scheme{
-          display: inline-flex;
-        }
-        .color_scheme ul{
-          padding: .5em;
-        }
+      .body{
+        display: grid;
+      }
 
-        .color_scheme ul > li{
-          width: 2em;
-          height: 2em;
-        }
+      #information_panel{
 
-        .color_box{
-          margin: 5px;
-        }
+      }
+      #information_panel.hidden{
+        scale: 0;
+      }
+      .info_card{
+        height: 42vh; width: 26vh;
+      }
+      #attributions{
+        grid-row: 1;
+        grid-column: 1;
+        overflow: auto;
+        margin: 1em;
+        border: solid 1px var(--b1);
+      }
+      #color_test{
+        grid-row: 1;
+        grid-column: 2;
+        overflow: auto;
+      }
+      #color_test > ul{
+        display: inline-flex;
+      }
+      #color_test ul{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .color_scheme{
+        display: inline-flex;
+      }
+      .color_scheme ul{
+        padding: .5em;
+      }
 
-      `}</style>
-      <div ref={information_panel} id="information_panel" className={classNames}>
-        <span id="attributions" className="info_card">
-          <a target="_blank" href="https://icons8.com/icon/qDNClnB7Z4Ky/people">People</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/20043/gold-bars">Gold Bars</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/D0dSYOIgHwUE/space-capsule">Space Capsule</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/PxbAzd4lNomR/museum">Museum</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/DrD7UPXiB0Mr/spacedock">Spacedock</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/ZiRwjHmdrgtj/info">Information</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/FXLF16VEeRcy/drawing-compass">architect</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/7911/qr-code">QR</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/bdHWJkPWyxoN/search">Search</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/111525/planet-on-the-dark-side">Planet on the Dark Side</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/UkBYfBtQ3Tjd/boy-on-the-rocket">Boy On The Rocket</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/zfocONnnXhqn/orion-a-prominent-constellation-located-on-the-celestial-equator">Orion a prominent constellation located on the celestial equator</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/3qmQGiklUZlg/postboard">Postboard</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/AorombwGHzLn/bank-safe">Bank Safe</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/94483/business-group">Business Group</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/1UaX1pxFlZtk/at-sign">At sign</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/43162/place-marker">Place Marker</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/43604/compact-camera">Camera</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/4CvT2ue9OxHQ/radio-studio">Radio Studio</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/mlaq6t4z5OhM/sticky-note">Sticky Note</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/w9KJ7U6IR4gR/chat">Communication</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/g2AFxEopLdQC/qr-code">Qr Code</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/SAgnQKmOXIlP/upload-image">Upload Image</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/zPiI0jnS1y6H/selfie">Selfie</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/IeqVzLO7hTAe/take-a-photo">Take A Photo</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/YP2lOU31pp9S/affinity-photo">Affinity Photo</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/46861/switch-camera">Switch Camera</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/108790/sound">Sound</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/RC42DqVAI9ju/record-video">Record Video</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/KLyXgIpg7AdE/stop-gesture">Stop Gesture</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://icons8.com/icon/42355/tick-box">Tick Box</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
-          <a target="_blank" href="https://skfb.ly/oDnoC">"Diner BO2-Zombies inspired" by JoSaCo</a> is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).<br/>
-        </span>
+      .color_scheme ul > li{
+        width: 2em;
+        height: 2em;
+      }
 
-        <div id="color_test" className="info_card">
-          <ul >
-            <li className="color_box" style={{ backgroundColor: 'var(--r1)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--o1)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--y1)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--g1)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--b1)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--i1)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--v1)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-          </ul>
-          <ul >
-            <li className="color_box" style={{ backgroundColor: 'var(--r2)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--o2)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--y2)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--g2)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--b2)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--i2)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--v2)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-          </ul>
-          <ul >
-            <li className="color_box" style={{ backgroundColor: 'var(--r3)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--o3)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--y3)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--g3)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--b3)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--i3)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li className="color_box" style={{ backgroundColor: 'var(--v3)', padding: '1em'}}>
-              <ul className="color_scheme" >
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
-                  </ul>
-                </li>
-                <li>
-                  <ul >
-                    <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
-                    <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </div>
+      .color_box{
+        margin: 5px;
+      }
 
-        <button className="pip_continue" onClick={props.toggleInformation}>close</button>
+
+
+    `}</style>
+    <div ref={information_panel} id="information_panel" className={classNames}>
+      <div className="head">
+        <h1 className="pip_title">Architect's Panel</h1>
+      </div>
+      <div ref={body} className="body">
+      <span id="attributions" className="info_card">
+        <a target="_blank" href="https://icons8.com/icon/qDNClnB7Z4Ky/people">People</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/20043/gold-bars">Gold Bars</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/D0dSYOIgHwUE/space-capsule">Space Capsule</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/PxbAzd4lNomR/museum">Museum</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/DrD7UPXiB0Mr/spacedock">Spacedock</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/ZiRwjHmdrgtj/info">Information</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/FXLF16VEeRcy/drawing-compass">architect</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/7911/qr-code">QR</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/bdHWJkPWyxoN/search">Search</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/111525/planet-on-the-dark-side">Planet on the Dark Side</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/UkBYfBtQ3Tjd/boy-on-the-rocket">Boy On The Rocket</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/zfocONnnXhqn/orion-a-prominent-constellation-located-on-the-celestial-equator">Orion a prominent constellation located on the celestial equator</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/3qmQGiklUZlg/postboard">Postboard</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/AorombwGHzLn/bank-safe">Bank Safe</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/94483/business-group">Business Group</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/1UaX1pxFlZtk/at-sign">At sign</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/43162/place-marker">Place Marker</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/43604/compact-camera">Camera</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/4CvT2ue9OxHQ/radio-studio">Radio Studio</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/mlaq6t4z5OhM/sticky-note">Sticky Note</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/w9KJ7U6IR4gR/chat">Communication</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/g2AFxEopLdQC/qr-code">Qr Code</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/SAgnQKmOXIlP/upload-image">Upload Image</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/zPiI0jnS1y6H/selfie">Selfie</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/IeqVzLO7hTAe/take-a-photo">Take A Photo</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/YP2lOU31pp9S/affinity-photo">Affinity Photo</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/46861/switch-camera">Switch Camera</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/108790/sound">Sound</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/RC42DqVAI9ju/record-video">Record Video</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/KLyXgIpg7AdE/stop-gesture">Stop Gesture</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://icons8.com/icon/42355/tick-box">Tick Box</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a><br />
+        <a target="_blank" href="https://skfb.ly/oDnoC">"Diner BO2-Zombies inspired" by JoSaCo</a> is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).<br/>
+      </span>
+
+      <div id="color_test" className="info_card">
+        <ul >
+          <li className="color_box" style={{ backgroundColor: 'var(--r1)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--o1)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--y1)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--g1)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--b1)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--i1)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--v1)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <ul >
+          <li className="color_box" style={{ backgroundColor: 'var(--r2)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--o2)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--y2)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--g2)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--b2)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--i2)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--v2)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <ul >
+          <li className="color_box" style={{ backgroundColor: 'var(--r3)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--o3)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--y3)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--g3)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--b3)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--i3)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li className="color_box" style={{ backgroundColor: 'var(--v3)', padding: '1em'}}>
+            <ul className="color_scheme" >
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--r1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--r3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--o1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--o3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--y1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--y3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--g1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--g3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--b1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--b3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--i1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--i3)' }}></li>
+                </ul>
+              </li>
+              <li>
+                <ul >
+                  <li className="color_box" style={{ backgroundColor: 'var(--v1)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v2)' }}></li>
+                  <li className="color_box" style={{ backgroundColor: 'var(--v3)' }}></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      </div>
+      <div className="controls">
+        <button className="pip_cancel" onClick={props.toggleInformation}>Exit</button>
 
       </div>
-    </>
-  )
+    </div>
+  </>);
 }
 // WeThe Starship
 function ViewScreenDisplay( props ){

@@ -182,13 +182,13 @@ class VerifyCapabilitiesModal extends Component {
           setTimeout( ( dictum_name, ndx )=>{
             this.screenplay.slo_mode = true; // TODO: REMOVE THIS TO STOP FORCING SLO_MODE
             this.director.emit( `${dictum_name}_progress`, dictum_name, ndx );
-          }, 3000, this.dictum_name, this.ndx );
+          }, 500, this.dictum_name, this.ndx );
         } else {
           setTimeout( ( dictum_name, ndx )=>{
             this.screenplay.slo_mode = true;
             document.querySelector( '#verify_capabilities .failure').classList.remove( 'hidden' );
             this.director.emit( `${dictum_name}_failure`, dictum_name, ndx );
-          }, 3000, this.dictum_name, this.ndx );
+          }, 500, this.dictum_name, this.ndx );
         }
       }
     });

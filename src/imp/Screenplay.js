@@ -451,7 +451,7 @@ class Screenplay extends _Screenplay{
 
             let starship = gltf.scene;
             starship.traverse( function( obj3D ) {
-              if( obj3D.isMesh ) obj3D.castShadow = true;
+              //if( obj3D.isMesh ) obj3D.castShadow = true;
             });
 
             starship.name = 'Starship You';
@@ -488,7 +488,7 @@ class Screenplay extends _Screenplay{
             starship_texture.wrapS = THREE.MirroredRepeatWrapping;
             starship_texture.wrapT = THREE.MirroredRepeatWrapping;
             starship_texture.repeat.set( 24, 24 );
-            let starship_material = new THREE.MeshPhongMaterial({map: starship_texture, color: 0x000111, emissive: 0x000000, specular: 0x111111, shininess: 100, combine: THREE.MultiplyOperation, side:THREE.DoubleSide, combine: THREE.MixOperation, flatShading: true});
+            let starship_material = new THREE.MeshPhongMaterial({map: starship_texture, color: 0xdddddd, emissive: 0x777777, specular: 0x111111, shininess: 100, combine: THREE.MultiplyOperation, side:THREE.DoubleSide, combine: THREE.MixOperation, flatShading: true});
             starship.Hull = starship.getObjectByName( 'Hull' );
             let _hull = starship.Hull.getObjectByName( 'Hull001' );
             _hull.traverse( function( obj3D ) {
