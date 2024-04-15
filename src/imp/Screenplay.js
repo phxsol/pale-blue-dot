@@ -487,8 +487,8 @@ class Screenplay extends _Screenplay{
             let starship_texture = new THREE.TextureLoader().load('textures/StarShipTexture.jpg' );
             starship_texture.wrapS = THREE.MirroredRepeatWrapping;
             starship_texture.wrapT = THREE.MirroredRepeatWrapping;
-            starship_texture.repeat.set( 24, 24 );
-            let starship_material = new THREE.MeshPhongMaterial({map: starship_texture, color: 0xdddddd, emissive: 0x777777, specular: 0x111111, shininess: 100, combine: THREE.MultiplyOperation, side:THREE.DoubleSide, combine: THREE.MixOperation, flatShading: true});
+            starship_texture.repeat.set( 36, 36 );
+            let starship_material = new THREE.MeshPhongMaterial({map: starship_texture, color: 0x858aa5, emissive: 0x000000, specular: 0x111111, shininess: 30, combine: THREE.MultiplyOperation, side:THREE.DoubleSide, refractionRatio: 0.98, flatShading: true});
             starship.Hull = starship.getObjectByName( 'Hull' );
             let _hull = starship.Hull.getObjectByName( 'Hull001' );
             _hull.traverse( function( obj3D ) {
@@ -497,7 +497,7 @@ class Screenplay extends _Screenplay{
             starship.Warp_Tunnel = starship.getObjectByName( 'Warp_Tunnel' );
             starship.Warp_Tunnel.visible = false;
             starship.Light = starship.getObjectByName( 'Light' );
-            starship.Light.intensity = 10;
+            starship.Light.intensity = 2;
 
             starship.Conference__Table = starship.getObjectByName( 'Conference__Table' );
             starship.Aft_Wall = starship.getObjectByName( 'Aft_Wall' );
