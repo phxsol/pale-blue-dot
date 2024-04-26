@@ -21,7 +21,7 @@ const LIGHT = {
   blue: 0x0000ff
 };
 const VIEW = {
-  fov: 110,
+  fov: 90,
   aspect: window.innerWidth / window.innerHeight,
   near: 0.1,
   far: 100000000000000,

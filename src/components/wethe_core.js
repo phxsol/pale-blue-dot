@@ -76,8 +76,12 @@ function WeTheMenu( props ){
     activePipGUID === 1 ? setActivePipGUID( 0 ) : setActivePipGUID( 1 );
     toggleMenu();
   }
-  function toggleShareContact( event ) {
+  function toggleQuickConnect( event ) {
     activePipGUID === 2 ? setActivePipGUID( 0 ) : setActivePipGUID( 2 );
+    toggleMenu();
+  }
+  function toggleCarpeDiem( event ) {
+    activePipGUID === 3 ? setActivePipGUID( 0 ) : setActivePipGUID( 3 );
     toggleMenu();
   }
   function toggleDropPin( event ) {
@@ -330,14 +334,15 @@ function WeTheMenu( props ){
         <label htmlFor="OpenGlyphScanner" className="pip_text">Scan a Glyph</label>
         <input type="image" src=".\elements\both_glyphscanner.png" name="OpenGlyphScanner" />
       </div>
-      <div className="menu_choice" data-position={2} onClick={toggleShareContact} >
-        <input type="image" src=".\elements\contacts.png" name="OpenShareContact" />
-        <label htmlFor="OpenShareContact" className="pip_text">Share Contact</label>
+      <div className="menu_choice" data-position={2} onClick={toggleQuickConnect} >
+        <input type="image" src=".\elements\contacts.png" name="OpenQuickConnect" />
+        <label htmlFor="OpenQuickConnect" className="pip_text">Quick Connect</label>
       </div>
-      <div className="menu_choice" data-position={3} onClick={toggleDropPin} >
-        <label htmlFor="OpenDropPin" className="pip_text">Drop-A-Pin</label>
-        <input type="image" src=".\elements\pin_location.png" name="OpenDropPin" />
+      <div className="menu_choice" data-position={3} onClick={toggleCarpeDiem} >
+        <label htmlFor="OpenCarpeDiem" className="pip_text">Carpe Diem</label>
+        <input type="image" src=".\elements\pin_location.png" name="OpenCarpeDiem" />
       </div>
+
       <div className="menu_choice" data-position={4} onClick={toggleSnapPix} >
         <label htmlFor="OpenSnapPix" className="pip_text">Snap Pix</label>
         <input type="image" src=".\elements\snap_pix.png" name="OpenSnapPix"/>
@@ -356,8 +361,9 @@ function WeTheMenu( props ){
       </div>
     </div>
     {activePipGUID === 1 ? <GlyphScanner toggle={toggleGlyphScanner} screenplay={screenplay} /> : <></>}
-    {activePipGUID === 2 ? <ShareContact toggle={toggleShareContact} screenplay={screenplay} /> : <></>}
-    {activePipGUID === 3 ? <DropPin toggle={toggleDropPin} screenplay={screenplay} /> : <></>}
+    {activePipGUID === 2 ? <QuickConnect toggle={toggleQuickConnect} screenplay={screenplay} /> : <></>}
+    {activePipGUID === 3 ? <CarpeDiem toggle={toggleCarpeDiem} screenplay={screenplay} /> : <></>}
+
     {activePipGUID === 4 ? <SnapPix toggle={toggleSnapPix} screenplay={screenplay} /> : <></>}
     {activePipGUID === 5 ? <RecordNote toggle={toggleRecordNote} screenplay={screenplay} /> : <></>}
     {activePipGUID === 6 ? <RemindMe toggle={toggleRemindMe} screenplay={screenplay} /> : <></>}
@@ -876,7 +882,7 @@ function GlyphScanner( props ){
       </>
   )
 }
-function ShareContact( props ) {
+function QuickConnect( props ) {
   const screenplay =  props.screenplay;
   const [enter, setEnter] = useState( false );
   const [exit, setExit] = useState( false );
@@ -908,11 +914,11 @@ function ShareContact( props ) {
       reset: ()=>{
         entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
-        screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+        screenplay.updatables.set( 'QuickConnect_entrance_transition', entrance_transition );
       },
       post: ( )=>{
         let cache = entrance_transition.cache;
-        screenplay.updatables.delete( 'ShareContact_entrance_transition' );
+        screenplay.updatables.delete( 'QuickConnect_entrance_transition' );
         panel.current.style.transform = `scale(1)`;
       }
     });
@@ -937,17 +943,17 @@ function ShareContact( props ) {
       reset: ()=>{
         exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
-        screenplay.updatables.set( 'ShareContact_exit_transition', exit_transition );
+        screenplay.updatables.set( 'QuickConnect_exit_transition', exit_transition );
       },
       post: ( )=>{
         let cache = exit_transition.cache;
-        screenplay.updatables.delete( 'ShareContact_exit_transition' );
+        screenplay.updatables.delete( 'QuickConnect_exit_transition' );
         panel.current.style.transform = `scale(0)`;
         director.emit( `${dictum_name}_progress`, dictum_name, ndx );
       }
     });
     setExit( exit_transition );
-    screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+    screenplay.updatables.set( 'QuickConnect_entrance_transition', entrance_transition );
 
     return cleanup;
   }
@@ -966,7 +972,131 @@ function ShareContact( props ) {
       <style>{`
 
         `}</style>
-      <div id="ShareContact" ref={panel} className="pip_gui pip_post">
+      <div id="QuickConnect" ref={panel} className="pip_gui pip_post">
+        <div className="head">
+          <h1 className="pip_title">Snap Pix</h1>
+        </div>
+        <ul className="controls" style={{ padding: 0, margin: 0 }}>
+          <li className="image_select">
+            <img src=".\elements\both_mic.png" alt="Select from this list" />
+            <select name="listName"></select>
+            <br />
+            <label htmlFor="listName">.image_select</label>
+          </li>
+
+          <li className="image_button">
+            <input  type="image" name="clickme" src=".\elements\both_capture-photo.png" alt="Do Something" />
+            <br />
+            <label htmlFor="clickme" className="pip_text" >.image_button</label>
+          </li>
+        </ul>
+        <div className="body">
+
+        </div>
+        <ul className="status"></ul>
+        <ul className="foot">
+          <li>
+            <button name="exit" className="pip_cancel" type="button" onClick={props.toggle}>Exit</button>
+          </li>
+          <li>
+            <button ref={reset_button} name="reset" className="pip_continue" type="button" onClick={()=>{setPhase( 0 )}}>Back</button>
+          </li>
+        </ul>
+      </div>
+      </>
+  )
+}
+function CarpeDiem( props ) {
+  const screenplay =  props.screenplay;
+  const [enter, setEnter] = useState( false );
+  const [exit, setExit] = useState( false );
+  const panel = useRef();
+  const reset_button = useRef();
+  const [phase, setPhase] = useState( 0 );
+
+  function cleanup(){
+
+  }
+  function init(){
+    const entrance_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = entrance_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          entrance_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in 60 frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
+        entrance_transition.cache.frame = 0;
+        screenplay.updatables.set( 'CarpeDiem_entrance_transition', entrance_transition );
+      },
+      post: ( )=>{
+        let cache = entrance_transition.cache;
+        screenplay.updatables.delete( 'CarpeDiem_entrance_transition' );
+        panel.current.style.transform = `scale(1)`;
+      }
+    });
+    setEnter( entrance_transition );
+    const exit_transition = new SceneTransformation({
+      update: ( delta )=>{
+        let cache = exit_transition.cache;
+        if( ++cache.frame <= cache.duration ){
+          let progress = 1 - cache.frame / cache.duration;
+          panel.current.style.scale = progress;
+
+        } else {
+          exit_transition.post( );  // This calls for the cleanup of the object from the scene and the values from itself.
+        }
+      },
+      cache: {
+        duration: screenplay.slo_mode ? 1 : 15, /* do something in this many frames */
+        frame: 0,
+        manual_control: false,
+        og_transition: false
+      },
+      reset: ()=>{
+        exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
+        exit_transition.cache.frame = 0;
+        screenplay.updatables.set( 'CarpeDiem_exit_transition', exit_transition );
+      },
+      post: ( )=>{
+        let cache = exit_transition.cache;
+        screenplay.updatables.delete( 'CarpeDiem_exit_transition' );
+        panel.current.style.transform = `scale(0)`;
+        director.emit( `${dictum_name}_progress`, dictum_name, ndx );
+      }
+    });
+    setExit( exit_transition );
+    screenplay.updatables.set( 'CarpeDiem_entrance_transition', entrance_transition );
+
+    return cleanup;
+  }
+  useEffect( init , []);
+
+  function onPhaseChange(){
+    switch( phase ){
+      case 0:
+        reset_button.current.disabled = true;
+    }
+  }
+  useEffect( onPhaseChange, [phase] );
+
+  return(
+      <>
+      <style>{`
+
+        `}</style>
+      <div id="CarpeDiem" ref={panel} className="pip_gui pip_post">
         <div className="head">
           <h1 className="pip_title">Snap Pix</h1>
         </div>
@@ -1036,11 +1166,11 @@ function DropPin( props ) {
       reset: ()=>{
         entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
-        screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+        screenplay.updatables.set( 'DropPin_entrance_transition', entrance_transition );
       },
       post: ( )=>{
         let cache = entrance_transition.cache;
-        screenplay.updatables.delete( 'ShareContact_entrance_transition' );
+        screenplay.updatables.delete( 'DropPin_entrance_transition' );
         panel.current.style.transform = `scale(1)`;
       }
     });
@@ -1065,17 +1195,17 @@ function DropPin( props ) {
       reset: ()=>{
         exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
-        screenplay.updatables.set( 'ShareContact_exit_transition', exit_transition );
+        screenplay.updatables.set( 'DropPin_exit_transition', exit_transition );
       },
       post: ( )=>{
         let cache = exit_transition.cache;
-        screenplay.updatables.delete( 'ShareContact_exit_transition' );
+        screenplay.updatables.delete( 'DropPin_exit_transition' );
         panel.current.style.transform = `scale(0)`;
         director.emit( `${dictum_name}_progress`, dictum_name, ndx );
       }
     });
     setExit( exit_transition );
-    screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+    screenplay.updatables.set( 'DropPin_entrance_transition', entrance_transition );
 
     // Declare the chart dimensions and margins.
     const width = 928;
@@ -2184,11 +2314,11 @@ function RemindMe( props ) {
       reset: ()=>{
         entrance_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         entrance_transition.cache.frame = 0;
-        screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+        screenplay.updatables.set( 'RemindMe_entrance_transition', entrance_transition );
       },
       post: ( )=>{
         let cache = entrance_transition.cache;
-        screenplay.updatables.delete( 'ShareContact_entrance_transition' );
+        screenplay.updatables.delete( 'RemindMe_entrance_transition' );
         panel.current.style.transform = `scale(1)`;
       }
     });
@@ -2213,17 +2343,17 @@ function RemindMe( props ) {
       reset: ()=>{
         exit_transition.cache.duration = screenplay.slo_mode ? 1 : 15;
         exit_transition.cache.frame = 0;
-        screenplay.updatables.set( 'ShareContact_exit_transition', exit_transition );
+        screenplay.updatables.set( 'RemindMe_exit_transition', exit_transition );
       },
       post: ( )=>{
         let cache = exit_transition.cache;
-        screenplay.updatables.delete( 'ShareContact_exit_transition' );
+        screenplay.updatables.delete( 'RemindMe_exit_transition' );
         panel.current.style.transform = `scale(0)`;
         director.emit( `${dictum_name}_progress`, dictum_name, ndx );
       }
     });
     setExit( exit_transition );
-    screenplay.updatables.set( 'ShareContact_entrance_transition', entrance_transition );
+    screenplay.updatables.set( 'RemindMe_entrance_transition', entrance_transition );
 
     const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     if (Notification.permission === 'denied' || Notification.permission === 'default') {
@@ -3060,7 +3190,7 @@ function WeTheHeader( props ){
       #discussions_panel{
         background-image: url(./backgrounds/discussions2.jpeg);
         background-size: cover;
-        background-position: center bottom;
+        background-position: center center;
       }
       #events_panel{
         background-image: url(./backgrounds/events.jpeg);
@@ -3502,6 +3632,26 @@ function CollectionsPanel( props ){
             glyph.value = glyph.blob.size;
             glyphs.current.push( glyph );
           }
+          // Initialize the circle: all located at the center of the svg area
+          var node = svg.append("g")
+            .selectAll("circle")
+            .data(glyphs.current)
+            .join("circle")
+              .attr("class", "node")
+              .attr("r", d => size(d.value))
+              .attr("cx", width / 2)
+              .attr("cy", height / 2)
+              .style("fill", d => color(d.region))
+              .style("fill-opacity", 0.8)
+              .attr("stroke", "black")
+              .style("stroke-width", 1)
+              .on("mouseover", mouseover) // What to do when hovered
+              .on("mousemove", mousemove)
+              .on("mouseleave", mouseleave)
+              .call(d3.drag() // call specific function when circle is dragged
+                   .on("start", dragstarted)
+                   .on("drag", dragged)
+                   .on("end", dragended));
           return true;
         };
       }
@@ -3559,14 +3709,211 @@ function CollectionsPanel( props ){
         };
       }
     }
+
+    // Color palette for continents?
+    const color = d3.scaleOrdinal()
+      .domain(["Asia", "Europe", "Africa", "Oceania", "Americas"])
+      .range(d3.schemeSet1);
+
+    // Size scale for countries
+    const size = d3.scaleLinear()
+      .domain([0, 1400000000])
+      .range([7,55])  // circle will be between 7 and 55 px wide
+
+    // create a tooltip
+    const Tooltip = d3.select("#collections_panel .body")
+      .append("div")
+      .style("opacity", 0)
+      .attr("class", "tooltip")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "2px")
+      .style("border-radius", "5px")
+      .style("padding", "5px")
+
+    // Three function that change the tooltip when user hover / move / leave a cell
+    const mouseover = function(event, d) {
+      Tooltip
+        .style("opacity", 1)
+    }
+    const mousemove = function(event, d) {
+      Tooltip
+        .html('<u>' + d.key + '</u>' + "<br>" + d.value + " inhabitants")
+        .style("left", (event.x/2+20) + "px")
+        .style("top", (event.y/2-30) + "px")
+    }
+    var mouseleave = function(event, d) {
+      Tooltip
+        .style("opacity", 0)
+    }
+
+    // What happens when a circle is dragged?
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(.03).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(.03);
+      d.fx = null;
+      d.fy = null;
+    }
+
+
+
+    // Features of the forces applied to the nodes:
+    const simulation = d3.forceSimulation()
+        .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
+        .force("charge", d3.forceManyBody().strength(.1)) // Nodes are attracted one each other of value is > 0
+        .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.value)+3) }).iterations(1)) // Force that avoids circle overlapping
+
+    // Apply these forces to the nodes and update their positions.
+    // Once the force algorithm is happy with positions ('alpha' value is low enough), simulations will stop.
+    simulation
+        .nodes(data)
+        .on("tick", function(d){
+          node
+              .attr("cx", d => d.x)
+              .attr("cy", d => d.y)
+        });
+
     const async_f = async ()=>{
       await OpenIndexedDBRequest( 'GlyphScanner', 1, onError, onGlyphScannerSuccess );
       await OpenIndexedDBRequest( 'SnapPix', 1, onError, onSnapPixSuccess );
       await OpenIndexedDBRequest( 'RecordNote', 1, onError, onRecordNoteSuccess );
       await OpenIndexedDBRequest( 'RemindMe', 1, onError, onRemindMeSuccess );
       await OpenIndexedDBRequest( 'Collections', 1, onError, onCollectionsSuccess );
-      //displayCirclePacking();
-      circlePacking();
+
+      // Specify the chart’s dimensions.
+      let width = body.current.clientWidth || body.current.offsetWidth;
+      let height = body.current.clientHeight || body.current.offsetHeight;
+
+      // append the svg object to the body of the page
+      const svg = d3.select("#collections_panel .body")
+        .append("svg")
+          .attr("width", width)
+          .attr("height", height);
+
+
+      const mydata = {
+        children: [ ...glyphs.current, ...snaps.current, ...dicts.current, ...minders.current, collections.current ],
+        name: "Collected Things!"
+      }
+      d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/11_SevCatOneNumNestedOneObsPerGroup.csv").then( function(data) {
+      /*  data = [
+        {
+          key: "Afghanistan",
+          region: "Asia",
+          subregion: "Southern Asia",
+          value: "25500100"
+        }
+      ]
+      */
+        // Specify the chart’s dimensions.
+        let width = body.current.clientWidth || body.current.offsetWidth;
+        let height = body.current.clientHeight || body.current.offsetHeight;
+
+        // append the svg object to the body of the page
+        const svg = d3.select("#collections_panel .body")
+          .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+
+        // Color palette for continents?
+        const color = d3.scaleOrdinal()
+          .domain(["Asia", "Europe", "Africa", "Oceania", "Americas"])
+          .range(d3.schemeSet1);
+
+        // Size scale for countries
+        const size = d3.scaleLinear()
+          .domain([0, 1400000000])
+          .range([7,55])  // circle will be between 7 and 55 px wide
+
+        // create a tooltip
+        const Tooltip = d3.select("#collections_panel .body")
+          .append("div")
+          .style("opacity", 0)
+          .attr("class", "tooltip")
+          .style("background-color", "white")
+          .style("border", "solid")
+          .style("border-width", "2px")
+          .style("border-radius", "5px")
+          .style("padding", "5px")
+
+        // Three function that change the tooltip when user hover / move / leave a cell
+        const mouseover = function(event, d) {
+          Tooltip
+            .style("opacity", 1)
+        }
+        const mousemove = function(event, d) {
+          Tooltip
+            .html('<u>' + d.key + '</u>' + "<br>" + d.value + " inhabitants")
+            .style("left", (event.x/2+20) + "px")
+            .style("top", (event.y/2-30) + "px")
+        }
+        var mouseleave = function(event, d) {
+          Tooltip
+            .style("opacity", 0)
+        }
+
+        // Initialize the circle: all located at the center of the svg area
+        var node = svg.append("g")
+          .selectAll("circle")
+          .data(data)
+          .join("circle")
+            .attr("class", "node")
+            .attr("r", d => size(d.value))
+            .attr("cx", width / 2)
+            .attr("cy", height / 2)
+            .style("fill", d => color(d.region))
+            .style("fill-opacity", 0.8)
+            .attr("stroke", "black")
+            .style("stroke-width", 1)
+            .on("mouseover", mouseover) // What to do when hovered
+            .on("mousemove", mousemove)
+            .on("mouseleave", mouseleave)
+            .call(d3.drag() // call specific function when circle is dragged
+                 .on("start", dragstarted)
+                 .on("drag", dragged)
+                 .on("end", dragended));
+
+        // Features of the forces applied to the nodes:
+        const simulation = d3.forceSimulation()
+            .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
+            .force("charge", d3.forceManyBody().strength(.1)) // Nodes are attracted one each other of value is > 0
+            .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.value)+3) }).iterations(1)) // Force that avoids circle overlapping
+
+        // Apply these forces to the nodes and update their positions.
+        // Once the force algorithm is happy with positions ('alpha' value is low enough), simulations will stop.
+        simulation
+            .nodes(data)
+            .on("tick", function(d){
+              node
+                  .attr("cx", d => d.x)
+                  .attr("cy", d => d.y)
+            });
+
+        // What happens when a circle is dragged?
+        function dragstarted(event, d) {
+          if (!event.active) simulation.alphaTarget(.03).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        }
+        function dragged(event, d) {
+          d.fx = event.x;
+          d.fy = event.y;
+        }
+        function dragended(event, d) {
+          if (!event.active) simulation.alphaTarget(.03);
+          d.fx = null;
+          d.fy = null;
+        }
+      })
+
     }
     async_f();
 
@@ -3579,1155 +3926,16 @@ function CollectionsPanel( props ){
   }
   useEffect( init , []);
 
-  function circlePacking(){
-
+  function resize( event ){
     // Specify the chart’s dimensions.
     let width = body.current.clientWidth || body.current.offsetWidth;
     let height = body.current.clientHeight || body.current.offsetHeight;
-    // Create the color scale.
-    const color = d3.scaleLinear().domain([0, 6]).range(["#052776", "#90A0C6"]).interpolate(d3.interpolateHcl);
-    // Compute the layout.
-    const pack = data => d3.pack()
-        .size([width, width])
-        .padding(3)
-      (d3.hierarchy(data)
-        .sum(d => d.value)
-        .sort((a, b) => b.value - a.value));
-    const old_data = {
-      "children": [
-          {
-              "children": [
-                  {
-                      "children": [
-                          {
-                              "name": "AgglomerativeCluster",
-                              "value": 3938
-                          },
-                          {
-                              "name": "CommunityStructure",
-                              "value": 3812
-                          },
-                          {
-                              "name": "HierarchicalCluster",
-                              "value": 6714
-                          },
-                          {
-                              "name": "MergeEdge",
-                              "value": 743
-                          }
-                      ],
-                      "name": "cluster"
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "BetweennessCentrality",
-                              "value": 3534
-                          },
-                          {
-                              "name": "LinkDistance",
-                              "value": 5731
-                          },
-                          {
-                              "name": "MaxFlowMinCut",
-                              "value": 7840
-                          },
-                          {
-                              "name": "ShortestPaths",
-                              "value": 5914
-                          },
-                          {
-                              "name": "SpanningTree",
-                              "value": 3416
-                          }
-                      ],
-                      "name": "graph"
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "AspectRatioBanker",
-                              "value": 7074
-                          }
-                      ],
-                      "name": "optimization"
-                  }
-              ],
-              "name": "analytics"
-          },
-          {
-              "children": [
-                  {
-                      "name": "Easing",
-                      "value": 17010
-                  },
-                  {
-                      "name": "FunctionSequence",
-                      "value": 5842
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "ArrayInterpolator",
-                              "value": 1983
-                          },
-                          {
-                              "name": "ColorInterpolator",
-                              "value": 2047
-                          },
-                          {
-                              "name": "DateInterpolator",
-                              "value": 1375
-                          },
-                          {
-                              "name": "Interpolator",
-                              "value": 8746
-                          },
-                          {
-                              "name": "MatrixInterpolator",
-                              "value": 2202
-                          },
-                          {
-                              "name": "NumberInterpolator",
-                              "value": 1382
-                          },
-                          {
-                              "name": "ObjectInterpolator",
-                              "value": 1629
-                          },
-                          {
-                              "name": "PointInterpolator",
-                              "value": 1675
-                          },
-                          {
-                              "name": "RectangleInterpolator",
-                              "value": 2042
-                          }
-                      ],
-                      "name": "interpolate"
-                  },
-                  {
-                      "name": "ISchedulable",
-                      "value": 1041
-                  },
-                  {
-                      "name": "Parallel",
-                      "value": 5176
-                  },
-                  {
-                      "name": "Pause",
-                      "value": 449
-                  },
-                  {
-                      "name": "Scheduler",
-                      "value": 5593
-                  },
-                  {
-                      "name": "Sequence",
-                      "value": 5534
-                  },
-                  {
-                      "name": "Transition",
-                      "value": 9201
-                  },
-                  {
-                      "name": "Transitioner",
-                      "value": 19975
-                  },
-                  {
-                      "name": "TransitionEvent",
-                      "value": 1116
-                  },
-                  {
-                      "name": "Tween",
-                      "value": 6006
-                  }
-              ],
-              "name": "animate"
-          },
-          {
-              "children": [
-                  {
-                      "children": [
-                          {
-                              "name": "Converters",
-                              "value": 721
-                          },
-                          {
-                              "name": "DelimitedTextConverter",
-                              "value": 4294
-                          },
-                          {
-                              "name": "GraphMLConverter",
-                              "value": 9800
-                          },
-                          {
-                              "name": "IDataConverter",
-                              "value": 1314
-                          },
-                          {
-                              "name": "JSONConverter",
-                              "value": 2220
-                          }
-                      ],
-                      "name": "converters"
-                  },
-                  {
-                      "name": "DataField",
-                      "value": 1759
-                  },
-                  {
-                      "name": "DataSchema",
-                      "value": 2165
-                  },
-                  {
-                      "name": "DataSet",
-                      "value": 586
-                  },
-                  {
-                      "name": "DataSource",
-                      "value": 3331
-                  },
-                  {
-                      "name": "DataTable",
-                      "value": 772
-                  },
-                  {
-                      "name": "DataUtil",
-                      "value": 3322
-                  }
-              ],
-              "name": "data"
-          },
-          {
-              "children": [
-                  {
-                      "name": "DirtySprite",
-                      "value": 8833
-                  },
-                  {
-                      "name": "LineSprite",
-                      "value": 1732
-                  },
-                  {
-                      "name": "RectSprite",
-                      "value": 3623
-                  },
-                  {
-                      "name": "TextSprite",
-                      "value": 10066
-                  }
-              ],
-              "name": "display"
-          },
-          {
-              "children": [
-                  {
-                      "name": "FlareVis",
-                      "value": 4116
-                  }
-              ],
-              "name": "flex"
-          },
-          {
-              "children": [
-                  {
-                      "name": "DragForce",
-                      "value": 1082
-                  },
-                  {
-                      "name": "GravityForce",
-                      "value": 1336
-                  },
-                  {
-                      "name": "IForce",
-                      "value": 319
-                  },
-                  {
-                      "name": "NBodyForce",
-                      "value": 10498
-                  },
-                  {
-                      "name": "Particle",
-                      "value": 2822
-                  },
-                  {
-                      "name": "Simulation",
-                      "value": 9983
-                  },
-                  {
-                      "name": "Spring",
-                      "value": 2213
-                  },
-                  {
-                      "name": "SpringForce",
-                      "value": 1681
-                  }
-              ],
-              "name": "physics"
-          },
-          {
-              "children": [
-                  {
-                      "name": "AggregateExpression",
-                      "value": 1616
-                  },
-                  {
-                      "name": "And",
-                      "value": 1027
-                  },
-                  {
-                      "name": "Arithmetic",
-                      "value": 3891
-                  },
-                  {
-                      "name": "Average",
-                      "value": 891
-                  },
-                  {
-                      "name": "BinaryExpression",
-                      "value": 2893
-                  },
-                  {
-                      "name": "Comparison",
-                      "value": 5103
-                  },
-                  {
-                      "name": "CompositeExpression",
-                      "value": 3677
-                  },
-                  {
-                      "name": "Count",
-                      "value": 781
-                  },
-                  {
-                      "name": "DateUtil",
-                      "value": 4141
-                  },
-                  {
-                      "name": "Distinct",
-                      "value": 933
-                  },
-                  {
-                      "name": "Expression",
-                      "value": 5130
-                  },
-                  {
-                      "name": "ExpressionIterator",
-                      "value": 3617
-                  },
-                  {
-                      "name": "Fn",
-                      "value": 3240
-                  },
-                  {
-                      "name": "If",
-                      "value": 2732
-                  },
-                  {
-                      "name": "IsA",
-                      "value": 2039
-                  },
-                  {
-                      "name": "Literal",
-                      "value": 1214
-                  },
-                  {
-                      "name": "Match",
-                      "value": 3748
-                  },
-                  {
-                      "name": "Maximum",
-                      "value": 843
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "add",
-                              "value": 593
-                          },
-                          {
-                              "name": "and",
-                              "value": 330
-                          },
-                          {
-                              "name": "average",
-                              "value": 287
-                          },
-                          {
-                              "name": "count",
-                              "value": 277
-                          },
-                          {
-                              "name": "distinct",
-                              "value": 292
-                          },
-                          {
-                              "name": "div",
-                              "value": 595
-                          },
-                          {
-                              "name": "eq",
-                              "value": 594
-                          },
-                          {
-                              "name": "fn",
-                              "value": 460
-                          },
-                          {
-                              "name": "gt",
-                              "value": 603
-                          },
-                          {
-                              "name": "gte",
-                              "value": 625
-                          },
-                          {
-                              "name": "iff",
-                              "value": 748
-                          },
-                          {
-                              "name": "isa",
-                              "value": 461
-                          },
-                          {
-                              "name": "lt",
-                              "value": 597
-                          },
-                          {
-                              "name": "lte",
-                              "value": 619
-                          },
-                          {
-                              "name": "max",
-                              "value": 283
-                          },
-                          {
-                              "name": "min",
-                              "value": 283
-                          },
-                          {
-                              "name": "mod",
-                              "value": 591
-                          },
-                          {
-                              "name": "mul",
-                              "value": 603
-                          },
-                          {
-                              "name": "neq",
-                              "value": 599
-                          },
-                          {
-                              "name": "not",
-                              "value": 386
-                          },
-                          {
-                              "name": "or",
-                              "value": 323
-                          },
-                          {
-                              "name": "orderby",
-                              "value": 307
-                          },
-                          {
-                              "name": "range",
-                              "value": 772
-                          },
-                          {
-                              "name": "select",
-                              "value": 296
-                          },
-                          {
-                              "name": "stddev",
-                              "value": 363
-                          },
-                          {
-                              "name": "sub",
-                              "value": 600
-                          },
-                          {
-                              "name": "sum",
-                              "value": 280
-                          },
-                          {
-                              "name": "update",
-                              "value": 307
-                          },
-                          {
-                              "name": "variance",
-                              "value": 335
-                          },
-                          {
-                              "name": "where",
-                              "value": 299
-                          },
-                          {
-                              "name": "xor",
-                              "value": 354
-                          },
-                          {
-                              "name": "_",
-                              "value": 264
-                          }
-                      ],
-                      "name": "methods"
-                  },
-                  {
-                      "name": "Minimum",
-                      "value": 843
-                  },
-                  {
-                      "name": "Not",
-                      "value": 1554
-                  },
-                  {
-                      "name": "Or",
-                      "value": 970
-                  },
-                  {
-                      "name": "Query",
-                      "value": 13896
-                  },
-                  {
-                      "name": "Range",
-                      "value": 1594
-                  },
-                  {
-                      "name": "StringUtil",
-                      "value": 4130
-                  },
-                  {
-                      "name": "Sum",
-                      "value": 791
-                  },
-                  {
-                      "name": "Variable",
-                      "value": 1124
-                  },
-                  {
-                      "name": "Variance",
-                      "value": 1876
-                  },
-                  {
-                      "name": "Xor",
-                      "value": 1101
-                  }
-              ],
-              "name": "query"
-          },
-          {
-              "children": [
-                  {
-                      "name": "IScaleMap",
-                      "value": 2105
-                  },
-                  {
-                      "name": "LinearScale",
-                      "value": 1316
-                  },
-                  {
-                      "name": "LogScale",
-                      "value": 3151
-                  },
-                  {
-                      "name": "OrdinalScale",
-                      "value": 3770
-                  },
-                  {
-                      "name": "QuantileScale",
-                      "value": 2435
-                  },
-                  {
-                      "name": "QuantitativeScale",
-                      "value": 4839
-                  },
-                  {
-                      "name": "RootScale",
-                      "value": 1756
-                  },
-                  {
-                      "name": "Scale",
-                      "value": 4268
-                  },
-                  {
-                      "name": "ScaleType",
-                      "value": 1821
-                  },
-                  {
-                      "name": "TimeScale",
-                      "value": 5833
-                  }
-              ],
-              "name": "scale"
-          },
-          {
-              "children": [
-                  {
-                      "name": "Arrays",
-                      "value": 8258
-                  },
-                  {
-                      "name": "Colors",
-                      "value": 10001
-                  },
-                  {
-                      "name": "Dates",
-                      "value": 8217
-                  },
-                  {
-                      "name": "Displays",
-                      "value": 12555
-                  },
-                  {
-                      "name": "Filter",
-                      "value": 2324
-                  },
-                  {
-                      "name": "Geometry",
-                      "value": 10993
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "FibonacciHeap",
-                              "value": 9354
-                          },
-                          {
-                              "name": "HeapNode",
-                              "value": 1233
-                          }
-                      ],
-                      "name": "heap"
-                  },
-                  {
-                      "name": "IEvaluable",
-                      "value": 335
-                  },
-                  {
-                      "name": "IPredicate",
-                      "value": 383
-                  },
-                  {
-                      "name": "IValueProxy",
-                      "value": 874
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "DenseMatrix",
-                              "value": 3165
-                          },
-                          {
-                              "name": "IMatrix",
-                              "value": 2815
-                          },
-                          {
-                              "name": "SparseMatrix",
-                              "value": 3366
-                          }
-                      ],
-                      "name": "math"
-                  },
-                  {
-                      "name": "Maths",
-                      "value": 17705
-                  },
-                  {
-                      "name": "Orientation",
-                      "value": 1486
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "ColorPalette",
-                              "value": 6367
-                          },
-                          {
-                              "name": "Palette",
-                              "value": 1229
-                          },
-                          {
-                              "name": "ShapePalette",
-                              "value": 2059
-                          },
-                          {
-                              "name": "SizePalette",
-                              "value": 2291
-                          }
-                      ],
-                      "name": "palette"
-                  },
-                  {
-                      "name": "Property",
-                      "value": 5559
-                  },
-                  {
-                      "name": "Shapes",
-                      "value": 19118
-                  },
-                  {
-                      "name": "Sort",
-                      "value": 6887
-                  },
-                  {
-                      "name": "Stats",
-                      "value": 6557
-                  },
-                  {
-                      "name": "Strings",
-                      "value": 22026
-                  }
-              ],
-              "name": "util"
-          },
-          {
-              "children": [
-                  {
-                      "children": [
-                          {
-                              "name": "Axes",
-                              "value": 1302
-                          },
-                          {
-                              "name": "Axis",
-                              "value": 24593
-                          },
-                          {
-                              "name": "AxisGridLine",
-                              "value": 652
-                          },
-                          {
-                              "name": "AxisLabel",
-                              "value": 636
-                          },
-                          {
-                              "name": "CartesianAxes",
-                              "value": 6703
-                          }
-                      ],
-                      "name": "axis"
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "AnchorControl",
-                              "value": 2138
-                          },
-                          {
-                              "name": "ClickControl",
-                              "value": 3824
-                          },
-                          {
-                              "name": "Control",
-                              "value": 1353
-                          },
-                          {
-                              "name": "ControlList",
-                              "value": 4665
-                          },
-                          {
-                              "name": "DragControl",
-                              "value": 2649
-                          },
-                          {
-                              "name": "ExpandControl",
-                              "value": 2832
-                          },
-                          {
-                              "name": "HoverControl",
-                              "value": 4896
-                          },
-                          {
-                              "name": "IControl",
-                              "value": 763
-                          },
-                          {
-                              "name": "PanZoomControl",
-                              "value": 5222
-                          },
-                          {
-                              "name": "SelectionControl",
-                              "value": 7862
-                          },
-                          {
-                              "name": "TooltipControl",
-                              "value": 8435
-                          }
-                      ],
-                      "name": "controls"
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "Data",
-                              "value": 20544
-                          },
-                          {
-                              "name": "DataList",
-                              "value": 19788
-                          },
-                          {
-                              "name": "DataSprite",
-                              "value": 10349
-                          },
-                          {
-                              "name": "EdgeSprite",
-                              "value": 3301
-                          },
-                          {
-                              "name": "NodeSprite",
-                              "value": 19382
-                          },
-                          {
-                              "children": [
-                                  {
-                                      "name": "ArrowType",
-                                      "value": 698
-                                  },
-                                  {
-                                      "name": "EdgeRenderer",
-                                      "value": 5569
-                                  },
-                                  {
-                                      "name": "IRenderer",
-                                      "value": 353
-                                  },
-                                  {
-                                      "name": "ShapeRenderer",
-                                      "value": 2247
-                                  }
-                              ],
-                              "name": "render"
-                          },
-                          {
-                              "name": "ScaleBinding",
-                              "value": 11275
-                          },
-                          {
-                              "name": "Tree",
-                              "value": 7147
-                          },
-                          {
-                              "name": "TreeBuilder",
-                              "value": 9930
-                          }
-                      ],
-                      "name": "data"
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "DataEvent",
-                              "value": 2313
-                          },
-                          {
-                              "name": "SelectionEvent",
-                              "value": 1880
-                          },
-                          {
-                              "name": "TooltipEvent",
-                              "value": 1701
-                          },
-                          {
-                              "name": "VisualizationEvent",
-                              "value": 1117
-                          }
-                      ],
-                      "name": "events"
-                  },
-                  {
-                      "children": [
-                          {
-                              "name": "Legend",
-                              "value": 20859
-                          },
-                          {
-                              "name": "LegendItem",
-                              "value": 4614
-                          },
-                          {
-                              "name": "LegendRange",
-                              "value": 10530
-                          }
-                      ],
-                      "name": "legend"
-                  },
-                  {
-                      "children": [
-                          {
-                              "children": [
-                                  {
-                                      "name": "BifocalDistortion",
-                                      "value": 4461
-                                  },
-                                  {
-                                      "name": "Distortion",
-                                      "value": 6314
-                                  },
-                                  {
-                                      "name": "FisheyeDistortion",
-                                      "value": 3444
-                                  }
-                              ],
-                              "name": "distortion"
-                          },
-                          {
-                              "children": [
-                                  {
-                                      "name": "ColorEncoder",
-                                      "value": 3179
-                                  },
-                                  {
-                                      "name": "Encoder",
-                                      "value": 4060
-                                  },
-                                  {
-                                      "name": "PropertyEncoder",
-                                      "value": 4138
-                                  },
-                                  {
-                                      "name": "ShapeEncoder",
-                                      "value": 1690
-                                  },
-                                  {
-                                      "name": "SizeEncoder",
-                                      "value": 1830
-                                  }
-                              ],
-                              "name": "encoder"
-                          },
-                          {
-                              "children": [
-                                  {
-                                      "name": "FisheyeTreeFilter",
-                                      "value": 5219
-                                  },
-                                  {
-                                      "name": "GraphDistanceFilter",
-                                      "value": 3165
-                                  },
-                                  {
-                                      "name": "VisibilityFilter",
-                                      "value": 3509
-                                  }
-                              ],
-                              "name": "filter"
-                          },
-                          {
-                              "name": "IOperator",
-                              "value": 1286
-                          },
-                          {
-                              "children": [
-                                  {
-                                      "name": "Labeler",
-                                      "value": 9956
-                                  },
-                                  {
-                                      "name": "RadialLabeler",
-                                      "value": 3899
-                                  },
-                                  {
-                                      "name": "StackedAreaLabeler",
-                                      "value": 3202
-                                  }
-                              ],
-                              "name": "label"
-                          },
-                          {
-                              "children": [
-                                  {
-                                      "name": "AxisLayout",
-                                      "value": 6725
-                                  },
-                                  {
-                                      "name": "BundledEdgeRouter",
-                                      "value": 3727
-                                  },
-                                  {
-                                      "name": "CircleLayout",
-                                      "value": 9317
-                                  },
-                                  {
-                                      "name": "CirclePackingLayout",
-                                      "value": 12003
-                                  },
-                                  {
-                                      "name": "DendrogramLayout",
-                                      "value": 4853
-                                  },
-                                  {
-                                      "name": "ForceDirectedLayout",
-                                      "value": 8411
-                                  },
-                                  {
-                                      "name": "IcicleTreeLayout",
-                                      "value": 4864
-                                  },
-                                  {
-                                      "name": "IndentedTreeLayout",
-                                      "value": 3174
-                                  },
-                                  {
-                                      "name": "Layout",
-                                      "value": 7881
-                                  },
-                                  {
-                                      "name": "NodeLinkTreeLayout",
-                                      "value": 12870
-                                  },
-                                  {
-                                      "name": "PieLayout",
-                                      "value": 2728
-                                  },
-                                  {
-                                      "name": "RadialTreeLayout",
-                                      "value": 12348
-                                  },
-                                  {
-                                      "name": "RandomLayout",
-                                      "value": 870
-                                  },
-                                  {
-                                      "name": "StackedAreaLayout",
-                                      "value": 9121
-                                  },
-                                  {
-                                      "name": "TreeMapLayout",
-                                      "value": 9191
-                                  }
-                              ],
-                              "name": "layout"
-                          },
-                          {
-                              "name": "Operator",
-                              "value": 2490
-                          },
-                          {
-                              "name": "OperatorList",
-                              "value": 5248
-                          },
-                          {
-                              "name": "OperatorSequence",
-                              "value": 4190
-                          },
-                          {
-                              "name": "OperatorSwitch",
-                              "value": 2581
-                          },
-                          {
-                              "name": "SortOperator",
-                              "value": 2023
-                          }
-                      ],
-                      "name": "operator"
-                  },
-                  {
-                      "name": "Visualization",
-                      "value": 16540
-                  }
-              ],
-              "name": "vis"
-          }
-      ],
-      "name": "flare"
-  };
-  debugger;
-    const data = {
-      children: [ ...glyphs.current, ...snaps.current, ...dicts.current, ...minders.current, collections.current ],
-      name: "Collected Things!"
-    }
-    const root = pack( data );
-    // Create the SVG container.
-    const urlCreator = window.URL || window.webkitURL;
-    const svg = d3.create("svg")
-        .attr("viewBox", `-${width} -${height} ${width * 2} ${height * 2}`)
+
+    // append the svg object to the body of the page
+    const svg = d3.select("#collections_panel .body")
+      .append("svg")
         .attr("width", width)
-        .attr("height", height);
-
-        // Append the nodes.
-      const nodes = svg.append("g");
-      const node = nodes.selectAll("circle")
-        .data(root)
-        .join("circle")
-          .attr("fill", ( d ) => color( d.depth ) )
-          .attr("pointer-events", d => !d.children ? null : null)
-          .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
-          .on("mouseout", function() { d3.select(this).attr("stroke", null); })
-          .on("click", (event, d) => focus !== d && (clickZoom(event, d), event.stopPropagation()))
-            .append("svg:image")
-            .attr("xlink:href", ( d ) => {
-              if( d.data.blob && d.data.blob.type ){
-                const url = urlCreator.createObjectURL( d.data.blob );
-                object_urls.current.push( url );
-                return url;
-              }});
-
-
-      // Append the text labels.
-      const labels = svg.append("g");
-      const label = labels.attr("class", "pip_title")
-          .attr("pointer-events", "none")
-          .attr("text-anchor", "middle")
-        .selectAll("text")
-        .data(root.descendants())
-        .join("text")
-          .style("fill-opacity", d => d.parent === root ? 1 : 0)
-          .style("display", d => d.parent === root ? "inline" : "none")
-          .text(d => d.data.name);
-
-      // Create the zoom behavior and zoom immediately in to the initial focus node.
-      svg.on("click", (event) => clickZoom(event, root));
-      body.current.appendChild( svg.node() );
-
-      let focus = root;
-      let view;
-      let k;
-      zoomTo([focus.x, focus.y, focus.r]);
-
-      function zoomTo(v) {
-        k = height / v[2];
-
-        view = v;
-
-        label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-        node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-        node.attr("r", d => d.r * k);
-      }
-      function clickZoom(event, d) {
-        const focus0 = focus;
-
-        focus = d;
-
-        const transition = svg.transition()
-            .duration(event.altKey ? 1500 : 750)
-            .tween("zoom", d => {
-              const i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r]);
-              return t => zoomTo(i(t));
-            });
-
-        label
-          .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
-          .transition(transition)
-            .style("fill-opacity", d => d.parent === focus ? 1 : 0)
-            .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
-            .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
-      }
-
-      const zoom = d3.zoom()
-      .scaleExtent([1, 40])
-      .on("zoom", zoomed);
-      nodes.call(zoom);
-      function zoomed({transform}) {
-        nodes.attr("transform", transform);
-        labels.attr("transform", transform);
-      }
-  }
-
-  function resize( event ){
-
-    circlePacking();
+        .attr("height", height)
   }
 
   return(<>
