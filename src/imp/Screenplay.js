@@ -1175,7 +1175,7 @@ class Screenplay extends _Screenplay{
           arrival_emitter: arrival_emitter,
           course: course,
           stage: 0,
-          durations: slo_mode ? [1,1,1,1] :[ 180, 360, 120, 1200 ],
+          durations: slo_mode ? [1,1,1,1] :[ 180, 36, 120, 120 ],
           starship: this.actors.Starship,
           destination: planetary_body,
           docking_quat: docking_quat,
@@ -1377,7 +1377,7 @@ class Screenplay extends _Screenplay{
       });
       this.updatables.set( 'change_cam', camera_change );
     },
-    change_cam: async ( cam_name ) => {
+    change_cam_almost: async ( cam_name ) => {
       if( cam_name !== this.active_cam.name ){
         function StringBuilder(){
           var _string = arguments[0] || '';
@@ -1452,6 +1452,227 @@ class Screenplay extends _Screenplay{
               if( cache.frame < cache.compilation.dolly_cam.positions.length || cache.frame < cache.compilation.dolly_cam.quaternions.length){
                 dolly_cam.position.copy( cache.compilation.dolly_cam.positions[cache.frame] );
                 dolly_cam.quaternion.copy( cache.compilation.dolly_cam.quaternions[cache.frame] );
+
+                dolly_cam.updateProjectionMatrix();
+              } else {
+                cache.completed = true;
+              }
+            }
+            cache.frame++;
+          },
+          cache: {
+            compiled: false,
+            completed: false,
+            frame: 0,
+            iteration: 0,
+            course: dolly_path,
+            duration: slo_mode ? 1 : 180,
+            destination: destination_camera,
+            dolly_cam: dolly_cam,
+            pilot: pilot,
+            compilation: {
+              dolly_cam: {
+                positions: [],
+                quaternions: []
+              }
+            }
+          }
+        }
+        transition_course.compile();
+        this.updatables.set('dolly_to', transition_course );
+      }
+    },
+    change_cam_nearly: async ( cam_name ) => {
+      if( cam_name !== this.active_cam.name ){
+        function StringBuilder(){
+          var _string = arguments[0] || '';
+
+          for (var i=1; i < arguments.length; i++) {
+            var symbol = '%' + i;
+            var replacement = arguments[i] || 0;
+            _string = _string.replace(symbol, replacement);
+          }
+          return _string;
+        }
+
+        function StringCombiner(){
+          var _string = arguments[0] || '';
+
+          for (var i=1; i < arguments.length; i++) {
+            _string += ' ' + arguments[i];
+          }
+          return _string;
+        }
+
+        let slo_mode = this.slo_mode;
+        document.title = StringCombiner( 'Dollying to ', cam_name ,' | Wethe.Network' );
+        let start_position = this.active_cam.getWorldPosition( new THREE.Vector3() );
+        let dolly_cam = this.active_cam.clone();
+        dolly_cam.position.copy( start_position );
+        this.sys_ve_scene.add( dolly_cam );
+        this.active_cam = dolly_cam;
+        let destination_camera = this.cameras.get( cam_name );
+        let finish_position = destination_camera.getWorldPosition( new THREE.Vector3() );
+        let distance_between = start_position.distanceTo( finish_position );
+        let ahead = new THREE.Vector3(0, 0, -1).transformDirection( dolly_cam.matrixWorld.clone() );
+        let ray_forward = new THREE.Ray( start_position, ahead );
+        let a_tenth_ahead = ray_forward.at( distance_between / 10, new THREE.Vector3() );
+
+        let before = new THREE.Vector3(0, 0, 1).transformDirection( destination_camera.matrixWorld.clone() );
+        let ray_before = new THREE.Ray( finish_position, before );
+        let a_tenth_before = ray_before.at( distance_between / 2, new THREE.Vector3() );
+
+        let dolly_path = new THREE.CubicBezierCurve3( start_position, a_tenth_ahead, a_tenth_before, finish_position );
+        let pilot = new THREE.Object3D();
+        pilot.position.copy( start_position );
+        let transition_course = {
+          compile: ( )=>{
+
+            let cache = transition_course.cache;
+            let dolly_cam = cache.dolly_cam;
+            let course = cache.course;
+            let pilot = cache.pilot;
+
+            for( ;cache.iteration < cache.duration; cache.iteration++ ){
+              let _prog = cache.iteration / cache.duration;
+              let dolly_progress = _prog * Math.min( 1, _prog ** (2-(2*_prog)) );
+              let next_pos = course.getPointAt( _prog );
+
+              dolly_cam.position.copy( pilot.position.clone() );
+              cache.compilation.dolly_cam.positions.push( dolly_cam.position.clone() );
+              pilot.position.copy( next_pos );
+              dolly_cam.lookAt( pilot.position );
+              cache.compilation.dolly_cam.quaternions.push( dolly_cam.quaternion.clone() );
+            }
+            cache.compilation.dolly_cam.positions.push( course.getPointAt( 1 ) );
+            cache.compilation.dolly_cam.quaternions.push( cache.destination.quaternion );
+            return cache.compiled = true;
+          },
+          update: ()=>{
+            let cache = transition_course.cache;
+            let dolly_cam = cache.dolly_cam;
+            if( cache.completed ){
+              debugger;
+              this.updatables.delete( 'dolly_to' );
+              this.sys_ve_scene.remove( dolly_cam );
+              this.active_cam = cache.destination;
+              document.title = StringCombiner( cam_name,' | Wethe.Network' );
+
+            } else {
+              if( cache.frame < cache.compilation.dolly_cam.positions.length || cache.frame < cache.compilation.dolly_cam.quaternions.length){
+                if( cache.compilation.dolly_cam.positions[cache.frame] ) dolly_cam.position.copy( cache.compilation.dolly_cam.positions[cache.frame] );
+                if( cache.compilation.dolly_cam.quaternions[cache.frame] ) dolly_cam.quaternion.copy( cache.compilation.dolly_cam.quaternions[cache.frame] );
+
+                dolly_cam.updateProjectionMatrix();
+              } else {
+                cache.completed = true;
+              }
+            }
+            cache.frame++;
+          },
+          cache: {
+            compiled: false,
+            completed: false,
+            frame: 0,
+            iteration: 0,
+            course: dolly_path,
+            duration: slo_mode ? 1 : 180,
+            destination: destination_camera,
+            dolly_cam: dolly_cam,
+            pilot: pilot,
+            compilation: {
+              dolly_cam: {
+                positions: [],
+                quaternions: []
+              }
+            }
+          }
+        }
+        transition_course.compile();
+        this.updatables.set('dolly_to', transition_course );
+      }
+    },
+    change_cam: async ( cam_name ) => {
+      if( cam_name !== this.active_cam.name ){
+        function StringBuilder(){
+          var _string = arguments[0] || '';
+
+          for (var i=1; i < arguments.length; i++) {
+            var symbol = '%' + i;
+            var replacement = arguments[i] || 0;
+            _string = _string.replace(symbol, replacement);
+          }
+          return _string;
+        }
+
+        function StringCombiner(){
+          var _string = arguments[0] || '';
+
+          for (var i=1; i < arguments.length; i++) {
+            _string += ' ' + arguments[i];
+          }
+          return _string;
+        }
+
+        let slo_mode = this.slo_mode;
+        //slo_mode = true;
+        document.title = StringCombiner( 'Dollying to ', cam_name ,' | Wethe.Network' );
+        let start_position = this.active_cam.getWorldPosition( new THREE.Vector3() );
+        let dolly_cam = this.active_cam.clone();
+        dolly_cam.position.copy( start_position );
+        this.sys_ve_scene.add( dolly_cam );
+        this.active_cam = dolly_cam;
+        let destination_camera = this.cameras.get( cam_name );
+        let finish_position = destination_camera.getWorldPosition( new THREE.Vector3() );
+        let distance_between = start_position.distanceTo( finish_position );
+        let ahead = new THREE.Vector3(0, 0, -1).transformDirection( dolly_cam.matrixWorld.clone() );
+        let ray_forward = new THREE.Ray( start_position, ahead );
+        let a_tenth_ahead = ray_forward.at( distance_between / 10, new THREE.Vector3() );
+
+        let before = new THREE.Vector3(0, 0, 1).transformDirection( destination_camera.matrixWorld.clone() );
+        let ray_before = new THREE.Ray( finish_position, before );
+        let a_tenth_before = ray_before.at( distance_between / 2, new THREE.Vector3() );
+
+        let dolly_path = new THREE.CubicBezierCurve3( start_position, a_tenth_ahead, a_tenth_before, finish_position );
+        let pilot = new THREE.Object3D();
+        pilot.position.copy( start_position );
+        let transition_course = {
+          compile: ( )=>{
+
+            let cache = transition_course.cache;
+            let dolly_cam = cache.dolly_cam;
+            let course = cache.course;
+            let pilot = cache.pilot;
+
+            for( ;cache.iteration < cache.duration; cache.iteration++ ){
+              let _prog = cache.iteration / cache.duration;
+              let dolly_progress = _prog * Math.min( 1, _prog ** (2-(2*_prog)) );
+              let next_pos = course.getPointAt( _prog );
+
+              dolly_cam.position.copy( pilot.position.clone() );
+              cache.compilation.dolly_cam.positions.push( dolly_cam.position.clone() );
+              pilot.position.copy( next_pos );
+              dolly_cam.lookAt( pilot.position );
+              cache.compilation.dolly_cam.quaternions.push( dolly_cam.quaternion.clone() );
+            }
+            cache.compilation.dolly_cam.positions.push( course.getPointAt( 1 ) );
+
+            //cache.compilation.dolly_cam.quaternions.push( cache.destination.quaternion );
+            return cache.compiled = true;
+          },
+          update: ()=>{
+            let cache = transition_course.cache;
+            let dolly_cam = cache.dolly_cam;
+            if( cache.completed ){
+              this.updatables.delete( 'dolly_to' );
+              this.sys_ve_scene.remove( dolly_cam );
+              this.active_cam = cache.destination;
+              document.title = StringCombiner( cam_name,' | Wethe.Network' );
+
+            } else {
+              if( cache.frame < cache.compilation.dolly_cam.positions.length || cache.frame < cache.compilation.dolly_cam.quaternions.length){
+                if( cache.compilation.dolly_cam.positions[cache.frame] ) dolly_cam.position.copy( cache.compilation.dolly_cam.positions[cache.frame] );
+                if( cache.compilation.dolly_cam.quaternions[cache.frame] ) dolly_cam.quaternion.copy( cache.compilation.dolly_cam.quaternions[cache.frame] );
 
                 dolly_cam.updateProjectionMatrix();
               } else {

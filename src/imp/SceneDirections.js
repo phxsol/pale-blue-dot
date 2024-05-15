@@ -211,6 +211,7 @@ class SceneDirections extends _SceneDirections {
     let posi = new THREE.Vector3();
     starship.OpsStation.children[0].getWorldPosition( posi );
     starship.cameras.forEach( function ( cam, ndx ){
+      debugger;
       this.set( ndx, cam );
     }, screenplay.cameras );
 

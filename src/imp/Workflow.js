@@ -180,7 +180,6 @@ class VerifyCapabilitiesModal extends Component {
         if ( test_results.score > 20 || test_results.max_fps > 30 ) {
           document.querySelector( '#verify_capabilities .success').classList.remove( 'hidden' );
           setTimeout( ( dictum_name, ndx )=>{
-            this.screenplay.slo_mode = true; // TODO: REMOVE THIS TO STOP FORCING SLO_MODE
             this.director.emit( `${dictum_name}_progress`, dictum_name, ndx );
           }, 500, this.dictum_name, this.ndx );
         } else {
